@@ -27,10 +27,15 @@ export const PhotoLedeSideBlock = {
       bylineDateline: '', // e.g., "Lone Pine, California"
       bylineDate: 'November 2024',
       bylineStyle: {
+        size: '16',
+        weight: 'normal',
+        color: '#e5e5e5',
+        font: 'IBM Plex Sans, sans-serif'
+      },
+      datelineStyle: {
         size: '14',
         weight: 'normal',
-        color: '#9ca3af',
-        font: 'IBM Plex Sans, sans-serif'
+        color: '#9ca3af'
       },
       
       // Subhead (above body text)
@@ -230,12 +235,12 @@ export const PhotoLedeSideBlock = {
           '<input type="checkbox" data-k="showReadTime" ' + (b.showReadTime !== false ? 'checked' : '') + '>' +
           '<span>Show reading time (auto-calculated on export)</span>' +
         '</label>' +
-        '<div class="p-2 border rounded bg-slate-50">' +
-          '<div class="text-xs font-semibold mb-2">Style</div>' +
+        '<div class="p-2 border rounded bg-slate-50 mb-3">' +
+          '<div class="text-xs font-semibold mb-2">Byline Text Style</div>' +
           '<div class="grid grid-cols-3 gap-2">' +
             '<div>' +
               '<label class="block text-xs">Size</label>' +
-              '<input data-k="bylineStyle.size" type="number" min="10" max="20" value="' + getStyle(b.bylineStyle || {}, 'size', '14') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+              '<input data-k="bylineStyle.size" type="number" min="10" max="24" value="' + getStyle(b.bylineStyle || {}, 'size', '16') + '" class="w-full border rounded px-2 py-1 text-sm">' +
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Weight</label>' +
@@ -245,7 +250,26 @@ export const PhotoLedeSideBlock = {
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Color</label>' +
-              '<input type="color" data-k="bylineStyle.color" value="' + getStyle(b.bylineStyle || {}, 'color', '#9ca3af') + '" class="w-full h-7 border rounded">' +
+              '<input type="color" data-k="bylineStyle.color" value="' + getStyle(b.bylineStyle || {}, 'color', '#e5e5e5') + '" class="w-full h-7 border rounded">' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p-2 border rounded bg-slate-50">' +
+          '<div class="text-xs font-semibold mb-2">Dateline + Date Style</div>' +
+          '<div class="grid grid-cols-3 gap-2">' +
+            '<div>' +
+              '<label class="block text-xs">Size</label>' +
+              '<input data-k="datelineStyle.size" type="number" min="10" max="20" value="' + getStyle(b.datelineStyle || {}, 'size', '14') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Weight</label>' +
+              '<select data-k="datelineStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
+                weightOpts.map(w => '<option ' + (getStyle(b.datelineStyle || {}, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Color</label>' +
+              '<input type="color" data-k="datelineStyle.color" value="' + getStyle(b.datelineStyle || {}, 'color', '#9ca3af') + '" class="w-full h-7 border rounded">' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -457,7 +481,7 @@ export const PhotoLedeSideBlock = {
     // Assemble all sections (alphabetical order, all collapsed)
     return labelFieldHtml +
       section('⚙️ Block Settings', blockSettingsContent, true) +
-      section('📝 Body Text', bodyTextContent, true) +
+      section('📄 Body Text', bodyTextContent, true) +
       section('👤 Byline', bylineContent, true) +
       section('🔤 Drop Cap & First Line', dropCapContent, true) +
       section('🖼️ Media', mediaContent, true) +
@@ -520,25 +544,31 @@ export const PhotoLedeSideBlock = {
     // Build byline HTML
     let bylineHtml = '';
     if (b.showByline) {
-      const bylineStyle = buildStyle(b.bylineStyle, { color: '#9ca3af', size: '20', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.6' });
+      const bylineStyle = buildStyle(b.bylineStyle, { color: '#e5e5e5', size: '16', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.6' });
+      const datelineStyleObj = b.datelineStyle || {};
+      const datelineSize = datelineStyleObj.size || '14';
+      const datelineWeight = datelineStyleObj.weight || 'normal';
+      const datelineColor = datelineStyleObj.color || '#9ca3af';
+      const datelineFontWeight = datelineWeight === 'bold' ? '700' : '400';
+
       const bylineText = b.bylineText || 'By Marcus Chan';
       const dateline = b.bylineDateline || '';
       const date = b.bylineDate || '';
       const readTime = (b.showReadTime !== false && b.readTime) ? b.readTime : '';
-      
+
       let secondLine = '';
       const parts = [];
       if (dateline) parts.push(dateline);
       if (date) parts.push(date);
       if (readTime) parts.push(readTime + ' min read');
-      
+
       if (parts.length > 0) {
-        const separator = ' <span style="color:#6b7280;padding:0 8px;">|</span> ';
-        secondLine = '<div style="font-size:18px;margin-top:4px;">' + parts.join(separator) + '</div>';
+        const separator = ' <span style="color:' + datelineColor + ';opacity:0.6;padding:0 8px;">|</span> ';
+        secondLine = '<div style="font-size:' + datelineSize + 'px;font-weight:' + datelineFontWeight + ';color:' + datelineColor + ';margin-top:4px;">' + parts.join(separator) + '</div>';
       }
-      
-      bylineHtml = '<div style="' + bylineStyle + 'margin-bottom:36px;">' +
-        '<div>' + bylineText + '</div>' +
+
+      bylineHtml = '<div style="margin-bottom:36px;">' +
+        '<div style="' + bylineStyle + '">' + bylineText + '</div>' +
         secondLine +
       '</div>';
     }
@@ -745,25 +775,31 @@ export const PhotoLedeSideBlock = {
     // Build byline HTML
     let bylineHtml = '';
     if (b.showByline) {
-      const bylineStyle = buildStyle(b.bylineStyle, { color: '#9ca3af', size: '20', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.6' });
+      const bylineStyle = buildStyle(b.bylineStyle, { color: '#e5e5e5', size: '16', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.6' });
+      const datelineStyleObj = b.datelineStyle || {};
+      const datelineSize = datelineStyleObj.size || '14';
+      const datelineWeight = datelineStyleObj.weight || 'normal';
+      const datelineColor = datelineStyleObj.color || '#9ca3af';
+      const datelineFontWeight = datelineWeight === 'bold' ? '700' : '400';
+
       const bylineText = b.bylineText || 'By Marcus Chan';
       const dateline = b.bylineDateline || '';
       const date = b.bylineDate || '';
       const readTime = (b.showReadTime !== false && b.readTime) ? b.readTime : '';
-      
+
       let secondLine = '';
       const parts = [];
       if (dateline) parts.push(dateline);
       if (date) parts.push(date);
       if (readTime) parts.push(readTime + ' min read');
-      
+
       if (parts.length > 0) {
-        const separator = ' <span style="color:#6b7280;padding:0 8px;">|</span> ';
-        secondLine = '<div style="font-size:18px;margin-top:4px;">' + parts.join(separator) + '</div>';
+        const separator = ' <span style="color:' + datelineColor + ';opacity:0.6;padding:0 8px;">|</span> ';
+        secondLine = '<div style="font-size:' + datelineSize + 'px;font-weight:' + datelineFontWeight + ';color:' + datelineColor + ';margin-top:4px;">' + parts.join(separator) + '</div>';
       }
-      
-      bylineHtml = '<div style="' + bylineStyle + 'margin-bottom:36px;">' +
-        '<div>' + String(bylineText) + '</div>' +
+
+      bylineHtml = '<div style="margin-bottom:36px;">' +
+        '<div style="' + bylineStyle + '">' + String(bylineText) + '</div>' +
         secondLine +
       '</div>';
     }
