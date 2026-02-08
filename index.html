@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StoryBuilder (Modular)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/storybuilder.css" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .block-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .block-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .block-item.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        /* Drag handle */
+        .drag-handle {
+            cursor: grab;
+            color: #9ca3af;
+            font-size: 12px;
+            letter-spacing: -2px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            user-select: none;
+        }
+
+        .drag-handle:hover {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Dragging state */
+        .block-item.dragging {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+
+        /* Drop indicators */
+        .block-item.drop-above {
+            border-top: 3px solid #3b82f6;
+            margin-top: -1px;
+        }
+
+        .block-item.drop-below {
+            border-bottom: 3px solid #3b82f6;
+            margin-bottom: -1px;
+        }
+
+        /* Collapsible sections */
+        .collapsible-section {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: white;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .collapsible-header:hover {
+            background: #f9fafb;
+        }
+
+        .collapsible-section.collapsed .collapsible-header {
+            background: #f9fafb;
+        }
+
+        .collapsible-chevron {
+            transition: transform 0.2s ease;
+            color: #9ca3af;
+        }
+
+        .collapsible-section.collapsed .collapsible-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            padding: 12px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .collapsible-section.collapsed .collapsible-content {
+            display: none;
+        }
+
+        .block-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        /* Gallery - yellow/brown (unchanged) */
+        .badge-gallery {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Text - green */
+        .badge-text {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Full-bleed media - red */
+        .badge-full-bleed {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Photo Lede Side - blue */
+        .badge-photo-lede-side {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Photo Lede - lighter blue */
+        .badge-photo-lede {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        /* Hero - purple */
+        .badge-hero {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        /* Sticky Hero - purple (same as hero) */
+        .badge-sticky-hero {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        /* Zoom on Photo - pink */
+        .badge-zoom-photo {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+
+        /* Split Panel - mid-gray */
+        .badge-split-panel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Split Layout - different purple */
+        .badge-split-layout {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .preview-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 0.25rem;
+            gap: 0.25rem;
+        }
+
+        .preview-toggle button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .preview-toggle button.active {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="hidden fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="analyticsOverlay"></div>
+        <div class="absolute inset-4 md:inset-12 bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-lg font-semibold">📊 Analytics Dashboard</h2>
+                <button id="analyticsClose" class="p-2 hover:bg-gray-200 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="analyticsContent" class="flex-1 overflow-auto"></div>
+        </div>
+    </div>
+
+    <div class="h-full flex flex-col">
+
+        <!-- Header -->
+        <div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
+            <div class="flex items-center justify-between mb-3">
+                <h1 class="text-2xl font-bold text-gray-900">StoryBuilder <span class="text-gray-500 font-normal">by
+                        Marcus Chan</span></h1>
+                <!-- Auth UI Container -->
+                <div id="authContainer" style="min-width: 200px;"></div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-semibold text-gray-700">Project Folder:</label>
+                        <input id="projectFolder" type="text" placeholder="e.g., mt_whitney"
+                            class="px-3 py-2 border border-blue-200 bg-white rounded-lg text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm font-semibold text-gray-700">Page Title:</label>
+                        <input id="pageTitle" type="text" placeholder="e.g., Hiking Mount Whitney"
+                            class="px-3 py-2 border border-blue-200 bg-white rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="analyticsBtn"
+                        class="px-4 py-2 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 text-sm font-medium text-purple-700">
+                        📊 Analytics
+                    </button>
+                    <label
+                        class="px-4 py-2 bg-white border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium cursor-pointer">
+                        Load JSON
+                        <input id="loadJson" type="file" accept=".json" class="hidden" />
+                    </label>
+                    <button id="saveJson"
+                        class="px-4 py-2 bg-white border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium">
+                        Save JSON
+                    </button>
+                    <button id="exportHtml"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium shadow-sm">
+                        Export HTML
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex overflow-hidden">
+
+            <!-- Left Panel: Blocks List -->
+            <div class="w-80 bg-gray-100 border-r border-gray-200 flex flex-col">
+                <!-- Cloud Stories Section -->
+                <div id="storiesContainer" class="border-b border-gray-300 bg-white px-4 py-2"></div>
+
+                <div class="p-4 border-b border-gray-300 bg-gray-50">
+                    <h2 class="font-semibold text-gray-900 mb-3">Story Blocks</h2>
+                    <div class="space-y-2">
+                        <select id="blockType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </select>
+                        <button id="addBlock"
+                            class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                            + Add Block
+                        </button>
+                    </div>
+                </div>
+
+                <div id="blocksList" class="flex-1 overflow-y-auto p-4">
+                    <!-- Blocks will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Middle Panel: Block Editor -->
+            <div id="editorPanel" class="w-96 bg-gray-50 border-r border-gray-200 overflow-y-auto p-6">
+                <div class="text-center text-gray-400 mt-12">
+                    <div class="text-4xl mb-2">📝</div>
+                    <div class="text-sm">Select a block to edit</div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview -->
+            <div class="flex-1 flex flex-col bg-white">
+                <div class="border-b border-gray-200 px-6 py-3">
+                    <div class="flex items-center justify-between">
+                        <div class="preview-toggle w-64">
+                            <button id="previewModeBtn" class="active">Preview</button>
+                            <button id="debugModeBtn">Debug View</button>
+                        </div>
+
+                        <div class="flex items-center gap-3" style="display: none;">
+                            <span class="text-sm text-gray-600">Zoom</span>
+                            <input id="previewZoom" type="range" min="25" max="100" value="50" class="w-32">
+                            <span id="zoomPct" class="text-sm font-medium text-gray-700 w-12">50%</span>
+                            <button id="renderPreview"
+                                class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                                Render
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-hidden bg-gray-100 p-4">
+                    <div class="h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-auto">
+                        <div id="preview"
+                            style="--sb-zoom:0.5; transform: scale(var(--sb-zoom)); transform-origin: top left; width: calc(100%/var(--sb-zoom)); height: calc(300vh / var(--sb-zoom));">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- App bootstrap -->
+    <script type="module">
+        import { renderPreview, buildExportHtml } from './src/preview.js';
+        import { dl, setPreviewZoom, initTextToolbars } from './src/utils.js';
+        import { BLOCKS, newBlock } from './src/blocks/index.js';
+        import { AuthUI } from './src/lib/authUI.js';
+        import { StoriesUI } from './src/lib/storiesUI.js';
+        import { AnalyticsUI } from './src/lib/analyticsUI.js';
+
+        const state = {
+            project: '',
+            pageTitle: '', // NEW: Page title for export
+            blocks: [],
+            selectedBlockIndex: null,
+            previewMode: 'iframe', // 'iframe' or 'debug'
+            user: null // Current authenticated user
+        };
+
+        const els = {
+            blocksList: document.getElementById('blocksList'),
+            editorPanel: document.getElementById('editorPanel'),
+            preview: document.getElementById('preview'),
+            projectInput: document.getElementById('projectFolder'),
+            pageTitleInput: document.getElementById('pageTitle'), // NEW
+            authContainer: document.getElementById('authContainer'),
+            storiesContainer: document.getElementById('storiesContainer'),
+            analyticsBtn: document.getElementById('analyticsBtn'),
+            analyticsModal: document.getElementById('analyticsModal'),
+            analyticsOverlay: document.getElementById('analyticsOverlay'),
+            analyticsClose: document.getElementById('analyticsClose'),
+            analyticsContent: document.getElementById('analyticsContent'),
+            zoomSlider: document.getElementById('previewZoom'),
+            zoomPct: document.getElementById('zoomPct'),
+            addBtn: document.getElementById('addBlock'),
+            blockType: document.getElementById('blockType'),
+            renderBtn: document.getElementById('renderPreview'),
+            exportBtn: document.getElementById('exportHtml'),
+            saveBtn: document.getElementById('saveJson'),
+            loadInp: document.getElementById('loadJson'),
+            previewModeBtn: document.getElementById('previewModeBtn'),
+            debugModeBtn: document.getElementById('debugModeBtn'),
+        };
+
+        // Populate block type dropdown
+        els.blockType.innerHTML = Object.values(BLOCKS)
+            .map(b => `<option value="${b.type}">${b.title}</option>`)
+            .join('');
+
+        // Render blocks list
+        function renderBlocksList() {
+            if (state.blocks.length === 0) {
+                els.blocksList.innerHTML = '<div class="text-center text-gray-400 text-sm mt-8">No blocks yet</div>';
+                return;
+            }
+
+            els.blocksList.innerHTML = state.blocks.map((block, idx) => {
+                const blockDef = BLOCKS[block.type];
+                const badgeClass = `badge-${block.type}`;
+                const isSelected = idx === state.selectedBlockIndex;
+
+                // Strip parenthetical description from title (e.g., "Hero (image/video + headline)" -> "Hero")
+                const blockTypeName = blockDef.title.split('(')[0].trim();
+
+                return `
+    <div class="block-item ${isSelected ? 'selected' : ''}" data-index="${idx}" draggable="true">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                <span class="block-badge ${badgeClass}">${idx + 1}</span>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-900">${blockTypeName}</span>
+                    ${block.label ? `<span class="text-xs text-blue-600 italic">${block.label}</span>` : ''}
+                </div>
+            </div>
+            <button class="delete-block p-1 hover:bg-red-100 rounded text-sm text-red-600" data-index="${idx}" title="Delete">×</button>
+        </div>
+    </div>
+                `;
+            }).join('');
+
+            // Add click handlers
+            els.blocksList.querySelectorAll('.block-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('button')) return; // Don't select if clicking a button
+                    selectBlock(parseInt(item.dataset.index));
+                });
+            });
+
+            // Delete handler
+            els.blocksList.querySelectorAll('.delete-block').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.index);
+                    if (confirm('Delete this block?')) {
+                        state.blocks.splice(idx, 1);
+                        if (state.selectedBlockIndex === idx) state.selectedBlockIndex = null;
+                        else if (state.selectedBlockIndex > idx) state.selectedBlockIndex--;
+                        renderBlocksList();
+                        renderEditor();
+                    }
+                });
+            });
+
+            // Drag and drop handlers
+            let draggedIndex = null;
+
+            els.blocksList.querySelectorAll('.block-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedIndex = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', draggedIndex);
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedIndex = null;
+                    // Remove all drop indicators
+                    els.blocksList.querySelectorAll('.block-item').forEach(el => {
+                        el.classList.remove('drop-above', 'drop-below');
+                    });
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+
+                    if (draggedIndex === null) return;
+                    const targetIndex = parseInt(item.dataset.index);
+                    if (targetIndex === draggedIndex) return;
+
+                    // Determine if dropping above or below based on mouse position
+                    const rect = item.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    const isAbove = e.clientY < midpoint;
+
+                    // Remove indicators from all items
+                    els.blocksList.querySelectorAll('.block-item').forEach(el => {
+                        el.classList.remove('drop-above', 'drop-below');
+                    });
+
+                    // Add indicator to current target
+                    item.classList.add(isAbove ? 'drop-above' : 'drop-below');
+                });
+
+                item.addEventListener('dragleave', () => {
+                    item.classList.remove('drop-above', 'drop-below');
+                });
+
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedIndex === null) return;
+
+                    const targetIndex = parseInt(item.dataset.index);
+                    if (targetIndex === draggedIndex) return;
+
+                    // Determine drop position
+                    const rect = item.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    const dropAbove = e.clientY < midpoint;
+
+                    // Calculate final position
+                    let newIndex = dropAbove ? targetIndex : targetIndex + 1;
+                    if (draggedIndex < newIndex) newIndex--; // Adjust for removal
+
+                    // Move the block
+                    const [movedBlock] = state.blocks.splice(draggedIndex, 1);
+                    state.blocks.splice(newIndex, 0, movedBlock);
+
+                    // Update selected index if needed
+                    if (state.selectedBlockIndex === draggedIndex) {
+                        state.selectedBlockIndex = newIndex;
+                    } else if (state.selectedBlockIndex !== null) {
+                        if (draggedIndex < state.selectedBlockIndex && newIndex >= state.selectedBlockIndex) {
+                            state.selectedBlockIndex--;
+                        } else if (draggedIndex > state.selectedBlockIndex && newIndex <= state.selectedBlockIndex) {
+                            state.selectedBlockIndex++;
+                        }
+                    }
+
+                    renderBlocksList();
+                    renderEditor();
+                });
+            });
+        }
+
+        // Select a block for editing
+        function selectBlock(index) {
+            state.selectedBlockIndex = index;
+            renderBlocksList();
+            renderEditor();
+            scrollToBlockInPreview(index);
+        }
+
+        // Scroll to a block in the preview without re-rendering
+        function scrollToBlockInPreview(index) {
+            if (index === null) return;
+
+            // Get the container (iframe or direct mount)
+            const iframe = els.preview.querySelector('iframe');
+            const container = iframe ? iframe.contentDocument : els.preview;
+            if (!container) return;
+
+            const block = container.querySelector(`[data-block-index="${index}"]`);
+            if (!block) return;
+
+            // Scroll to block
+            block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Add highlight effect
+            block.style.outline = '3px solid #3b82f6';
+            block.style.outlineOffset = '2px';
+            block.style.transition = 'outline-color 0.3s ease';
+
+            // Fade out highlight after 1.5 seconds
+            setTimeout(() => {
+                block.style.outlineColor = 'transparent';
+                setTimeout(() => {
+                    block.style.outline = '';
+                    block.style.outlineOffset = '';
+                    block.style.transition = '';
+                }, 300);
+            }, 1500);
+        }
+
+        // Track which block was last rendered (for section state preservation)
+        let lastRenderedBlockIndex = null;
+
+        // Render editor panel
+function renderEditor() {
+  if (state.selectedBlockIndex === null) {
+    lastRenderedBlockIndex = null;
+    els.editorPanel.innerHTML = `
+      <div class="text-center text-gray-400 mt-12">
+        <div class="text-4xl mb-2">📝</div>
+        <div class="text-sm">Select a block to edit</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Only preserve open sections if re-rendering the SAME block
+  const isSameBlock = lastRenderedBlockIndex === state.selectedBlockIndex;
+  const openSections = new Set();
+  if (isSameBlock) {
+    els.editorPanel.querySelectorAll('.collapsible-section:not(.collapsed)').forEach(section => {
+      const headerText = section.querySelector('.collapsible-header span')?.textContent;
+      if (headerText) openSections.add(headerText);
+    });
+  }
+
+  const block = state.blocks[state.selectedBlockIndex];
+  const blockDef = BLOCKS[block.type];
+
+  // Get the block's editor HTML
+  const editorHtml = blockDef.editor({ block });
+
+  // Only add fade controls if the block doesn't already include them
+  const hasFadeControl = editorHtml.includes('data-k="_fadeOnScroll"');
+  const fadeControlsHtml = hasFadeControl ? '' : `
+      <!-- Fade effect controls -->
+      <div class="mt-4 border-t pt-4">
+        <label class="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            data-k="_fadeOnScroll"
+            class="rounded border-gray-300"
+            ${block._fadeOnScroll ? 'checked' : ''}
+          />
+          Enable fade effect on scroll
+        </label>
+        <p class="text-xs text-gray-500 mt-1">
+          Content will fade in when scrolled into view
+        </p>
+      </div>`;
+
+  els.editorPanel.innerHTML = `
+    <h2 class="font-semibold text-gray-900 mb-4">
+      ${state.selectedBlockIndex + 1}. ${blockDef.title}
+    </h2>
+
+    <div class="rounded-lg border border-gray-300 p-3" style="background: #e5e7eb;">
+      ${editorHtml}
+      ${fadeControlsHtml}
+    </div>
+  `;
+
+  // Restore previously open sections (only if same block)
+  if (isSameBlock && openSections.size > 0) {
+    els.editorPanel.querySelectorAll('.collapsible-section').forEach(section => {
+      const headerText = section.querySelector('.collapsible-header span')?.textContent;
+      if (headerText && openSections.has(headerText)) {
+        section.classList.remove('collapsed');
+      }
+    });
+  }
+
+  // Update last rendered block index
+  lastRenderedBlockIndex = state.selectedBlockIndex;
+
+            // Initialize text formatting toolbars
+            initTextToolbars(els.editorPanel);
+
+            // Initialize collapsible sections
+            els.editorPanel.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const section = header.closest('.collapsible-section');
+                    section.classList.toggle('collapsed');
+                });
+            });
+
+            // Add input listeners
+            els.editorPanel.querySelectorAll('input, select, textarea').forEach(inp => {
+                inp.addEventListener('input', (e) => {
+                    const key = e.target.dataset.k;
+                    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+
+                    if (blockDef.set) {
+                        blockDef.set(block, key, val);
+                    } else {
+                        block[key] = val;
+                    }
+
+                    renderBlocksList(); // Update the list view
+                });
+
+                // Handle toggle checkboxes that control visibility of sibling fields
+                if (inp.type === 'checkbox') {
+                    inp.addEventListener('change', (e) => {
+                        const label = e.target.closest('label');
+                        if (label) {
+                            const fieldsDiv = label.nextElementSibling;
+                            if (fieldsDiv && fieldsDiv.tagName === 'DIV') {
+                                if (e.target.checked) {
+                                    fieldsDiv.classList.remove('opacity-50');
+                                } else {
+                                    fieldsDiv.classList.add('opacity-50');
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Handle body style master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('body-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.body-style-fields');
+                        const inheritCheckbox = els.editorPanel.querySelector('.body-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isBodyStyleMaster = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isBodyStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isBodyStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle body style inherit checkbox - toggle field visibility
+                if (inp.classList.contains('body-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.body-style-fields');
+                        const masterCheckbox = els.editorPanel.querySelector('.body-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (fieldsDiv) {
+                            if (e.target.checked && !isMaster) {
+                                // Inheriting and not master - dim the fields
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            } else {
+                                // Not inheriting or is master - show fields
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle drop cap style master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('dropcap-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.dropcap-style-fields');
+                        const inheritCheckbox = els.editorPanel.querySelector('.dropcap-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isDropCapStyleMaster = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isDropCapStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isDropCapStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle drop cap style inherit checkbox - toggle field visibility
+                if (inp.classList.contains('dropcap-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.dropcap-style-fields');
+                        const masterCheckbox = els.editorPanel.querySelector('.dropcap-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (fieldsDiv) {
+                            if (e.target.checked && !isMaster) {
+                                // Inheriting and not master - dim the fields
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            } else {
+                                // Not inheriting or is master - show fields
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        }
+
+                        // Set the value explicitly to true/false
+                        block._inheritDropCapStyle = e.target.checked;
+                    });
+                }
+
+                // Handle background color master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('bgcolor-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.bgcolor-style-fields');
+                        const inheritCheckbox = els.editorPanel.querySelector('.bgcolor-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isBgColorMaster = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isBgColorMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isBgColorMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle background color inherit checkbox - toggle field visibility
+                if (inp.classList.contains('bgcolor-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.bgcolor-style-fields');
+                        const masterCheckbox = els.editorPanel.querySelector('.bgcolor-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (fieldsDiv) {
+                            if (e.target.checked && !isMaster) {
+                                // Inheriting and not master - dim the fields
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            } else {
+                                // Not inheriting or is master - show fields
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        }
+
+                        // Set the value explicitly to true/false
+                        block._inheritBgColor = e.target.checked;
+                    });
+                }
+
+                // Handle caption style master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('caption-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.caption-style-fields');
+                        const inheritCheckbox = els.editorPanel.querySelector('.caption-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isCaptionStyleMaster = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isCaptionStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isCaptionStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle caption style inherit checkbox - toggle field visibility
+                if (inp.classList.contains('caption-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.caption-style-fields');
+                        const masterCheckbox = els.editorPanel.querySelector('.caption-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (fieldsDiv) {
+                            if (e.target.checked && !isMaster) {
+                                // Inheriting and not master - dim the fields
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            } else {
+                                // Not inheriting or is master - show fields
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        }
+
+                        // Set the value explicitly to true/false
+                        block._inheritCaptionStyle = e.target.checked;
+                    });
+                }
+
+                // Handle pull quote style master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('pullquote-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.pullquote-style-fields');
+                        const inheritCheckbox = els.editorPanel.querySelector('.pullquote-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isPullQuoteStyleMaster = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isPullQuoteStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isPullQuoteStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle pull quote style inherit checkbox - toggle field visibility
+                if (inp.classList.contains('pullquote-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const fieldsDiv = els.editorPanel.querySelector('.pullquote-style-fields');
+                        const masterCheckbox = els.editorPanel.querySelector('.pullquote-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (fieldsDiv) {
+                            if (e.target.checked && !isMaster) {
+                                // Inheriting and not master - dim the fields
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            } else {
+                                // Not inheriting or is master - show fields
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        }
+
+                        // Set the value explicitly to true/false
+                        block._inheritPullQuoteStyle = e.target.checked;
+                    });
+                }
+            });
+
+
+            // Gallery block: Slot count dropdown
+            const slotCountDropdown = els.editorPanel.querySelector('.gallery-slot-count');
+            if (slotCountDropdown) {
+                // Store the current value when focused (before change)
+                let previousSlotCount = slotCountDropdown.value;
+                slotCountDropdown.addEventListener('focus', (e) => {
+                    previousSlotCount = e.target.value;
+                });
+                slotCountDropdown.addEventListener('change', (e) => {
+                    const newSlotCount = parseInt(e.target.value);
+                    const defaultTemplates = { 2: 'two-equal', 3: 'three-equal', 4: 'four-grid' };
+
+                    // Warn if media will be lost
+                    if (block.media && block.media.length > newSlotCount) {
+                        if (!confirm(`Switching to ${newSlotCount} slots will remove extra media. Continue?`)) {
+                            e.target.value = previousSlotCount;
+                            return;
+                        }
+                        block.media = block.media.slice(0, newSlotCount);
+                    }
+
+                    block.slotCount = newSlotCount;
+                    block.template = defaultTemplates[newSlotCount];
+                    renderEditor();
+                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                });
+            }
+
+            // Gallery block: Template selection
+            els.editorPanel.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const templateKey = card.dataset.template;
+                    block.template = templateKey;
+                    renderEditor();
+                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                });
+            });
+
+            // Gallery block: Slot media path
+            els.editorPanel.querySelectorAll('[data-slot-src]').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const idx = parseInt(e.target.dataset.slotSrc);
+                    if (!block.media) block.media = [];
+                    while (block.media.length <= idx) {
+                        block.media.push({ src: '', type: 'image', caption: '', focalPoint: 'center' });
+                    }
+                    block.media[idx].src = e.target.value;
+                });
+            });
+
+            // Gallery block: Slot type
+            els.editorPanel.querySelectorAll('[data-slot-type]').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.slotType);
+                    if (!block.media) block.media = [];
+                    while (block.media.length <= idx) {
+                        block.media.push({ src: '', type: 'image', caption: '', focalPoint: 'center' });
+                    }
+                    block.media[idx].type = e.target.value;
+                });
+            });
+
+            // Gallery block: Slot focal point
+            els.editorPanel.querySelectorAll('[data-slot-focal]').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.slotFocal);
+                    if (!block.media) block.media = [];
+                    while (block.media.length <= idx) {
+                        block.media.push({ src: '', type: 'image', caption: '', focalPoint: 'center' });
+                    }
+                    block.media[idx].focalPoint = e.target.value;
+                });
+            });
+
+            // Gallery block: Slot caption
+            els.editorPanel.querySelectorAll('[data-slot-caption]').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const idx = parseInt(e.target.dataset.slotCaption);
+                    if (!block.media) block.media = [];
+                    while (block.media.length <= idx) {
+                        block.media.push({ src: '', type: 'image', caption: '', focalPoint: 'center' });
+                    }
+                    block.media[idx].caption = e.target.value;
+                });
+            });
+
+
+
+            // Handle panel add/remove buttons (add this after the input listeners in renderEditor)
+            els.editorPanel.querySelectorAll('[data-add-panel]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!block.panels) block.panels = [];
+                    if (block.panels.length < 2) {
+                        block.panels.push({
+                            image: '', video: '', textBgColor: '#000000', headline: 'New Panel',
+                            headlineStyle: { size: 'text-4xl', weight: 'font-bold', color: '#fbbf24', font: '', align: 'text-left' },
+                            subhead: '', subheadStyle: { size: 'text-xl', weight: 'font-normal', color: '#d1d5db', font: '', align: 'text-left' },
+                            text: 'Panel text...', textStyle: { size: 'text-lg', weight: 'font-normal', color: '#ffffff', font: '', align: 'text-left' },
+                            embeddedImage: '', embeddedImageWidth: 'medium', embeddedImageCaption: ''
+                        });
+                        renderEditor();
+                    }
+                });
+            });
+
+            els.editorPanel.querySelectorAll('[data-remove-panel]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (block.panels && block.panels.length > 0) {
+                        block.panels.pop();
+                        renderEditor();
+                    }
+                });
+            });
+        }
+
+        // Zoom control
+        els.zoomSlider.addEventListener('input', e => setPreviewZoom(els.preview, els.zoomPct, e.target.value));
+
+        // Add block
+        els.addBtn.addEventListener('click', () => {
+            const type = els.blockType.value;
+            state.blocks.push(newBlock(type));
+            renderBlocksList();
+        });
+
+        // Preview mode toggle
+        els.previewModeBtn.addEventListener('click', () => {
+            state.previewMode = 'iframe';
+            els.previewModeBtn.classList.add('active');
+            els.debugModeBtn.classList.remove('active');
+            // Hide zoom controls for iframe mode
+            els.zoomSlider.parentElement.style.display = 'none';
+            renderPreview({ state, mount: els.preview, mode: 'iframe', selectedBlockIndex: state.selectedBlockIndex });
+        });
+
+        els.debugModeBtn.addEventListener('click', () => {
+            state.previewMode = 'debug';
+            els.debugModeBtn.classList.add('active');
+            els.previewModeBtn.classList.remove('active');
+            // Show zoom controls for debug mode
+            els.zoomSlider.parentElement.style.display = 'flex';
+            renderPreview({ state, mount: els.preview, mode: 'debug', selectedBlockIndex: state.selectedBlockIndex });
+        });
+
+        // Render preview
+        els.renderBtn.addEventListener('click', () => {
+            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+        });
+
+        // Export HTML
+        els.exportBtn.addEventListener('click', () => {
+            // Add analytics config if user is logged in and story is saved
+            const exportState = { ...state };
+            if (storiesUI.currentStoryId) {
+                exportState.analyticsConfig = {
+                    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+                    supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+                    storyId: storiesUI.currentStoryId
+                };
+            }
+            const html = buildExportHtml({ state: exportState });
+            dl(`story-${state.project || 'export'}.html`, html);
+        });
+
+        // Save JSON
+        els.saveBtn.addEventListener('click', () => {
+            const payload = JSON.stringify({
+                project: state.project || els.projectInput.value || '',
+                pageTitle: state.pageTitle || els.pageTitleInput.value || '', // NEW: Save page title
+                blocks: state.blocks
+            }, null, 2);
+            dl(`story-${state.project || 'project'}.json`, payload);
+        });
+
+        // Load JSON
+        els.loadInp.addEventListener('change', (e) => {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+                try {
+                    const j = JSON.parse(r.result);
+                    state.project = j.project || '';
+                    state.pageTitle = j.pageTitle || ''; // NEW: Load page title
+                    state.blocks = Array.isArray(j.blocks) ? j.blocks : [];
+                    state.selectedBlockIndex = null;
+                    els.projectInput.value = state.project;
+                    els.pageTitleInput.value = state.pageTitle; // NEW: Set input value
+                    renderBlocksList();
+                    renderEditor();
+                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                } catch {
+                    alert('Invalid JSON');
+                }
+            };
+            r.readAsText(f);
+            e.target.value = '';
+        });
+
+        els.projectInput.addEventListener('input', () => {
+            state.project = els.projectInput.value.trim();
+        });
+
+        // NEW: Page title input listener
+        els.pageTitleInput.addEventListener('input', () => {
+            state.pageTitle = els.pageTitleInput.value.trim();
+        });
+
+        // ============================================
+        // Auth & Cloud Storage Integration
+        // ============================================
+
+        // Initialize Stories UI first (so we can pass it to Auth)
+        const storiesUI = new StoriesUI(els.storiesContainer, {
+            // Called when user loads a story from cloud
+            onLoad: (storyData) => {
+                state.project = storyData.project || '';
+                state.pageTitle = storyData.title || '';
+                state.blocks = storyData.blocks || [];
+                state.selectedBlockIndex = null;
+                els.projectInput.value = state.project;
+                els.pageTitleInput.value = state.pageTitle;
+                renderBlocksList();
+                renderEditor();
+                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+            },
+            // Called when user clicks "New Story"
+            onNew: () => {
+                state.project = '';
+                state.pageTitle = '';
+                state.blocks = [];
+                state.selectedBlockIndex = null;
+                els.projectInput.value = '';
+                els.pageTitleInput.value = '';
+                renderBlocksList();
+                renderEditor();
+                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+            },
+            // Called when saving to get current state
+            getState: () => ({
+                project: state.project,
+                pageTitle: state.pageTitle,
+                blocks: state.blocks
+            })
+        });
+
+        // Initialize Auth UI
+        const authUI = new AuthUI(els.authContainer, (user) => {
+            state.user = user;
+            storiesUI.setUser(user);
+            analyticsUI.setUser(user);
+        });
+
+        // Initialize Analytics UI
+        const analyticsUI = new AnalyticsUI(els.analyticsContent);
+
+        // Analytics modal handlers
+        els.analyticsBtn.addEventListener('click', () => {
+            els.analyticsModal.classList.remove('hidden');
+            analyticsUI.loadSummary();
+        });
+
+        els.analyticsClose.addEventListener('click', () => {
+            els.analyticsModal.classList.add('hidden');
+        });
+
+        els.analyticsOverlay.addEventListener('click', () => {
+            els.analyticsModal.classList.add('hidden');
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !els.analyticsModal.classList.contains('hidden')) {
+                els.analyticsModal.classList.add('hidden');
+            }
+        });
+
+        // Initial render
+        renderBlocksList();
+        renderEditor();
+    </script>
+</body>
+
+</html>
