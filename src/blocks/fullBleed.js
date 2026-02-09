@@ -219,9 +219,10 @@ export const FullBleedBlock = {
       }
     }
 
-    const containerStyle = b.captionPosition === 'below' ? '' : 'position:relative;';
+    const containerStyle = 'position:relative;z-index:1;';
 
-    return `<section class="fullbleed" style="padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
+    return `<section class="fullbleed" style="position:relative;z-index:3;padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div>
       <div style="${containerStyle}">
         ${mediaHtml}
         ${captionHtml}

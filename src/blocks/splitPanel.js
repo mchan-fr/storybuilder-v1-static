@@ -475,7 +475,7 @@ export const SplitPanelBlock = {
 
       const textWidthClass = widthMap[panel.textWidth || 'medium'];
 
-      const textSide = '<div class="flex items-center justify-center p-12 ' + pt + ' ' + pb + '" style="background-color:' + (panel.textBgColor || '#000000') + ';">' +
+      const textSide = '<div class="flex items-center justify-center p-12 min-h-screen ' + pt + ' ' + pb + '" style="background-color:' + (panel.textBgColor || '#000000') + ';">' +
         '<div class="w-full relative z-20 ' + textWidthClass + '">' + textContent + '</div></div>';
 
       const imageContainer = '<div class="relative h-screen">' + imageSide + '</div>';

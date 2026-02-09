@@ -1092,8 +1092,7 @@ function toggleMute(videoId, button) {
     
     var firstImage=firstRow.querySelector('.split-image-sticky');
     var secondImage=secondRow.querySelector('.split-image-sticky');
-    var secondText=secondRow.querySelector('.split-text-scroll');
-    if(!firstImage||!secondImage||!secondText)return;
+    if(!firstImage||!secondImage)return;
     
     function applyMobileStyles(){
       firstImage.style.display='block';
@@ -1116,23 +1115,17 @@ function toggleMute(videoId, button) {
     
     function checkAndApply(){
       var isMobile = window.innerWidth <= 1024;
-      
+
       if(isMobile){
         applyMobileStyles();
         return;
       }
-      
+
       var windowHeight=window.innerHeight;
       var firstRowRect=firstRow.getBoundingClientRect();
       var secondRowRect=secondRow.getBoundingClientRect();
-      var secondTextRect=secondText.getBoundingClientRect();
-      
-      if(secondTextRect.top < -windowHeight){
-        firstImage.style.display='none';
-        secondImage.style.display='none';
-        return;
-      }
-      
+
+      // If split panel is below viewport, hide both images
       if(firstRowRect.top>=windowHeight){
         firstImage.style.display='none';
         secondImage.style.display='none';
