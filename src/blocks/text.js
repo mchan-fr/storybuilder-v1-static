@@ -82,8 +82,6 @@ export const TextBlock = {
 
       // Block settings
       bgColor: '#ffffff',
-      bgImage: '',
-      bgOverlay: '0',
       paddingTop: 'medium',
       paddingBottom: 'medium',
       expectedViewTime: null
@@ -153,16 +151,6 @@ export const TextBlock = {
         '</div>' +
         '<div class="bgcolor-style-fields' + (b._inheritBgColor === true && !b._isBgColorMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
           '<input type="color" data-k="bgColor" value="' + (b.bgColor || '#ffffff') + '" class="w-full h-9 border rounded">' +
-        '</div>' +
-      '</div>' +
-      '<div class="mb-3">' +
-        '<label class="block text-sm mb-1">Background Image (optional)</label>' +
-        '<input data-k="bgImage" value="' + (b.bgImage || '') + '" class="w-full border rounded px-2 py-1 text-sm mb-2">' +
-        '<div class="grid grid-cols-2 gap-2">' +
-          '<div>' +
-            '<label class="block text-xs">Overlay Opacity (0-1)</label>' +
-            '<input data-k="bgOverlay" type="number" min="0" max="1" step="0.1" value="' + (b.bgOverlay || '0') + '" class="w-full border rounded px-2 py-1 text-sm">' +
-          '</div>' +
         '</div>' +
       '</div>' +
       '<div class="grid grid-cols-2 gap-3 mb-3">' +
@@ -523,18 +511,7 @@ export const TextBlock = {
       }
     }
 
-    const hasBg = b.bgImage && b.bgImage.trim();
-    const bgOverlay = parseFloat(b.bgOverlay || '0');
     let bgStyle = 'background-color:' + bgColor + ';';
-    let bgImageHtml = '';
-    let overlayHtml = '';
-
-    if (hasBg) {
-      bgImageHtml = '<div class="absolute inset-0 bg-cover bg-center" style="background-image:url(' + resolvePreviewPath(b.bgImage, project) + ');"></div>';
-      if (bgOverlay > 0) {
-        overlayHtml = '<div class="absolute inset-0" style="background-color:rgba(0,0,0,' + bgOverlay + ');"></div>';
-      }
-    }
 
     // Check for inherited body text style
     let effectiveTextStyle = b.textStyle || {};
@@ -705,7 +682,6 @@ export const TextBlock = {
     const fadeAttr = b._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
     return styleTag + '<section class="text-block-section relative ' + pt + ' ' + pb + '"' + fadeAttr + ' style="' + bgStyle + '">' +
-      bgImageHtml + overlayHtml +
       '<div class="relative z-10 ' + pad + ' ' + textWidthClass + '">' + contentHtml + '</div>' +
     '</section>';
   },
@@ -749,18 +725,7 @@ export const TextBlock = {
       }
     }
 
-    const hasBg = b.bgImage && b.bgImage.trim();
-    const bgOverlay = parseFloat(b.bgOverlay || '0');
     let bgStyle = 'background-color:' + bgColor + ';';
-    let bgImageHtml = '';
-    let overlayHtml = '';
-
-    if (hasBg) {
-      bgImageHtml = '<div class="absolute inset-0 bg-cover bg-center" style="background-image:url(' + resolveExportPath(b.bgImage) + ');"></div>';
-      if (bgOverlay > 0) {
-        overlayHtml = '<div class="absolute inset-0" style="background-color:rgba(0,0,0,' + bgOverlay + ');"></div>';
-      }
-    }
 
     // Check for inherited body text style
     let effectiveTextStyle = b.textStyle || {};
@@ -924,7 +889,6 @@ export const TextBlock = {
     const fadeAttr = b._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
     return styleTag + '<section class="text-block-section relative ' + pt + ' ' + pb + '"' + fadeAttr + ' style="' + bgStyle + '">' +
-      bgImageHtml + overlayHtml +
       '<div class="relative z-10 ' + pad + ' ' + textWidthClass + '">' + contentHtml + '</div>' +
     '</section>';
   },

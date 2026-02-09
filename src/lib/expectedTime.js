@@ -39,7 +39,6 @@ export function calculateExpectedTime(block) {
 
     case 'hero':
     case 'fullBleed':
-    case 'stickyHero':
       // Image/video blocks - base time, more if has video
       if (block.video || block.videoMobile) {
         return block.videoDuration || BASE_VIDEO_TIME;
