@@ -1063,6 +1063,13 @@ function renderEditor() {
             const type = els.blockType.value;
             state.blocks.push(newBlock(type));
             renderBlocksList();
+
+            // Scroll the new block into view if needed
+            const newBlockIndex = state.blocks.length - 1;
+            const newBlockElement = els.blocksList.querySelector(`[data-index="${newBlockIndex}"]`);
+            if (newBlockElement) {
+                newBlockElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         });
 
         // Preview mode toggle
