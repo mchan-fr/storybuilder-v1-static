@@ -394,8 +394,9 @@ export const HeroBlock = {
 
     // Desktop: headline + deck together in overlay (user-positioned)
     // Mobile: headline only in overlay (bottom-left, larger), deck wipes up from bottom
-    return `<section class="sb-hero fullbleed overflow-hidden${mobileClass}"${fadeAttr}>
-      <div class="hero-image-section">
+    return `<section class="sb-hero fullbleed overflow-hidden${mobileClass}" style="position:relative;z-index:3;"${fadeAttr}>
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div>
+      <div class="hero-image-section" style="position:relative;z-index:1;">
         ${bg}
         <div class="hero-gradient"></div>
         <div class="overlay desktop-overlay ${vertClass} ${horizClass}">

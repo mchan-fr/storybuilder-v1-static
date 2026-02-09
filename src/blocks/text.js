@@ -888,8 +888,9 @@ export const TextBlock = {
 
     const fadeAttr = b._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="text-block-section relative ' + pt + ' ' + pb + '"' + fadeAttr + ' style="' + bgStyle + '">' +
-      '<div class="relative z-10 ' + pad + ' ' + textWidthClass + '">' + contentHtml + '</div>' +
+    return styleTag + '<section class="text-block-section relative ' + pt + ' ' + pb + '"' + fadeAttr + ' style="position:relative;z-index:3;' + bgStyle + '">' +
+      '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;' + bgStyle + 'z-index:0;"></div>' +
+      '<div class="relative z-10 ' + pad + ' ' + textWidthClass + '" style="position:relative;z-index:1;">' + contentHtml + '</div>' +
     '</section>';
   },
 

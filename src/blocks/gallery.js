@@ -501,9 +501,13 @@ export const GalleryBlock = {
 
     gridHtml += '</div>';
 
+    const bgColor = b.bgColor || '#000000';
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
-    return `<section class="fullbleed" style="background-color:${b.bgColor || '#000000'};padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
-      ${gridHtml}
+    return `<section class="fullbleed" style="position:relative;z-index:3;background-color:${bgColor};padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:${bgColor};z-index:0;"></div>
+      <div style="position:relative;z-index:1;">
+        ${gridHtml}
+      </div>
     </section>`;
   },
 

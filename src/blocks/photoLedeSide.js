@@ -962,7 +962,10 @@ export const PhotoLedeSideBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="background-color:' + bgColor + ';"' + fadeAttr + '>' + desktopContent + mobileContent + '</section>';
+    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="position:relative;z-index:3;background-color:' + bgColor + ';"' + fadeAttr + '>' +
+      '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:' + bgColor + ';z-index:0;"></div>' +
+      '<div style="position:relative;z-index:1;">' + desktopContent + mobileContent + '</div>' +
+    '</section>';
   },
 
   set(block, key, value) {

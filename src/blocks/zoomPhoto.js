@@ -232,8 +232,10 @@ export const ZoomPhotoBlock = {
     const spacerBg = block.spacerBg || '#000000';
 
     return `
-      <div class="sb-zoom-spacer" style="height: ${spacerHeight}vh; background: ${spacerBg};"></div>
-      <section class="sb-zoomsec" id="${id}" style="background:${spacerBg};"
+      <div class="sb-zoom-spacer" style="position:relative;z-index:3;height: ${spacerHeight}vh; background: ${spacerBg};">
+        <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:${spacerBg};z-index:0;"></div>
+      </div>
+      <section class="sb-zoomsec" id="${id}" style="position:relative;z-index:3;background:${spacerBg};"
         data-scale-end="${Number(block.maxScale || 2.6)}"
         data-fade-in="${Number(block.fadeIn || 0.18)}"
         data-fade-out="${Number(block.fadeOut || 0.18)}"
@@ -241,7 +243,8 @@ export const ZoomPhotoBlock = {
         data-panel-end="${Number(block.panelEnd || 0.72)}"
         data-focus-x="${fx}" data-focus-y="${fy}"
         data-activate-at="${Number(block.activateAt || 0.35)}">
-        <div class="sb-zoom-pin">
+        <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:${spacerBg};z-index:0;"></div>
+        <div class="sb-zoom-pin" style="position:relative;z-index:1;">
           <img class="sb-zoom-photo" src="${img}" alt="${altText}">
           <div class="sb-zoom-vignette"></div>
           ${block.panel?.show

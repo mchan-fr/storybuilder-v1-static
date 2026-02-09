@@ -909,8 +909,10 @@ export const PhotoLedeBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="background-color:' + bgColor + ';"' + fadeAttr + '>' +
-      photoHtml + textHtml + '</section>';
+    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="position:relative;z-index:3;background-color:' + bgColor + ';"' + fadeAttr + '>' +
+      '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:' + bgColor + ';z-index:0;"></div>' +
+      '<div style="position:relative;z-index:1;">' + photoHtml + textHtml + '</div>' +
+    '</section>';
   },
 
   set(block, key, value) {

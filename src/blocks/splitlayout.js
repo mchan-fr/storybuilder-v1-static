@@ -482,7 +482,10 @@ export const SplitLayoutBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return '<section class="sb-split-layout fullbleed overflow-hidden flex" style="height:100vh;padding-top:' + paddingTop + ';padding-bottom:' + paddingBottom + ';"' + fadeAttr + '>' + layout + '</section>';
+    return '<section class="sb-split-layout fullbleed overflow-hidden flex" style="position:relative;z-index:3;height:100vh;padding-top:' + paddingTop + ';padding-bottom:' + paddingBottom + ';"' + fadeAttr + '>' +
+      '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div>' +
+      '<div style="position:relative;z-index:1;display:flex;width:100%;height:100%;">' + layout + '</div>' +
+    '</section>';
   },
 
   set(block, key, value) {
