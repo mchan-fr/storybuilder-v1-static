@@ -581,19 +581,97 @@ export function styleInheritControls(block, masterKey, inheritKey, inheritDefaul
 export function getEffectiveStyle(block, blocks, styleKey, masterFlag, inheritFlag, inheritDefault = true) {
   const shouldInherit = inheritDefault ? block[inheritFlag] !== false : block[inheritFlag] === true;
 
-  if (shouldInherit) {
+  if (shouldInherit && blocks && blocks.length > 0) {
+    // Find master block - use truthy check for the flag
     const masterBlock = blocks.find(blk => blk[masterFlag] && blk !== block);
     if (masterBlock) {
-      // Check for style directly on block (text, photoLedeSide) or in panels (split-panel)
-      if (masterBlock[styleKey]) {
-        return masterBlock[styleKey];
-      } else if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0][styleKey]) {
-        return masterBlock.panels[0][styleKey];
+      // For split-panel master: style is in panels[0], not at block level
+      // For text/photoLede/photoLedeSide master: style is at block level
+      // Check panels first (split-panel), then direct (text/photoLede/photoLedeSide)
+      const panelStyle = masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0][styleKey];
+      const directStyle = masterBlock[styleKey];
+
+      // Return whichever exists and has properties
+      if (panelStyle && typeof panelStyle === 'object' && Object.keys(panelStyle).length > 0) {
+        return { ...panelStyle }; // Return a copy
+      }
+      if (directStyle && typeof directStyle === 'object' && Object.keys(directStyle).length > 0) {
+        return { ...directStyle }; // Return a copy
       }
     }
   }
 
   return block[styleKey] || {};
+}
+
+/**
+ * Pull quote style defaults - used to ensure all properties exist when inheriting
+ * These are generic defaults that get merged with master's style
+ */
+const PULL_QUOTE_DEFAULTS = {
+  size: '24',
+  weight: '500',
+  italic: false,
+  color: '#ffffff',
+  font: 'system-ui',
+  leading: '1.8',
+  bgColor: '#3d3314',
+  borderColor: '#fbbf24'
+};
+
+/**
+ * Get effective pull quote style - returns master's style when inheriting,
+ * or block's own style when not inheriting (without merging defaults)
+ */
+export function getEffectivePullQuoteStyle(block, blocks) {
+  // Debug: log to console with type info
+  console.log('[PQ Debug] block.type:', block.type);
+  console.log('[PQ Debug] block._inheritPullQuoteStyle:', block._inheritPullQuoteStyle, '(type:', typeof block._inheritPullQuoteStyle + ')');
+  console.log('[PQ Debug] blocks count:', blocks ? blocks.length : 'no blocks');
+
+  // Use truthy check instead of strict === true, since checkbox values may vary
+  const shouldInherit = block._inheritPullQuoteStyle === true || block._inheritPullQuoteStyle === 'true';
+  console.log('[PQ Debug] shouldInherit:', shouldInherit);
+
+  if (shouldInherit && blocks && blocks.length > 0) {
+    // Find master - log all blocks' master status with types
+    blocks.forEach((blk, idx) => {
+      console.log(`[PQ Debug] Block ${idx} (${blk.type}): _isPullQuoteStyleMaster =`, blk._isPullQuoteStyleMaster, '(type:', typeof blk._isPullQuoteStyleMaster + ')');
+    });
+
+    // Use truthy check for master flag as well
+    const masterBlock = blocks.find(blk => (blk._isPullQuoteStyleMaster === true || blk._isPullQuoteStyleMaster === 'true' || blk._isPullQuoteStyleMaster) && blk !== block);
+    console.log('[PQ Debug] Found masterBlock:', masterBlock ? masterBlock.type : 'NONE');
+
+    if (masterBlock) {
+      // Check panels first (split-panel), then direct (text/photoLede/photoLedeSide)
+      const panelStyle = masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].pullQuoteStyle;
+      const directStyle = masterBlock.pullQuoteStyle;
+
+      console.log('[PQ Debug] panelStyle:', panelStyle);
+      console.log('[PQ Debug] directStyle:', directStyle);
+
+      // Get the master's style - use whichever exists, or empty object if neither
+      const masterStyle = (panelStyle && typeof panelStyle === 'object' && Object.keys(panelStyle).length > 0)
+        ? panelStyle
+        : (directStyle && typeof directStyle === 'object' && Object.keys(directStyle).length > 0)
+          ? directStyle
+          : {}; // Use empty object instead of null - we'll merge with defaults
+
+      console.log('[PQ Debug] masterStyle:', masterStyle);
+
+      // Always merge with defaults to ensure all properties exist
+      // This handles cases where master block was created before pullQuoteStyle was added
+      const result = { ...PULL_QUOTE_DEFAULTS, ...masterStyle };
+      console.log('[PQ Debug] Returning inherited style:', result);
+      return result;
+    }
+  }
+
+  // Return block's own style WITHOUT merging defaults
+  // Each block type has its own defaults that are applied at render time
+  console.log('[PQ Debug] Returning own style:', block.pullQuoteStyle);
+  return block.pullQuoteStyle || {};
 }
 
 /**

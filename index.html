@@ -980,9 +980,9 @@ function renderEditor() {
                 // Handle pull quote style master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('pullquote-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        // Find fields div relative to the checkbox's collapsible section
+                        // Find ALL fields divs in the collapsible section (one per panel)
                         const container = e.target.closest('.collapsible-content');
-                        const fieldsDiv = container ? container.querySelector('.pullquote-style-fields') : els.editorPanel.querySelector('.pullquote-style-fields');
+                        const fieldsDivs = container ? container.querySelectorAll('.pullquote-style-fields') : els.editorPanel.querySelectorAll('.pullquote-style-fields');
                         const inheritCheckbox = container ? container.querySelector('.pullquote-style-inherit') : els.editorPanel.querySelector('.pullquote-style-inherit');
 
                         if (e.target.checked) {
@@ -1001,14 +1001,12 @@ function renderEditor() {
                             // Set this block as master
                             block._isPullQuoteStyleMaster = true;
                             // Master always has active fields
-                            if (fieldsDiv) {
-                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                            }
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
                         } else {
                             block._isPullQuoteStyleMaster = false;
                             // If inherit is checked, dim the fields
-                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
-                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            if (inheritCheckbox && inheritCheckbox.checked) {
+                                fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
                             }
                         }
                     });
@@ -1017,20 +1015,18 @@ function renderEditor() {
                 // Handle pull quote style inherit checkbox - toggle field visibility
                 if (inp.classList.contains('pullquote-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        // Find fields div relative to the checkbox's collapsible section
+                        // Find ALL fields divs in the collapsible section (one per panel)
                         const container = e.target.closest('.collapsible-content');
-                        const fieldsDiv = container ? container.querySelector('.pullquote-style-fields') : els.editorPanel.querySelector('.pullquote-style-fields');
+                        const fieldsDivs = container ? container.querySelectorAll('.pullquote-style-fields') : els.editorPanel.querySelectorAll('.pullquote-style-fields');
                         const masterCheckbox = container ? container.querySelector('.pullquote-style-master') : els.editorPanel.querySelector('.pullquote-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
-                        if (fieldsDiv) {
-                            if (e.target.checked && !isMaster) {
-                                // Inheriting and not master - dim the fields
-                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
-                            } else {
-                                // Not inheriting or is master - show fields
-                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                            }
+                        if (e.target.checked && !isMaster) {
+                            // Inheriting and not master - dim the fields
+                            fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
+                        } else {
+                            // Not inheriting or is master - show fields
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
                         }
 
                         // Set the value explicitly to true/false

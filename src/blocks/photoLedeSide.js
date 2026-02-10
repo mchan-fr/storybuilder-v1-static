@@ -21,6 +21,7 @@ import {
   getEffectiveStyle,
   getEffectiveBgColor,
   getEffectiveDropCapSettings,
+  getEffectivePullQuoteStyle,
   dropCapCss,
   generateBlockId
 } from '../utils.js';
@@ -430,12 +431,17 @@ export const PhotoLedeSideBlock = {
     // Get effective styles using shared utilities
     const effectiveTextStyle = getEffectiveStyle(b, blocks, 'textStyle', '_isBodyStyleMaster', '_inheritBodyStyle', true);
     const effectiveSubheadStyle = getEffectiveStyle(b, blocks, 'subheadStyle', '_isSubheadStyleMaster', '_inheritSubheadStyle', true);
-    const effectivePullQuoteStyle = getEffectiveStyle(b, blocks, 'pullQuoteStyle', '_isPullQuoteStyleMaster', '_inheritPullQuoteStyle', false);
+    const effectivePullQuoteStyle = getEffectivePullQuoteStyle(b, blocks);
+
+    // Debug: log what photoLedeSide preview is receiving
+    console.log('[PLS Preview] _inheritPullQuoteStyle:', b._inheritPullQuoteStyle);
+    console.log('[PLS Preview] effectivePullQuoteStyle:', effectivePullQuoteStyle);
+    console.log('[PLS Preview] effectivePullQuoteStyle.bgColor:', effectivePullQuoteStyle.bgColor);
 
     const subheadStyleStr = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
     const pullQuoteStyleStr = buildInlineStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500', leading: '1.8' });
-    const pullQuoteBgColor = getStyle(effectivePullQuoteStyle, 'bgColor', '#3d3314');
-    const pullQuoteBorderColor = getStyle(effectivePullQuoteStyle, 'borderColor', '#fbbf24');
+    const pullQuoteBgColor = effectivePullQuoteStyle.bgColor || '#3d3314';
+    const pullQuoteBorderColor = effectivePullQuoteStyle.borderColor || '#fbbf24';
     const textStyleStr = buildInlineStyle(effectiveTextStyle, { color: '#e5e5e5', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.7' });
 
     // Build pull quote HTML (only if text exists and position > 0)
@@ -590,12 +596,12 @@ export const PhotoLedeSideBlock = {
     // Get effective styles using shared utilities
     const effectiveTextStyle = getEffectiveStyle(b, blocks, 'textStyle', '_isBodyStyleMaster', '_inheritBodyStyle', true);
     const effectiveSubheadStyle = getEffectiveStyle(b, blocks, 'subheadStyle', '_isSubheadStyleMaster', '_inheritSubheadStyle', true);
-    const effectivePullQuoteStyle = getEffectiveStyle(b, blocks, 'pullQuoteStyle', '_isPullQuoteStyleMaster', '_inheritPullQuoteStyle', false);
+    const effectivePullQuoteStyle = getEffectivePullQuoteStyle(b, blocks);
 
     const subheadStyleStr = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
     const pullQuoteStyleStr = buildInlineStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500', leading: '1.8' });
-    const pullQuoteBgColor = getStyle(effectivePullQuoteStyle, 'bgColor', '#3d3314');
-    const pullQuoteBorderColor = getStyle(effectivePullQuoteStyle, 'borderColor', '#fbbf24');
+    const pullQuoteBgColor = effectivePullQuoteStyle.bgColor || '#3d3314';
+    const pullQuoteBorderColor = effectivePullQuoteStyle.borderColor || '#fbbf24';
     const textStyleStr = buildInlineStyle(effectiveTextStyle, { color: '#e5e5e5', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.7' });
 
     // Build pull quote HTML
@@ -765,12 +771,28 @@ export const PhotoLedeSideBlock = {
   },
 
   set(block, key, value) {
+    console.log('[PLS set] key:', key, 'value:', value);
     if (key.includes('.')) {
       const [parent, child] = key.split('.');
       if (!block[parent]) block[parent] = {};
       block[parent][child] = value;
     } else {
       block[key] = value;
+
+      // When setting as pull quote style master, ensure pullQuoteStyle exists with defaults
+      if (key === '_isPullQuoteStyleMaster' && value && !block.pullQuoteStyle) {
+        block.pullQuoteStyle = {
+          size: '24',
+          weight: '500',
+          italic: false,
+          color: '#ffffff',
+          font: 'IBM Plex Sans, sans-serif',
+          leading: '1.8',
+          bgColor: '#3d3314',
+          borderColor: '#fbbf24'
+        };
+      }
     }
+    console.log('[PLS set] after set, block._inheritPullQuoteStyle:', block._inheritPullQuoteStyle);
   }
 };

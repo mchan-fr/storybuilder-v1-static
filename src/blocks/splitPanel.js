@@ -14,7 +14,8 @@ import {
   labelFieldHtml,
   paddingSelectHtml,
   textWidthSelectHtml,
-  getEffectiveBgColor
+  getEffectiveBgColor,
+  getEffectivePullQuoteStyle
 } from '../utils.js';
 
 export const SplitPanelBlock = {
@@ -392,64 +393,86 @@ export const SplitPanelBlock = {
     // ========== PULL QUOTE ==========
     const pullQuoteStyle1 = panel1.pullQuoteStyle || {};
     const pullQuoteStyle2 = panel2.pullQuoteStyle || {};
-    const pullQuoteFieldsDisabled = b._inheritPullQuoteStyle === true && !b._isPullQuoteStyleMaster;
+    const pullQuoteFieldsDisabled = (b._inheritPullQuoteStyle === true || b._inheritPullQuoteStyle === 'true') && !b._isPullQuoteStyleMaster;
+    const pullQuoteStyleDimClass = pullQuoteFieldsDisabled ? ' opacity-50 pointer-events-none' : '';
+
+    // Build position dropdown options for each panel
+    const paragraphs1 = (panel1.bodyText || '').split(/\n\n+/).filter(p => p.trim());
+    const paragraphs2 = (panel2.bodyText || '').split(/\n\n+/).filter(p => p.trim());
+    const numParagraphs1 = Math.max(paragraphs1.length, 10);
+    const numParagraphs2 = Math.max(paragraphs2.length, 10);
+
+    let pullQuotePositionOptions1 = '<option value="0">Don\'t show pull quote</option>';
+    for (let i = 1; i <= numParagraphs1; i++) {
+      pullQuotePositionOptions1 += '<option value="' + i + '" ' + ((panel1.pullQuotePosition || '0') === String(i) ? 'selected' : '') + '>After paragraph ' + i + '</option>';
+    }
+    let pullQuotePositionOptions2 = '<option value="0">Don\'t show pull quote</option>';
+    for (let i = 1; i <= numParagraphs2; i++) {
+      pullQuotePositionOptions2 += '<option value="' + i + '" ' + ((panel2.pullQuotePosition || '0') === String(i) ? 'selected' : '') + '>After paragraph ' + i + '</option>';
+    }
 
     const pullQuoteContent =
-      '<div class="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs">' +
-        '<label class="flex items-center gap-2 mb-2">' +
-          '<input type="checkbox" data-k="_isPullQuoteStyleMaster" class="pullquote-style-master" ' + (b._isPullQuoteStyleMaster ? 'checked' : '') + '>' +
-          '<span>Set styling for all blocks</span>' +
-        '</label>' +
-        '<label class="flex items-center gap-2">' +
-          '<input type="checkbox" data-k="_inheritPullQuoteStyle" class="pullquote-style-inherit" ' + (b._inheritPullQuoteStyle === true ? 'checked' : '') + '>' +
-          '<span class="text-gray-600">Inherit styling from master</span>' +
-        '</label>' +
-      '</div>' +
-      '<div class="pullquote-style-fields' + (pullQuoteFieldsDisabled ? ' opacity-50 pointer-events-none' : '') + '">' +
       // Panel 1 Pull Quote
       '<div class="p-3 mb-3 border-2 border-blue-200 rounded-lg bg-blue-50">' +
-        '<div class="font-semibold text-blue-900 mb-2">Text Panel 1 Pull Quote</div>' +
+        '<div class="font-semibold text-blue-900 mb-2">Text Panel 1</div>' +
         '<textarea data-k="panels.0.pullQuote" rows="2" class="w-full border rounded px-2 py-1 mb-2 bg-white" placeholder="Enter pull quote text...">' + (panel1.pullQuote || '') + '</textarea>' +
-        '<div class="mb-2"><label class="block text-xs mb-1">Position (after paragraph #)</label><input type="number" data-k="panels.0.pullQuotePosition" min="0" max="20" value="' + (panel1.pullQuotePosition || '0') + '" class="w-full border rounded px-2 py-1 text-sm" placeholder="0 = hidden"><p class="text-xs text-slate-500 mt-1">0 = don\'t show, 1 = after first paragraph, etc.</p></div>' +
+        '<div class="mb-3"><label class="block text-xs mb-1">Position</label><select data-k="panels.0.pullQuotePosition" class="w-full border rounded px-2 py-1 text-sm">' + pullQuotePositionOptions1 + '</select></div>' +
         '<div class="p-2 border rounded bg-white">' +
           '<div class="text-xs font-semibold mb-2">Pull Quote Style</div>' +
-          '<div class="grid grid-cols-3 gap-2 mb-2">' +
-            '<div><label class="block text-xs">Size</label><input data-k="panels.0.pullQuoteStyle.size" type="number" min="14" max="48" value="' + getStyle(pullQuoteStyle1, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm"></div>' +
-            '<div><label class="block text-xs">Weight</label><select data-k="panels.0.pullQuoteStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + ['normal', '500', '600', 'bold'].map(w => '<option ' + (getStyle(pullQuoteStyle1, 'weight', '500') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') + '</select></div>' +
-            '<div><label class="block text-xs">Color</label><input type="color" data-k="panels.0.pullQuoteStyle.color" value="' + getStyle(pullQuoteStyle1, 'color', '#ffffff') + '" class="w-full h-7 border rounded"></div>' +
+          // Master/inherit controls (always clickable)
+          '<div class="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">' +
+            '<label class="flex items-center gap-2 mb-2">' +
+              '<input type="checkbox" data-k="_isPullQuoteStyleMaster" class="pullquote-style-master" ' + (b._isPullQuoteStyleMaster ? 'checked' : '') + '>' +
+              '<span>Set styling for all blocks</span>' +
+            '</label>' +
+            '<label class="flex items-center gap-2">' +
+              '<input type="checkbox" data-k="_inheritPullQuoteStyle" class="pullquote-style-inherit" ' + (b._inheritPullQuoteStyle === true ? 'checked' : '') + '>' +
+              '<span class="text-gray-600">Inherit styling from master</span>' +
+            '</label>' +
           '</div>' +
-          '<div class="grid grid-cols-2 gap-2 mb-2">' +
-            '<div><label class="block text-xs">Background</label><input type="color" data-k="panels.0.pullQuoteStyle.bgColor" value="' + getStyle(pullQuoteStyle1, 'bgColor', '#3d3314') + '" class="w-full h-7 border rounded"></div>' +
-            '<div><label class="block text-xs">Border</label><input type="color" data-k="panels.0.pullQuoteStyle.borderColor" value="' + getStyle(pullQuoteStyle1, 'borderColor', '#fbbf24') + '" class="w-full h-7 border rounded"></div>' +
-          '</div>' +
-          '<div class="flex items-center gap-4">' +
-            '<div class="flex-1"><label class="block text-xs">Font</label><select data-k="panels.0.pullQuoteStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(pullQuoteStyle1, 'font', 'IBM Plex Sans, sans-serif')) + '</select></div>' +
-            '<label class="flex items-center gap-1 text-xs pt-4"><input type="checkbox" data-k="panels.0.pullQuoteStyle.italic" ' + (getStyle(pullQuoteStyle1, 'italic', false) ? 'checked' : '') + '><span>Italic</span></label>' +
+          // Style fields (dimmed if inheriting)
+          '<div class="pullquote-style-fields' + pullQuoteStyleDimClass + '">' +
+            '<div class="grid grid-cols-3 gap-2 mb-2">' +
+              '<div><label class="block text-xs">Size</label><input data-k="panels.0.pullQuoteStyle.size" type="number" min="14" max="48" value="' + getStyle(pullQuoteStyle1, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm"></div>' +
+              '<div><label class="block text-xs">Weight</label><select data-k="panels.0.pullQuoteStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + ['normal', '500', '600', 'bold'].map(w => '<option ' + (getStyle(pullQuoteStyle1, 'weight', '500') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') + '</select></div>' +
+              '<div><label class="block text-xs">Color</label><input type="color" data-k="panels.0.pullQuoteStyle.color" value="' + getStyle(pullQuoteStyle1, 'color', '#ffffff') + '" class="w-full h-7 border rounded"></div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-2 mb-2">' +
+              '<div><label class="block text-xs">Background</label><input type="color" data-k="panels.0.pullQuoteStyle.bgColor" value="' + getStyle(pullQuoteStyle1, 'bgColor', '#3d3314') + '" class="w-full h-7 border rounded"></div>' +
+              '<div><label class="block text-xs">Border</label><input type="color" data-k="panels.0.pullQuoteStyle.borderColor" value="' + getStyle(pullQuoteStyle1, 'borderColor', '#fbbf24') + '" class="w-full h-7 border rounded"></div>' +
+            '</div>' +
+            '<div class="flex items-center gap-4">' +
+              '<div class="flex-1"><label class="block text-xs">Font</label><select data-k="panels.0.pullQuoteStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(pullQuoteStyle1, 'font', 'IBM Plex Sans, sans-serif')) + '</select></div>' +
+              '<label class="flex items-center gap-1 text-xs pt-4"><input type="checkbox" data-k="panels.0.pullQuoteStyle.italic" ' + (getStyle(pullQuoteStyle1, 'italic', false) ? 'checked' : '') + '><span>Italic</span></label>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       // Panel 2 Pull Quote
       '<div class="p-3 border-2 border-purple-200 rounded-lg bg-purple-50">' +
-        '<div class="font-semibold text-purple-900 mb-2">Text Panel 2 Pull Quote</div>' +
+        '<div class="font-semibold text-purple-900 mb-2">Text Panel 2</div>' +
         '<textarea data-k="panels.1.pullQuote" rows="2" class="w-full border rounded px-2 py-1 mb-2 bg-white" placeholder="Enter pull quote text...">' + (panel2.pullQuote || '') + '</textarea>' +
-        '<div class="mb-2"><label class="block text-xs mb-1">Position (after paragraph #)</label><input type="number" data-k="panels.1.pullQuotePosition" min="0" max="20" value="' + (panel2.pullQuotePosition || '0') + '" class="w-full border rounded px-2 py-1 text-sm" placeholder="0 = hidden"><p class="text-xs text-slate-500 mt-1">0 = don\'t show, 1 = after first paragraph, etc.</p></div>' +
+        '<div class="mb-3"><label class="block text-xs mb-1">Position</label><select data-k="panels.1.pullQuotePosition" class="w-full border rounded px-2 py-1 text-sm">' + pullQuotePositionOptions2 + '</select></div>' +
         '<div class="p-2 border rounded bg-white">' +
           '<div class="text-xs font-semibold mb-2">Pull Quote Style</div>' +
-          '<div class="grid grid-cols-3 gap-2 mb-2">' +
-            '<div><label class="block text-xs">Size</label><input data-k="panels.1.pullQuoteStyle.size" type="number" min="14" max="48" value="' + getStyle(pullQuoteStyle2, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm"></div>' +
-            '<div><label class="block text-xs">Weight</label><select data-k="panels.1.pullQuoteStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + ['normal', '500', '600', 'bold'].map(w => '<option ' + (getStyle(pullQuoteStyle2, 'weight', '500') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') + '</select></div>' +
-            '<div><label class="block text-xs">Color</label><input type="color" data-k="panels.1.pullQuoteStyle.color" value="' + getStyle(pullQuoteStyle2, 'color', '#ffffff') + '" class="w-full h-7 border rounded"></div>' +
-          '</div>' +
-          '<div class="grid grid-cols-2 gap-2 mb-2">' +
-            '<div><label class="block text-xs">Background</label><input type="color" data-k="panels.1.pullQuoteStyle.bgColor" value="' + getStyle(pullQuoteStyle2, 'bgColor', '#3d3314') + '" class="w-full h-7 border rounded"></div>' +
-            '<div><label class="block text-xs">Border</label><input type="color" data-k="panels.1.pullQuoteStyle.borderColor" value="' + getStyle(pullQuoteStyle2, 'borderColor', '#fbbf24') + '" class="w-full h-7 border rounded"></div>' +
-          '</div>' +
-          '<div class="flex items-center gap-4">' +
-            '<div class="flex-1"><label class="block text-xs">Font</label><select data-k="panels.1.pullQuoteStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(pullQuoteStyle2, 'font', 'IBM Plex Sans, sans-serif')) + '</select></div>' +
-            '<label class="flex items-center gap-1 text-xs pt-4"><input type="checkbox" data-k="panels.1.pullQuoteStyle.italic" ' + (getStyle(pullQuoteStyle2, 'italic', false) ? 'checked' : '') + '><span>Italic</span></label>' +
+          '<p class="text-xs text-gray-500 mb-2 italic">Uses same master/inherit settings as Panel 1</p>' +
+          // Style fields (dimmed if inheriting)
+          '<div class="pullquote-style-fields' + pullQuoteStyleDimClass + '">' +
+            '<div class="grid grid-cols-3 gap-2 mb-2">' +
+              '<div><label class="block text-xs">Size</label><input data-k="panels.1.pullQuoteStyle.size" type="number" min="14" max="48" value="' + getStyle(pullQuoteStyle2, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm"></div>' +
+              '<div><label class="block text-xs">Weight</label><select data-k="panels.1.pullQuoteStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + ['normal', '500', '600', 'bold'].map(w => '<option ' + (getStyle(pullQuoteStyle2, 'weight', '500') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') + '</select></div>' +
+              '<div><label class="block text-xs">Color</label><input type="color" data-k="panels.1.pullQuoteStyle.color" value="' + getStyle(pullQuoteStyle2, 'color', '#ffffff') + '" class="w-full h-7 border rounded"></div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-2 mb-2">' +
+              '<div><label class="block text-xs">Background</label><input type="color" data-k="panels.1.pullQuoteStyle.bgColor" value="' + getStyle(pullQuoteStyle2, 'bgColor', '#3d3314') + '" class="w-full h-7 border rounded"></div>' +
+              '<div><label class="block text-xs">Border</label><input type="color" data-k="panels.1.pullQuoteStyle.borderColor" value="' + getStyle(pullQuoteStyle2, 'borderColor', '#fbbf24') + '" class="w-full h-7 border rounded"></div>' +
+            '</div>' +
+            '<div class="flex items-center gap-4">' +
+              '<div class="flex-1"><label class="block text-xs">Font</label><select data-k="panels.1.pullQuoteStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(pullQuoteStyle2, 'font', 'IBM Plex Sans, sans-serif')) + '</select></div>' +
+              '<label class="flex items-center gap-1 text-xs pt-4"><input type="checkbox" data-k="panels.1.pullQuoteStyle.italic" ' + (getStyle(pullQuoteStyle2, 'italic', false) ? 'checked' : '') + '><span>Italic</span></label>' +
+            '</div>' +
           '</div>' +
         '</div>' +
-      '</div>' +
       '</div>';
 
     // Assemble all sections (alphabetically ordered)
@@ -520,6 +543,27 @@ export const SplitPanelBlock = {
       firstLineColor: panel1.firstLineColor
     };
 
+    // Pull quote style inheritance: external master OR Panel 1 as internal master
+    // Use shared utility that merges with defaults to ensure all properties exist
+    let externalPullQuoteStyle = null;
+    if ((b._inheritPullQuoteStyle === true || b._inheritPullQuoteStyle === 'true') && !b._isPullQuoteStyleMaster) {
+      // Create a temporary block object to use the shared utility
+      const tempBlock = { _inheritPullQuoteStyle: true, pullQuoteStyle: {} };
+      const inheritedStyle = getEffectivePullQuoteStyle(tempBlock, blocks);
+      // Check if we actually inherited (style has non-default values from a master)
+      const masterBlock = blocks && blocks.find(blk => blk._isPullQuoteStyleMaster && blk !== b);
+      if (masterBlock) {
+        externalPullQuoteStyle = inheritedStyle;
+      }
+    }
+    // Panel 1's pull quote style for internal inheritance (merged with defaults)
+    const panel1PullQuoteStyle = {
+      size: '24', weight: '500', italic: false, color: '#ffffff',
+      font: 'IBM Plex Sans, sans-serif', leading: '1.8',
+      bgColor: '#3d3314', borderColor: '#fbbf24',
+      ...(panel1.pullQuoteStyle || {})
+    };
+
     // Generate unique ID for this block
     const blockId = 'split-preview-' + Math.random().toString(36).substr(2, 9);
 
@@ -535,13 +579,22 @@ export const SplitPanelBlock = {
       // Build paragraphs with pull quote
       const paragraphs = (panel.bodyText || '').split(/\n\n+/).filter(p => p.trim());
       const pullQuotePosition = parseInt(panel.pullQuotePosition || '0');
-      const pullQuoteStyle = panel.pullQuoteStyle || {};
+
+      // Determine effective pull quote style (similar to drop cap inheritance)
+      let effectivePullQuoteStyle;
+      if (externalPullQuoteStyle) {
+        effectivePullQuoteStyle = externalPullQuoteStyle;
+      } else if ((b._isPullQuoteStyleMaster || b._inheritPullQuoteStyle === true || b._inheritPullQuoteStyle === 'true') && panelIdx === 1) {
+        effectivePullQuoteStyle = panel1PullQuoteStyle;
+      } else {
+        effectivePullQuoteStyle = panel.pullQuoteStyle || {};
+      }
 
       let pullQuoteHtml = '';
       if (panel.pullQuote && pullQuotePosition > 0) {
-        const pqStyle = buildInlineStyle(pullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500' });
-        const pqBgColor = pullQuoteStyle.bgColor || '#3d3314';
-        const pqBorderColor = pullQuoteStyle.borderColor || '#fbbf24';
+        const pqStyle = buildInlineStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500' });
+        const pqBgColor = effectivePullQuoteStyle.bgColor || '#3d3314';
+        const pqBorderColor = effectivePullQuoteStyle.borderColor || '#fbbf24';
         pullQuoteHtml = '<div style="background:' + pqBgColor + ';padding:30px 40px;border-left:4px solid ' + pqBorderColor + ';margin:30px 0;">' +
           '<p style="' + pqStyle + 'margin:0;">' + processBodyText(panel.pullQuote || '') + '</p></div>';
       }
@@ -719,6 +772,27 @@ export const SplitPanelBlock = {
       firstLineColor: panel1.firstLineColor
     };
 
+    // Pull quote style inheritance: external master OR Panel 1 as internal master
+    // Use shared utility that merges with defaults to ensure all properties exist
+    let externalPullQuoteStyle = null;
+    if ((b._inheritPullQuoteStyle === true || b._inheritPullQuoteStyle === 'true') && !b._isPullQuoteStyleMaster) {
+      // Create a temporary block object to use the shared utility
+      const tempBlock = { _inheritPullQuoteStyle: true, pullQuoteStyle: {} };
+      const inheritedStyle = getEffectivePullQuoteStyle(tempBlock, blocks);
+      // Check if we actually inherited (style has non-default values from a master)
+      const masterBlock = blocks && blocks.find(blk => blk._isPullQuoteStyleMaster && blk !== b);
+      if (masterBlock) {
+        externalPullQuoteStyle = inheritedStyle;
+      }
+    }
+    // Panel 1's pull quote style for internal inheritance (merged with defaults)
+    const panel1PullQuoteStyle = {
+      size: '24', weight: '500', italic: false, color: '#ffffff',
+      font: 'IBM Plex Sans, sans-serif', leading: '1.8',
+      bgColor: '#3d3314', borderColor: '#fbbf24',
+      ...(panel1.pullQuoteStyle || {})
+    };
+
     // Collect all drop cap styles
     let allDropCapCss = '';
 
@@ -734,13 +808,22 @@ export const SplitPanelBlock = {
       // Build paragraphs with pull quote
       const paragraphs = String(panel.bodyText || '').split(/\n\n+/).filter(p => p.trim());
       const pullQuotePosition = parseInt(panel.pullQuotePosition || '0');
-      const pullQuoteStyle = panel.pullQuoteStyle || {};
+
+      // Determine effective pull quote style (similar to drop cap inheritance)
+      let effectivePullQuoteStyle;
+      if (externalPullQuoteStyle) {
+        effectivePullQuoteStyle = externalPullQuoteStyle;
+      } else if ((b._isPullQuoteStyleMaster || b._inheritPullQuoteStyle === true || b._inheritPullQuoteStyle === 'true') && panelIdx === 1) {
+        effectivePullQuoteStyle = panel1PullQuoteStyle;
+      } else {
+        effectivePullQuoteStyle = panel.pullQuoteStyle || {};
+      }
 
       let pullQuoteHtml = '';
       if (panel.pullQuote && pullQuotePosition > 0) {
-        const pqStyle = buildInlineStyle(pullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500' });
-        const pqBgColor = pullQuoteStyle.bgColor || '#3d3314';
-        const pqBorderColor = pullQuoteStyle.borderColor || '#fbbf24';
+        const pqStyle = buildInlineStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500' });
+        const pqBgColor = effectivePullQuoteStyle.bgColor || '#3d3314';
+        const pqBorderColor = effectivePullQuoteStyle.borderColor || '#fbbf24';
         pullQuoteHtml = '<div style="background:' + pqBgColor + ';padding:30px 40px;border-left:4px solid ' + pqBorderColor + ';margin:30px 0;">' +
           '<p style="' + pqStyle + 'margin:0;">' + processBodyText(panel.pullQuote || '', { brTag: '<br/>' }) + '</p></div>';
       }
@@ -893,6 +976,24 @@ export const SplitPanelBlock = {
       }
     } else {
       block[key] = value;
+
+      // When setting as pull quote style master, ensure panels[0].pullQuoteStyle exists with defaults
+      if (key === '_isPullQuoteStyleMaster' && value) {
+        if (!block.panels) block.panels = [{}, {}];
+        if (!block.panels[0]) block.panels[0] = {};
+        if (!block.panels[0].pullQuoteStyle) {
+          block.panels[0].pullQuoteStyle = {
+            size: '24',
+            weight: '500',
+            italic: false,
+            color: '#ffffff',
+            font: 'IBM Plex Sans, sans-serif',
+            leading: '1.8',
+            bgColor: '#3d3314',
+            borderColor: '#fbbf24'
+          };
+        }
+      }
     }
   }
 };

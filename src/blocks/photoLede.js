@@ -1,4 +1,4 @@
-import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml, getLinkStyles, bodyFonts, fontSelectHtml, globalBodyStyle } from '../utils.js';
+import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml, getLinkStyles, bodyFonts, fontSelectHtml, globalBodyStyle, getEffectivePullQuoteStyle } from '../utils.js';
 
 export const PhotoLedeBlock = {
   type: 'photo-lede',
@@ -598,14 +598,8 @@ export const PhotoLedeBlock = {
     }
     const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
 
-    // Check for inherited pull quote style
-    let effectivePullQuoteStyle = b.pullQuoteStyle || {};
-    if (b._inheritPullQuoteStyle === true) {
-      const masterBlock = blocks.find(blk => blk._isPullQuoteStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.pullQuoteStyle) {
-        effectivePullQuoteStyle = masterBlock.pullQuoteStyle;
-      }
-    }
+    // Check for inherited pull quote style (uses shared utility that merges with defaults)
+    const effectivePullQuoteStyle = getEffectivePullQuoteStyle(b, blocks);
     const pullQuoteStyle = buildStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500', leading: '1.8' });
     const pullQuoteBgColor = (effectivePullQuoteStyle && effectivePullQuoteStyle.bgColor) || '#3d3314';
     const pullQuoteBorderColor = (effectivePullQuoteStyle && effectivePullQuoteStyle.borderColor) || '#fbbf24';
@@ -802,14 +796,8 @@ export const PhotoLedeBlock = {
     }
     const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
 
-    // Check for inherited pull quote style
-    let effectivePullQuoteStyle = b.pullQuoteStyle || {};
-    if (b._inheritPullQuoteStyle === true) {
-      const masterBlock = blocks.find(blk => blk._isPullQuoteStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.pullQuoteStyle) {
-        effectivePullQuoteStyle = masterBlock.pullQuoteStyle;
-      }
-    }
+    // Check for inherited pull quote style (uses shared utility that merges with defaults)
+    const effectivePullQuoteStyle = getEffectivePullQuoteStyle(b, blocks);
     const pullQuoteStyle = buildStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500', leading: '1.8' });
     const pullQuoteBgColor = (effectivePullQuoteStyle && effectivePullQuoteStyle.bgColor) || '#3d3314';
     const pullQuoteBorderColor = (effectivePullQuoteStyle && effectivePullQuoteStyle.borderColor) || '#fbbf24';
@@ -952,6 +940,20 @@ export const PhotoLedeBlock = {
       block[parent][child] = value;
     } else {
       block[key] = value;
+
+      // When setting as pull quote style master, ensure pullQuoteStyle exists with defaults
+      if (key === '_isPullQuoteStyleMaster' && value && !block.pullQuoteStyle) {
+        block.pullQuoteStyle = {
+          size: '24',
+          weight: '500',
+          italic: false,
+          color: '#ffffff',
+          font: 'IBM Plex Sans, sans-serif',
+          leading: '1.8',
+          bgColor: '#3d3314',
+          borderColor: '#fbbf24'
+        };
+      }
     }
   }
 };
