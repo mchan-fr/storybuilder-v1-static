@@ -253,33 +253,45 @@ export const TextBlock = {
       '<input data-k="subhead" value="' + (b.subhead || '') + '" class="w-full border rounded px-2 py-1 mb-3" placeholder="Appears above body text">' +
       '<div class="p-2 border rounded bg-slate-50">' +
         '<div class="text-xs font-semibold mb-2">Style</div>' +
-        '<div class="grid grid-cols-3 gap-2 mb-2">' +
-          '<div>' +
-            '<label class="block text-xs">Size</label>' +
-            '<input data-k="subheadStyle.size" type="number" min="12" max="48" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
-          '</div>' +
-          '<div>' +
-            '<label class="block text-xs">Weight</label>' +
-            '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-              weightOpts.map(w => '<option ' + (getStyle(subheadStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-            '</select>' +
-          '</div>' +
-          '<div>' +
-            '<label class="block text-xs">Color</label>' +
-            '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#6b7280') + '" class="w-full h-7 border rounded">' +
-          '</div>' +
-        '</div>' +
-        '<div class="flex items-center gap-4">' +
-          '<div class="flex-1">' +
-            '<label class="block text-xs">Font</label>' +
-            '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-              fontSelectHtml(getStyle(subheadStyle, 'font', 'system-ui')) +
-            '</select>' +
-          '</div>' +
-          '<label class="flex items-center gap-1 text-xs pt-4">' +
-            '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
-            '<span>Italic</span>' +
+        '<div class="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs">' +
+          '<label class="flex items-center gap-2 mb-2">' +
+            '<input type="checkbox" data-k="_isSubheadStyleMaster" class="subhead-style-master" ' + (b._isSubheadStyleMaster ? 'checked' : '') + '>' +
+            '<span>Set styling for all blocks</span>' +
           '</label>' +
+          '<label class="flex items-center gap-2">' +
+            '<input type="checkbox" data-k="_inheritSubheadStyle" class="subhead-style-inherit" ' + (b._inheritSubheadStyle !== false ? 'checked' : '') + '>' +
+            '<span class="text-gray-600">Inherit styling from master</span>' +
+          '</label>' +
+        '</div>' +
+        '<div class="subhead-style-fields' + (b._inheritSubheadStyle !== false && !b._isSubheadStyleMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
+          '<div class="grid grid-cols-3 gap-2 mb-2">' +
+            '<div>' +
+              '<label class="block text-xs">Size</label>' +
+              '<input data-k="subheadStyle.size" type="number" min="12" max="48" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Weight</label>' +
+              '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
+                weightOpts.map(w => '<option ' + (getStyle(subheadStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Color</label>' +
+              '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#6b7280') + '" class="w-full h-7 border rounded">' +
+            '</div>' +
+          '</div>' +
+          '<div class="flex items-center gap-4">' +
+            '<div class="flex-1">' +
+              '<label class="block text-xs">Font</label>' +
+              '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
+                fontSelectHtml(getStyle(subheadStyle, 'font', 'system-ui')) +
+              '</select>' +
+            '</div>' +
+            '<label class="flex items-center gap-1 text-xs pt-4">' +
+              '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
+              '<span>Italic</span>' +
+            '</label>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -517,8 +529,13 @@ export const TextBlock = {
     let effectiveTextStyle = b.textStyle || {};
     if (b._inheritBodyStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isBodyStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.textStyle) {
-        effectiveTextStyle = masterBlock.textStyle;
+      if (masterBlock) {
+        // Check for textStyle directly on block (text) or in panels (split-panel)
+        if (masterBlock.textStyle) {
+          effectiveTextStyle = masterBlock.textStyle;
+        } else if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].textStyle) {
+          effectiveTextStyle = masterBlock.panels[0].textStyle;
+        }
       }
     }
 
@@ -566,8 +583,17 @@ export const TextBlock = {
       '</div>';
     }
 
+    // Check for inherited subhead style
+    let effectiveSubheadStyle = b.subheadStyle || {};
+    if (b._inheritSubheadStyle !== false) {
+      const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
+      if (masterBlock && masterBlock.subheadStyle) {
+        effectiveSubheadStyle = masterBlock.subheadStyle;
+      }
+    }
+
     // Build subhead HTML
-    const subheadStyle = buildStyle(b.subheadStyle, { color: '#6b7280', size: '24', font: 'system-ui', weight: 'normal', leading: '1.5' });
+    const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#6b7280', size: '24', font: 'system-ui', weight: 'normal', leading: '1.5' });
     const subheadHtml = b.subhead ? '<h3 style="' + subheadStyle + 'margin-bottom:24px;">' + b.subhead + '</h3>' : '';
 
     // Check for inherited pull quote style
@@ -612,11 +638,13 @@ export const TextBlock = {
       if (b._inheritDropCapStyle === true) {
         const masterBlock = blocks.find(blk => blk._isDropCapStyleMaster && blk !== b);
         if (masterBlock) {
-          effDropCapColor = masterBlock.dropCapColor || effDropCapColor;
-          effDropCapSize = masterBlock.dropCapSize || effDropCapSize;
-          effFirstLineSize = masterBlock.firstLineSize || effFirstLineSize;
-          effFirstLineWeight = masterBlock.firstLineWeight || effFirstLineWeight;
-          effFirstLineColor = masterBlock.firstLineColor || effFirstLineColor;
+          // Check for drop cap settings directly on block (text) or in panels (split-panel)
+          const masterDropCap = masterBlock.panels && masterBlock.panels[0] ? masterBlock.panels[0] : masterBlock;
+          effDropCapColor = masterDropCap.dropCapColor || effDropCapColor;
+          effDropCapSize = masterDropCap.dropCapSize || effDropCapSize;
+          effFirstLineSize = masterDropCap.firstLineSize || effFirstLineSize;
+          effFirstLineWeight = masterDropCap.firstLineWeight || effFirstLineWeight;
+          effFirstLineColor = masterDropCap.firstLineColor || effFirstLineColor;
         }
       }
     }
@@ -731,8 +759,13 @@ export const TextBlock = {
     let effectiveTextStyle = b.textStyle || {};
     if (b._inheritBodyStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isBodyStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.textStyle) {
-        effectiveTextStyle = masterBlock.textStyle;
+      if (masterBlock) {
+        // Check for textStyle directly on block (text) or in panels (split-panel)
+        if (masterBlock.textStyle) {
+          effectiveTextStyle = masterBlock.textStyle;
+        } else if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].textStyle) {
+          effectiveTextStyle = masterBlock.panels[0].textStyle;
+        }
       }
     }
 
@@ -780,8 +813,17 @@ export const TextBlock = {
       '</div>';
     }
 
+    // Check for inherited subhead style
+    let effectiveSubheadStyle = b.subheadStyle || {};
+    if (b._inheritSubheadStyle !== false) {
+      const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
+      if (masterBlock && masterBlock.subheadStyle) {
+        effectiveSubheadStyle = masterBlock.subheadStyle;
+      }
+    }
+
     // Build subhead HTML
-    const subheadStyle = buildStyle(b.subheadStyle, { color: '#6b7280', size: '24', font: 'system-ui', weight: 'normal', leading: '1.5' });
+    const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#6b7280', size: '24', font: 'system-ui', weight: 'normal', leading: '1.5' });
     const subheadHtml = b.subhead ? '<h3 style="' + subheadStyle + 'margin-bottom:24px;">' + String(b.subhead) + '</h3>' : '';
 
     // Check for inherited pull quote style
@@ -869,11 +911,13 @@ export const TextBlock = {
       if (b._inheritDropCapStyle === true) {
         const masterBlock = blocks.find(blk => blk._isDropCapStyleMaster && blk !== b);
         if (masterBlock) {
-          effDropCapColor = masterBlock.dropCapColor || effDropCapColor;
-          effDropCapSize = masterBlock.dropCapSize || effDropCapSize;
-          effFirstLineSize = masterBlock.firstLineSize || effFirstLineSize;
-          effFirstLineWeight = masterBlock.firstLineWeight || effFirstLineWeight;
-          effFirstLineColor = masterBlock.firstLineColor || effFirstLineColor;
+          // Check for drop cap settings directly on block (text) or in panels (split-panel)
+          const masterDropCap = masterBlock.panels && masterBlock.panels[0] ? masterBlock.panels[0] : masterBlock;
+          effDropCapColor = masterDropCap.dropCapColor || effDropCapColor;
+          effDropCapSize = masterDropCap.dropCapSize || effDropCapSize;
+          effFirstLineSize = masterDropCap.firstLineSize || effFirstLineSize;
+          effFirstLineWeight = masterDropCap.firstLineWeight || effFirstLineWeight;
+          effFirstLineColor = masterDropCap.firstLineColor || effFirstLineColor;
         }
       }
 

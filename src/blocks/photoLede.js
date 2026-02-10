@@ -326,33 +326,45 @@ export const PhotoLedeBlock = {
       '<input data-k="subhead" value="' + (b.subhead || '') + '" class="w-full border rounded px-2 py-1 mb-3" placeholder="Appears above body text">' +
       '<div class="p-2 border rounded bg-slate-50">' +
         '<div class="text-xs font-semibold mb-2">Style</div>' +
-        '<div class="grid grid-cols-3 gap-2 mb-2">' +
-          '<div>' +
-            '<label class="block text-xs">Size</label>' +
-            '<input data-k="subheadStyle.size" type="number" min="12" max="48" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
-          '</div>' +
-          '<div>' +
-            '<label class="block text-xs">Weight</label>' +
-            '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-              weightOpts.map(w => '<option ' + (getStyle(subheadStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-            '</select>' +
-          '</div>' +
-          '<div>' +
-            '<label class="block text-xs">Color</label>' +
-            '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#d1d5db') + '" class="w-full h-7 border rounded">' +
-          '</div>' +
-        '</div>' +
-        '<div class="flex items-center gap-4">' +
-          '<div class="flex-1">' +
-            '<label class="block text-xs">Font</label>' +
-            '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-              fontSelectHtml(getStyle(subheadStyle, 'font', 'IBM Plex Sans, sans-serif')) +
-            '</select>' +
-          '</div>' +
-          '<label class="flex items-center gap-1 text-xs pt-4">' +
-            '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
-            '<span>Italic</span>' +
+        '<div class="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs">' +
+          '<label class="flex items-center gap-2 mb-2">' +
+            '<input type="checkbox" data-k="_isSubheadStyleMaster" class="subhead-style-master" ' + (b._isSubheadStyleMaster ? 'checked' : '') + '>' +
+            '<span>Set styling for all blocks</span>' +
           '</label>' +
+          '<label class="flex items-center gap-2">' +
+            '<input type="checkbox" data-k="_inheritSubheadStyle" class="subhead-style-inherit" ' + (b._inheritSubheadStyle !== false ? 'checked' : '') + '>' +
+            '<span class="text-gray-600">Inherit styling from master</span>' +
+          '</label>' +
+        '</div>' +
+        '<div class="subhead-style-fields' + (b._inheritSubheadStyle !== false && !b._isSubheadStyleMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
+          '<div class="grid grid-cols-3 gap-2 mb-2">' +
+            '<div>' +
+              '<label class="block text-xs">Size</label>' +
+              '<input data-k="subheadStyle.size" type="number" min="12" max="48" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Weight</label>' +
+              '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
+                weightOpts.map(w => '<option ' + (getStyle(subheadStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs">Color</label>' +
+              '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#d1d5db') + '" class="w-full h-7 border rounded">' +
+            '</div>' +
+          '</div>' +
+          '<div class="flex items-center gap-4">' +
+            '<div class="flex-1">' +
+              '<label class="block text-xs">Font</label>' +
+              '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
+                fontSelectHtml(getStyle(subheadStyle, 'font', 'IBM Plex Sans, sans-serif')) +
+              '</select>' +
+            '</div>' +
+            '<label class="flex items-center gap-1 text-xs pt-4">' +
+              '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
+              '<span>Italic</span>' +
+            '</label>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -575,7 +587,16 @@ export const PhotoLedeBlock = {
     }
 
     const captionStyle = buildStyle(effectiveCaptionStyle, { color: '#aaaaaa', size: '16', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
-    const subheadStyle = buildStyle(b.subheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
+
+    // Check for inherited subhead style
+    let effectiveSubheadStyle = b.subheadStyle || {};
+    if (b._inheritSubheadStyle !== false) {
+      const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
+      if (masterBlock && masterBlock.subheadStyle) {
+        effectiveSubheadStyle = masterBlock.subheadStyle;
+      }
+    }
+    const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
 
     // Check for inherited pull quote style
     let effectivePullQuoteStyle = b.pullQuoteStyle || {};
@@ -770,7 +791,16 @@ export const PhotoLedeBlock = {
     }
 
     const captionStyle = buildStyle(effectiveCaptionStyle, { color: '#aaaaaa', size: '16', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
-    const subheadStyle = buildStyle(b.subheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
+
+    // Check for inherited subhead style
+    let effectiveSubheadStyle = b.subheadStyle || {};
+    if (b._inheritSubheadStyle !== false) {
+      const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
+      if (masterBlock && masterBlock.subheadStyle) {
+        effectiveSubheadStyle = masterBlock.subheadStyle;
+      }
+    }
+    const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
 
     // Check for inherited pull quote style
     let effectivePullQuoteStyle = b.pullQuoteStyle || {};

@@ -1,4 +1,21 @@
-import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml } from '../utils.js';
+import {
+  resolvePreviewPath,
+  resolveExportPath,
+  processBodyText,
+  textToolbarHtml,
+  paddingSizes,
+  paddingValueMap,
+  textWidthClassMap,
+  getStyle,
+  buildInlineStyle,
+  labelFieldHtml,
+  paddingSelectHtml,
+  weightSelectHtml,
+  fontSelectHtml,
+  styleInheritControls,
+  getEffectiveStyle,
+  bodyFonts
+} from '../utils.js';
 
 export const SplitLayoutBlock = {
   type: 'split-layout',
@@ -36,49 +53,20 @@ export const SplitLayoutBlock = {
     const sideOpts = ['left', 'right'];
     const widthOpts = ['25', '33', '40', '50'];
     const contentWidthOpts = ['extra-narrow', 'narrow', 'medium', 'wide'];
-    const weightOpts = ['normal', 'bold'];
-    const paddingSizes = [
-      { value: 'none', label: 'None (0px)' },
-      { value: 'tight', label: 'Tight (15px)' },
-      { value: 'medium', label: 'Medium (30px)' },
-      { value: 'spacious', label: 'Spacious (50px)' }
-    ];
-    const fontFamilies = [
-      'system-ui',
-      'IBM Plex Sans, sans-serif',
-      'Georgia, serif',
-      'Times New Roman, serif',
-      'Arial, sans-serif',
-      'Helvetica, sans-serif',
-      'Courier New, monospace',
-      'Lora, serif',
-      'Merriweather, serif',
-      'Bitter, serif',
-      'Playfair Display, serif',
-      'Montserrat, sans-serif',
-      'Raleway, sans-serif'
-    ];
 
-    const getStyle = (styleObj, prop, fallback) => (styleObj && styleObj[prop]) || fallback;
     const headlineStyle = b.headlineStyle || {};
     const deckStyle = b.deckStyle || {};
     const subheadStyle = b.subheadStyle || {};
     const textStyle = b.textStyle || {};
 
-    const labelFieldHtml = 
-      '<div class="mb-4 p-3 bg-blue-50 border-2 border-blue-200 rounded-lg">' +
-        '<label class="block text-sm font-semibold text-blue-900 mb-2">📝 Block Label (Optional)</label>' +
-        '<input type="text" data-k="label" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" ' +
-          'placeholder="e.g., Mountain intro..." ' +
-          'value="' + (b.label || '') + '" />' +
-        '<p class="text-xs text-blue-600 mt-2">💡 Give this block a memorable name</p>' +
-      '</div>' +
+    const labelHtml = labelFieldHtml(b.label, 'e.g., Mountain intro...') +
+      '<p class="text-xs text-blue-600 mt-2 mb-4">Give this block a memorable name</p>' +
       '<hr class="my-4 border-gray-300" />';
 
-    return labelFieldHtml +
+    return labelHtml +
       '<label class="block font-medium">Image</label>' +
       '<input data-k="image" value="' + (b.image || '') + '" class="w-full border rounded px-2 py-1 mb-3">' +
-      
+
       '<label class="block font-medium">Video (optional)</label>' +
       '<input data-k="video" value="' + (b.video || '') + '" class="w-full border rounded px-2 py-1 mb-3">' +
 
@@ -105,15 +93,11 @@ export const SplitLayoutBlock = {
       '<div class="grid grid-cols-2 gap-3 mt-3 mb-3">' +
         '<div>' +
           '<label class="block font-semibold mb-2">Padding Top</label>' +
-          '<select data-k="paddingTop" class="w-full border rounded px-3 py-2">' +
-            paddingSizes.map(p => '<option value="' + p.value + '" ' + ((b.paddingTop || 'none') === p.value ? 'selected' : '') + '>' + p.label + '</option>').join('') +
-          '</select>' +
+          '<select data-k="paddingTop" class="w-full border rounded px-3 py-2">' + paddingSelectHtml(b.paddingTop, 'none') + '</select>' +
         '</div>' +
         '<div>' +
           '<label class="block font-semibold mb-2">Padding Bottom</label>' +
-          '<select data-k="paddingBottom" class="w-full border rounded px-3 py-2">' +
-            paddingSizes.map(p => '<option value="' + p.value + '" ' + ((b.paddingBottom || 'none') === p.value ? 'selected' : '') + '>' + p.label + '</option>').join('') +
-          '</select>' +
+          '<select data-k="paddingBottom" class="w-full border rounded px-3 py-2">' + paddingSelectHtml(b.paddingBottom, 'none') + '</select>' +
         '</div>' +
       '</div>' +
 
@@ -144,7 +128,7 @@ export const SplitLayoutBlock = {
       '<div class="p-3 mb-4 mt-4 border-2 border-amber-200 rounded-lg bg-amber-50">' +
         '<label class="block font-semibold text-amber-900 mb-2">Headline</label>' +
         '<textarea data-k="headline" rows="2" class="w-full border rounded px-2 py-1 mb-2">' + (b.headline || '') + '</textarea>' +
-        
+
         '<div class="p-2 border rounded bg-white">' +
           '<div class="text-xs font-semibold mb-2 text-amber-700">Headline Style</div>' +
           '<div class="grid grid-cols-3 gap-2 mb-2">' +
@@ -154,9 +138,7 @@ export const SplitLayoutBlock = {
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Weight</label>' +
-              '<select data-k="headlineStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-                weightOpts.map(w => '<option ' + (getStyle(headlineStyle, 'weight', 'bold') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-              '</select>' +
+              '<select data-k="headlineStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + weightSelectHtml(getStyle(headlineStyle, 'weight', 'bold'), 'bold', true) + '</select>' +
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Color</label>' +
@@ -166,9 +148,7 @@ export const SplitLayoutBlock = {
           '<div class="grid grid-cols-[1fr_auto] gap-2 mb-2">' +
             '<div>' +
               '<label class="block text-xs">Font</label>' +
-              '<select data-k="headlineStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-                fontFamilies.map(f => '<option ' + (getStyle(headlineStyle, 'font', 'system-ui') === f ? 'selected' : '') + ' value="' + f + '">' + f.split(',')[0] + '</option>').join('') +
-              '</select>' +
+              '<select data-k="headlineStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(headlineStyle, 'font', 'system-ui')) + '</select>' +
             '</div>' +
             '<div class="flex items-end">' +
               '<label class="flex items-center gap-1 text-xs">' +
@@ -188,7 +168,7 @@ export const SplitLayoutBlock = {
       '<div class="p-3 mb-4 border-2 border-orange-200 rounded-lg bg-orange-50">' +
         '<label class="block font-semibold text-orange-900 mb-2">Deck (optional)</label>' +
         '<textarea data-k="deck" rows="2" class="w-full border rounded px-2 py-1 mb-2">' + (b.deck || '') + '</textarea>' +
-        
+
         '<div class="p-2 border rounded bg-white">' +
           '<div class="text-xs font-semibold mb-2 text-orange-700">Deck Style</div>' +
           '<div class="grid grid-cols-3 gap-2 mb-2">' +
@@ -198,9 +178,7 @@ export const SplitLayoutBlock = {
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Weight</label>' +
-              '<select data-k="deckStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-                weightOpts.map(w => '<option ' + (getStyle(deckStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-              '</select>' +
+              '<select data-k="deckStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + weightSelectHtml(getStyle(deckStyle, 'weight', 'normal'), 'normal', true) + '</select>' +
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Color</label>' +
@@ -210,9 +188,7 @@ export const SplitLayoutBlock = {
           '<div class="grid grid-cols-[1fr_auto] gap-2">' +
             '<div>' +
               '<label class="block text-xs">Font</label>' +
-              '<select data-k="deckStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-                fontFamilies.map(f => '<option ' + (getStyle(deckStyle, 'font', 'system-ui') === f ? 'selected' : '') + ' value="' + f + '">' + f.split(',')[0] + '</option>').join('') +
-              '</select>' +
+              '<select data-k="deckStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(deckStyle, 'font', 'system-ui')) + '</select>' +
             '</div>' +
             '<div class="flex items-end">' +
               '<label class="flex items-center gap-1 text-xs">' +
@@ -228,37 +204,36 @@ export const SplitLayoutBlock = {
         '<label class="block font-semibold text-purple-900 mb-2">Subhead (optional)</label>' +
         '<input data-k="subhead" value="' + (b.subhead || '') + '" class="w-full border rounded px-2 py-1 mb-2">' +
         '<p class="text-xs text-purple-700 mb-2">For content slides (not hero mode)</p>' +
-        
+
         '<div class="p-2 border rounded bg-white">' +
           '<div class="text-xs font-semibold mb-2 text-purple-700">Subhead Style</div>' +
-          '<div class="grid grid-cols-3 gap-2 mb-2">' +
-            '<div>' +
-              '<label class="block text-xs">Size (px)</label>' +
-              '<input data-k="subheadStyle.size" type="number" min="8" max="72" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+          styleInheritControls(b, '_isSubheadStyleMaster', '_inheritSubheadStyle', true, 'subhead') +
+          '<div class="subhead-style-fields' + (b._inheritSubheadStyle !== false && !b._isSubheadStyleMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
+            '<div class="grid grid-cols-3 gap-2 mb-2">' +
+              '<div>' +
+                '<label class="block text-xs">Size (px)</label>' +
+                '<input data-k="subheadStyle.size" type="number" min="8" max="72" value="' + getStyle(subheadStyle, 'size', '24') + '" class="w-full border rounded px-2 py-1 text-sm">' +
+              '</div>' +
+              '<div>' +
+                '<label class="block text-xs">Weight</label>' +
+                '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + weightSelectHtml(getStyle(subheadStyle, 'weight', 'normal'), 'normal', true) + '</select>' +
+              '</div>' +
+              '<div>' +
+                '<label class="block text-xs">Color</label>' +
+                '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#d1d5db') + '" class="w-full h-8 border rounded">' +
+              '</div>' +
             '</div>' +
-            '<div>' +
-              '<label class="block text-xs">Weight</label>' +
-              '<select data-k="subheadStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-                weightOpts.map(w => '<option ' + (getStyle(subheadStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-              '</select>' +
-            '</div>' +
-            '<div>' +
-              '<label class="block text-xs">Color</label>' +
-              '<input type="color" data-k="subheadStyle.color" value="' + getStyle(subheadStyle, 'color', '#d1d5db') + '" class="w-full h-8 border rounded">' +
-            '</div>' +
-          '</div>' +
-          '<div class="grid grid-cols-[1fr_auto] gap-2">' +
-            '<div>' +
-              '<label class="block text-xs">Font</label>' +
-              '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-                fontFamilies.map(f => '<option ' + (getStyle(subheadStyle, 'font', 'system-ui') === f ? 'selected' : '') + ' value="' + f + '">' + f.split(',')[0] + '</option>').join('') +
-              '</select>' +
-            '</div>' +
-            '<div class="flex items-end">' +
-              '<label class="flex items-center gap-1 text-xs">' +
-                '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
-                '<span>Italic</span>' +
-              '</label>' +
+            '<div class="grid grid-cols-[1fr_auto] gap-2">' +
+              '<div>' +
+                '<label class="block text-xs">Font</label>' +
+                '<select data-k="subheadStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(subheadStyle, 'font', 'system-ui')) + '</select>' +
+              '</div>' +
+              '<div class="flex items-end">' +
+                '<label class="flex items-center gap-1 text-xs">' +
+                  '<input type="checkbox" data-k="subheadStyle.italic" ' + (getStyle(subheadStyle, 'italic', false) ? 'checked' : '') + '>' +
+                  '<span>Italic</span>' +
+                '</label>' +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -286,9 +261,7 @@ export const SplitLayoutBlock = {
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Weight</label>' +
-              '<select data-k="textStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' +
-                weightOpts.map(w => '<option ' + (getStyle(textStyle, 'weight', 'normal') === w ? 'selected' : '') + ' value="' + w + '">' + w + '</option>').join('') +
-              '</select>' +
+              '<select data-k="textStyle.weight" class="w-full border rounded px-2 py-1 text-xs">' + weightSelectHtml(getStyle(textStyle, 'weight', 'normal'), 'normal', true) + '</select>' +
             '</div>' +
             '<div>' +
               '<label class="block text-xs">Color</label>' +
@@ -298,9 +271,7 @@ export const SplitLayoutBlock = {
           '<div class="grid grid-cols-[1fr_auto] gap-2 mb-2">' +
             '<div>' +
               '<label class="block text-xs">Font</label>' +
-              '<select data-k="textStyle.font" class="w-full border rounded px-2 py-1 text-xs">' +
-                fontFamilies.map(f => '<option ' + (getStyle(textStyle, 'font', 'system-ui') === f ? 'selected' : '') + ' value="' + f + '">' + f.split(',')[0] + '</option>').join('') +
-              '</select>' +
+              '<select data-k="textStyle.font" class="w-full border rounded px-2 py-1 text-xs">' + fontSelectHtml(getStyle(textStyle, 'font', 'system-ui')) + '</select>' +
             '</div>' +
             '<div class="flex items-end">' +
               '<label class="flex items-center gap-1 text-xs">' +
@@ -327,34 +298,18 @@ export const SplitLayoutBlock = {
       '</div>';
   },
 
-  preview({ block, project }) {
+  preview({ block, project, blocks = [] }) {
     const bg = block.video
       ? '<video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline src="' + resolvePreviewPath(block.video, project) + '"></video>'
       : '<img class="absolute inset-0 w-full h-full object-cover" src="' + resolvePreviewPath(block.image, project) + '" alt="">';
 
-    const contentWidthMap = {
-      'extra-narrow': 'max-w-md',
-      'narrow': 'max-w-lg',
-      'medium': 'max-w-4xl',
-      'wide': 'max-w-6xl'
-    };
+    // Get effective subhead style
+    const effectiveSubheadStyle = getEffectiveStyle(block, blocks, 'subheadStyle', '_isSubheadStyleMaster', '_inheritSubheadStyle', true);
 
-    const buildStyle = (styleObj, fallbacks) => {
-      const color = (styleObj && styleObj.color) || fallbacks.color;
-      const size = (styleObj && styleObj.size) || fallbacks.size;
-      const font = (styleObj && styleObj.font) || fallbacks.font;
-      const weight = (styleObj && styleObj.weight) || fallbacks.weight;
-      const italic = (styleObj && styleObj.italic) || false;
-      const leading = (styleObj && styleObj.leading) || fallbacks.leading || '1.2';
-      const fontStyle = italic ? 'italic' : 'normal';
-      const fontWeight = weight === 'bold' ? '700' : '400';
-      return 'color:' + color + ';font-size:' + size + 'px;font-family:' + font + ';font-weight:' + fontWeight + ';font-style:' + fontStyle + ';line-height:' + leading + ';';
-    };
-
-    const headline = buildStyle(block.headlineStyle, { color: '#ffffff', size: '48', font: 'system-ui', weight: 'bold', leading: '1.2' });
-    const deck = buildStyle(block.deckStyle, { color: '#ffffff', size: '20', font: 'system-ui', weight: 'normal' });
-    const subhead = buildStyle(block.subheadStyle, { color: '#d1d5db', size: '24', font: 'system-ui', weight: 'normal' });
-    const textStyle = buildStyle(block.textStyle, { color: '#ffffff', size: '18', font: 'system-ui', weight: 'normal', leading: '1.7' });
+    const headline = buildInlineStyle(block.headlineStyle, { color: '#ffffff', size: '48', font: 'system-ui', weight: 'bold', leading: '1.2' });
+    const deck = buildInlineStyle(block.deckStyle, { color: '#ffffff', size: '20', font: 'system-ui', weight: 'normal' });
+    const subhead = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'system-ui', weight: 'normal' });
+    const textStyleStr = buildInlineStyle(block.textStyle, { color: '#ffffff', size: '18', font: 'system-ui', weight: 'normal', leading: '1.7' });
 
     const posV = block.positionVertical || 'center';
     const offsetV = block.offsetVertical || 0;
@@ -366,11 +321,10 @@ export const SplitLayoutBlock = {
     const textPanelWidth = block.textPanelWidth || '33';
     const imageSide = block.imageSide || 'right';
     const textPanelColor = block.textPanelColor || '#000000';
-    const contentWidthClass = contentWidthMap[block.contentWidth || 'medium'];
+    const contentWidthClass = textWidthClassMap[block.contentWidth || 'medium'];
 
-    const paddingMap = { none: '0', tight: '15px', medium: '30px', spacious: '50px' };
-    const paddingTop = paddingMap[block.paddingTop || 'none'];
-    const paddingBottom = paddingMap[block.paddingBottom || 'none'];
+    const paddingTop = paddingValueMap[block.paddingTop || 'none'];
+    const paddingBottom = paddingValueMap[block.paddingBottom || 'none'];
 
     let contentHtml = '<h1 style="' + headline + '">' + processBodyText(block.headline || '') + '</h1>';
 
@@ -386,7 +340,7 @@ export const SplitLayoutBlock = {
       }
 
       if (block.text) {
-        contentHtml += '<div class="mt-4" style="' + textStyle + '"><p>' + processBodyText(block.text || '') + '</p></div>';
+        contentHtml += '<div class="mt-4" style="' + textStyleStr + '"><p>' + processBodyText(block.text || '') + '</p></div>';
       }
 
       contentHtml += '</div>';
@@ -406,34 +360,18 @@ export const SplitLayoutBlock = {
     return '<section class="relative fullbleed mb-6 overflow-hidden flex" style="height:100vh;padding-top:' + paddingTop + ';padding-bottom:' + paddingBottom + ';"' + fadeAttr + '>' + layout + '</section>';
   },
 
-  exportHTML({ block }) {
+  exportHTML({ block, blocks = [] }) {
     const bg = block.video
       ? '<video class="media" autoplay muted loop playsinline src="' + resolveExportPath(block.video) + '"></video>'
       : '<img class="media" src="' + resolveExportPath(block.image) + '" alt="">';
 
-    const contentWidthMap = {
-      'extra-narrow': 'max-w-md',
-      'narrow': 'max-w-lg',
-      'medium': 'max-w-4xl',
-      'wide': 'max-w-6xl'
-    };
+    // Get effective subhead style
+    const effectiveSubheadStyle = getEffectiveStyle(block, blocks, 'subheadStyle', '_isSubheadStyleMaster', '_inheritSubheadStyle', true);
 
-    const buildStyle = (styleObj, fallbacks) => {
-      const color = (styleObj && styleObj.color) || fallbacks.color;
-      const size = (styleObj && styleObj.size) || fallbacks.size;
-      const font = (styleObj && styleObj.font) || fallbacks.font;
-      const weight = (styleObj && styleObj.weight) || fallbacks.weight;
-      const italic = (styleObj && styleObj.italic) || false;
-      const leading = (styleObj && styleObj.leading) || fallbacks.leading || '1.2';
-      const fontStyle = italic ? 'italic' : 'normal';
-      const fontWeight = weight === 'bold' ? '700' : '400';
-      return 'color:' + color + ';font-size:' + size + 'px;font-family:' + font + ';font-weight:' + fontWeight + ';font-style:' + fontStyle + ';line-height:' + leading + ';text-shadow:0 2px 8px rgba(0,0,0,0.55);';
-    };
-
-    const headline = buildStyle(block.headlineStyle, { color: '#ffffff', size: '48', font: 'system-ui', weight: 'bold', leading: '1.2' });
-    const deck = buildStyle(block.deckStyle, { color: '#ffffff', size: '20', font: 'system-ui', weight: 'normal' });
-    const subhead = buildStyle(block.subheadStyle, { color: '#d1d5db', size: '24', font: 'system-ui', weight: 'normal' });
-    const textStyle = buildStyle(block.textStyle, { color: '#ffffff', size: '18', font: 'system-ui', weight: 'normal', leading: '1.7' });
+    const headline = buildInlineStyle(block.headlineStyle, { color: '#ffffff', size: '48', font: 'system-ui', weight: 'bold', leading: '1.2' }, { addTextShadow: true });
+    const deck = buildInlineStyle(block.deckStyle, { color: '#ffffff', size: '20', font: 'system-ui', weight: 'normal' }, { addTextShadow: true });
+    const subhead = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'system-ui', weight: 'normal' }, { addTextShadow: true });
+    const textStyleStr = buildInlineStyle(block.textStyle, { color: '#ffffff', size: '18', font: 'system-ui', weight: 'normal', leading: '1.7' }, { addTextShadow: true });
 
     const posV = block.positionVertical || 'center';
     const offsetV = block.offsetVertical || 0;
@@ -445,11 +383,10 @@ export const SplitLayoutBlock = {
     const textPanelWidth = block.textPanelWidth || '33';
     const imageSide = block.imageSide || 'right';
     const textPanelColor = block.textPanelColor || '#000000';
-    const contentWidthClass = contentWidthMap[block.contentWidth || 'medium'];
+    const contentWidthClass = textWidthClassMap[block.contentWidth || 'medium'];
 
-    const paddingMap = { none: '0', tight: '15px', medium: '30px', spacious: '50px' };
-    const paddingTop = paddingMap[block.paddingTop || 'none'];
-    const paddingBottom = paddingMap[block.paddingBottom || 'none'];
+    const paddingTop = paddingValueMap[block.paddingTop || 'none'];
+    const paddingBottom = paddingValueMap[block.paddingBottom || 'none'];
 
     let contentHtml = '<h1 style="' + headline + '">' + processBodyText(block.headline || '', { brTag: '<br/>' }) + '</h1>';
 
@@ -465,7 +402,7 @@ export const SplitLayoutBlock = {
       }
 
       if (block.text) {
-        contentHtml += '<div class="mt-4" style="' + textStyle + '"><p>' + processBodyText(block.text || '', { brTag: '<br/>' }) + '</p></div>';
+        contentHtml += '<div class="mt-4" style="' + textStyleStr + '"><p>' + processBodyText(block.text || '', { brTag: '<br/>' }) + '</p></div>';
       }
 
       contentHtml += '</div>';

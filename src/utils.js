@@ -392,3 +392,273 @@ ${selector} a:hover {
 }
   `.trim();
 }
+
+// ============================================
+// SHARED EDITOR & RENDER UTILITIES
+// ============================================
+
+/**
+ * Padding size options for editor dropdowns
+ */
+export const paddingSizes = [
+  { value: 'none', label: 'None (0px)' },
+  { value: 'tight', label: 'Tight (15px)' },
+  { value: 'medium', label: 'Medium (30px)' },
+  { value: 'spacious', label: 'Spacious (50px)' }
+];
+
+/**
+ * Padding value map for CSS classes (preview)
+ */
+export const paddingClassMap = {
+  none: { pt: 'pt-0', pb: 'pb-0', py: 'py-0' },
+  tight: { pt: 'pt-4', pb: 'pb-4', py: 'py-4' },
+  medium: { pt: 'pt-16', pb: 'pb-16', py: 'py-16' },
+  spacious: { pt: 'pt-24', pb: 'pb-24', py: 'py-24' }
+};
+
+/**
+ * Padding value map for inline styles (export)
+ */
+export const paddingValueMap = {
+  none: '0',
+  tight: '15px',
+  medium: '30px',
+  spacious: '50px'
+};
+
+/**
+ * Text/content width options
+ */
+export const textWidthOpts = ['extra-narrow', 'narrow', 'medium', 'wide'];
+
+/**
+ * Text width to CSS class mapping
+ */
+export const textWidthClassMap = {
+  'extra-narrow': 'max-w-md',
+  'narrow': 'max-w-lg',
+  'medium': 'max-w-4xl',
+  'wide': 'max-w-6xl'
+};
+
+/**
+ * Font weight options
+ */
+export const weightOpts = ['normal', '500', '600', 'bold'];
+
+/**
+ * Simple font weight options (normal/bold only)
+ */
+export const simpleWeightOpts = ['normal', 'bold'];
+
+/**
+ * Get style property with fallback
+ */
+export function getStyle(styleObj, prop, fallback) {
+  return (styleObj && styleObj[prop]) || fallback;
+}
+
+/**
+ * Convert font weight string to numeric value
+ */
+export function fontWeightToValue(weight) {
+  if (weight === 'bold') return '700';
+  if (weight === '600') return '600';
+  if (weight === '500') return '500';
+  return '400';
+}
+
+/**
+ * Build inline style string from style object
+ * @param {Object} styleObj - Style properties object
+ * @param {Object} fallbacks - Default values for each property
+ * @param {Object} options - Additional options (addTextShadow, etc)
+ */
+export function buildInlineStyle(styleObj, fallbacks, options = {}) {
+  const color = getStyle(styleObj, 'color', fallbacks.color);
+  const size = getStyle(styleObj, 'size', fallbacks.size);
+  const font = getStyle(styleObj, 'font', fallbacks.font);
+  const weight = getStyle(styleObj, 'weight', fallbacks.weight);
+  const italic = getStyle(styleObj, 'italic', false);
+  const leading = getStyle(styleObj, 'leading', fallbacks.leading || '1.2');
+
+  const fontStyle = italic ? 'italic' : 'normal';
+  const fontWeight = fontWeightToValue(weight);
+
+  let style = 'color:' + color + ';font-size:' + size + 'px;font-family:' + font + ';font-weight:' + fontWeight + ';font-style:' + fontStyle + ';line-height:' + leading + ';';
+
+  if (options.addTextShadow) {
+    style += 'text-shadow:0 2px 8px rgba(0,0,0,0.55);';
+  }
+
+  return style;
+}
+
+/**
+ * Create collapsible section HTML for editor panels
+ */
+export function collapsibleSection(title, content, collapsed = true) {
+  return '<div class="collapsible-section' + (collapsed ? ' collapsed' : '') + '">' +
+    '<div class="collapsible-header">' +
+      '<span>' + title + '</span>' +
+      '<span class="collapsible-chevron">&#9660;</span>' +
+    '</div>' +
+    '<div class="collapsible-content">' + content + '</div>' +
+  '</div>';
+}
+
+/**
+ * Generate block label field HTML
+ */
+export function labelFieldHtml(label, placeholder = 'e.g., Section name...') {
+  return '<div class="mb-4 p-3 bg-blue-50 border-2 border-blue-200 rounded-lg">' +
+    '<label class="block text-sm font-semibold text-blue-900 mb-2">📝 Block Label (Optional)</label>' +
+    '<input type="text" data-k="label" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" ' +
+      'placeholder="' + placeholder + '" ' +
+      'value="' + (label || '') + '" />' +
+  '</div>';
+}
+
+/**
+ * Generate padding select options HTML
+ */
+export function paddingSelectHtml(selectedValue, defaultValue = 'medium') {
+  return paddingSizes.map(p =>
+    '<option value="' + p.value + '" ' + ((selectedValue || defaultValue) === p.value ? 'selected' : '') + '>' + p.label + '</option>'
+  ).join('');
+}
+
+/**
+ * Generate text width select options HTML
+ */
+export function textWidthSelectHtml(selectedValue, defaultValue = 'medium') {
+  return textWidthOpts.map(w =>
+    '<option value="' + w + '" ' + ((selectedValue || defaultValue) === w ? 'selected' : '') + '>' + w + '</option>'
+  ).join('');
+}
+
+/**
+ * Generate weight select options HTML
+ */
+export function weightSelectHtml(selectedValue, defaultValue = 'normal', useSimple = false) {
+  const opts = useSimple ? simpleWeightOpts : weightOpts;
+  return opts.map(w =>
+    '<option value="' + w + '" ' + ((selectedValue || defaultValue) === w ? 'selected' : '') + '>' + w + '</option>'
+  ).join('');
+}
+
+/**
+ * Generate master/inherit style controls HTML
+ * @param {Object} block - The block data
+ * @param {string} masterKey - The data key for the master flag (e.g., '_isBgColorMaster')
+ * @param {string} inheritKey - The data key for the inherit flag (e.g., '_inheritBgColor')
+ * @param {boolean} inheritDefault - Whether inherit is checked by default
+ * @param {string} classPrefix - CSS class prefix for JS handlers (e.g., 'bgcolor' -> 'bgcolor-style-master')
+ * @param {string} label - What's being set/inherited (e.g., 'color' or 'styling')
+ */
+export function styleInheritControls(block, masterKey, inheritKey, inheritDefault = true, classPrefix = '', label = 'styling') {
+  const isMaster = block[masterKey] || false;
+  const inherits = inheritDefault ? block[inheritKey] !== false : block[inheritKey] === true;
+  const masterClass = classPrefix ? ' class="' + classPrefix + '-style-master"' : '';
+  const inheritClass = classPrefix ? ' class="' + classPrefix + '-style-inherit"' : '';
+
+  return '<div class="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">' +
+    '<label class="flex items-center gap-2 mb-2">' +
+      '<input type="checkbox" data-k="' + masterKey + '"' + masterClass + ' ' + (isMaster ? 'checked' : '') + '>' +
+      '<span>Set ' + label + ' for all blocks</span>' +
+    '</label>' +
+    '<label class="flex items-center gap-2">' +
+      '<input type="checkbox" data-k="' + inheritKey + '"' + inheritClass + ' ' + (inherits ? 'checked' : '') + '>' +
+      '<span class="text-gray-600">Inherit ' + label + ' from master</span>' +
+    '</label>' +
+  '</div>';
+}
+
+/**
+ * Get effective style from block or master block
+ */
+export function getEffectiveStyle(block, blocks, styleKey, masterFlag, inheritFlag, inheritDefault = true) {
+  const shouldInherit = inheritDefault ? block[inheritFlag] !== false : block[inheritFlag] === true;
+
+  if (shouldInherit) {
+    const masterBlock = blocks.find(blk => blk[masterFlag] && blk !== block);
+    if (masterBlock) {
+      // Check for style directly on block (text, photoLedeSide) or in panels (split-panel)
+      if (masterBlock[styleKey]) {
+        return masterBlock[styleKey];
+      } else if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0][styleKey]) {
+        return masterBlock.panels[0][styleKey];
+      }
+    }
+  }
+
+  return block[styleKey] || {};
+}
+
+/**
+ * Get effective background color from block or master block
+ */
+export function getEffectiveBgColor(block, blocks, defaultColor = '#000000') {
+  if (block._inheritBgColor === true) {
+    const masterBlock = blocks.find(blk => blk._isBgColorMaster && blk !== block);
+    if (masterBlock && masterBlock.bgColor) {
+      return masterBlock.bgColor;
+    }
+  }
+  return block.bgColor || defaultColor;
+}
+
+/**
+ * Get effective drop cap settings from block or master block
+ */
+export function getEffectiveDropCapSettings(block, blocks) {
+  const defaults = {
+    dropCapColor: '#fbbf24',
+    dropCapSize: '56',
+    firstLineSize: '24',
+    firstLineWeight: '600',
+    firstLineColor: '#ffffff'
+  };
+
+  if (block._inheritDropCapStyle === true) {
+    const masterBlock = blocks.find(blk => blk._isDropCapStyleMaster && blk !== block);
+    if (masterBlock) {
+      // Check for drop cap settings directly on block (text, photoLedeSide) or in panels (split-panel)
+      const masterDropCap = masterBlock.panels && masterBlock.panels[0] ? masterBlock.panels[0] : masterBlock;
+      return {
+        dropCapColor: masterDropCap.dropCapColor || defaults.dropCapColor,
+        dropCapSize: masterDropCap.dropCapSize || defaults.dropCapSize,
+        firstLineSize: masterDropCap.firstLineSize || defaults.firstLineSize,
+        firstLineWeight: masterDropCap.firstLineWeight || defaults.firstLineWeight,
+        firstLineColor: masterDropCap.firstLineColor || defaults.firstLineColor
+      };
+    }
+  }
+
+  return {
+    dropCapColor: block.dropCapColor || defaults.dropCapColor,
+    dropCapSize: block.dropCapSize || defaults.dropCapSize,
+    firstLineSize: block.firstLineSize || defaults.firstLineSize,
+    firstLineWeight: block.firstLineWeight || defaults.firstLineWeight,
+    firstLineColor: block.firstLineColor || defaults.firstLineColor
+  };
+}
+
+/**
+ * Generate drop cap CSS
+ */
+export function dropCapCss(className, settings) {
+  const dropCapLineHeight = Math.floor(parseInt(settings.dropCapSize) * 0.85);
+  const firstLineWeightVal = fontWeightToValue(settings.firstLineWeight);
+
+  return '.' + className + '::first-letter{float:left;font-size:' + settings.dropCapSize + 'px !important;line-height:' + dropCapLineHeight + 'px !important;padding-right:10px;margin-top:2px;color:' + settings.dropCapColor + ' !important;font-weight:bold;}' +
+    '.' + className + '::first-line{font-size:' + settings.firstLineSize + 'px !important;font-weight:' + firstLineWeightVal + ' !important;color:' + settings.firstLineColor + ' !important;}';
+}
+
+/**
+ * Generate unique block ID
+ */
+export function generateBlockId(prefix = 'block') {
+  return prefix + '-' + Math.random().toString(36).substr(2, 9);
+}

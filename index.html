@@ -689,27 +689,33 @@ function renderEditor() {
                 // Handle body style master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('body-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.body-style-fields');
-                        const inheritCheckbox = els.editorPanel.querySelector('.body-style-inherit');
+                        // Find ALL fields divs in the collapsible section (one per panel)
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDivs = container ? container.querySelectorAll('.body-style-fields') : els.editorPanel.querySelectorAll('.body-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.body-style-inherit') : els.editorPanel.querySelector('.body-style-inherit');
 
                         if (e.target.checked) {
-                            // Uncheck all other blocks' master checkbox
+                            // Uncheck all other blocks' master checkbox (data)
                             state.blocks.forEach((b, idx) => {
                                 if (idx !== state.selectedBlockIndex) {
                                     b._isBodyStyleMaster = false;
                                 }
                             });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.body-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
+                                }
+                            });
                             // Set this block as master
                             block._isBodyStyleMaster = true;
                             // Master always has active fields
-                            if (fieldsDiv) {
-                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                            }
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
                         } else {
                             block._isBodyStyleMaster = false;
                             // If inherit is checked, dim the fields
-                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
-                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            if (inheritCheckbox && inheritCheckbox.checked) {
+                                fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
                             }
                         }
                     });
@@ -718,8 +724,66 @@ function renderEditor() {
                 // Handle body style inherit checkbox - toggle field visibility
                 if (inp.classList.contains('body-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.body-style-fields');
-                        const masterCheckbox = els.editorPanel.querySelector('.body-style-master');
+                        // Find ALL fields divs in the collapsible section (one per panel)
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDivs = container ? container.querySelectorAll('.body-style-fields') : els.editorPanel.querySelectorAll('.body-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.body-style-master') : els.editorPanel.querySelector('.body-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (e.target.checked && !isMaster) {
+                            // Inheriting and not master - dim the fields
+                            fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
+                        } else {
+                            // Not inheriting or is master - show fields
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
+                        }
+                    });
+                }
+
+                // Handle subhead style master checkbox - ensure mutual exclusivity
+                if (inp.classList.contains('subhead-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.subhead-style-fields') : els.editorPanel.querySelector('.subhead-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.subhead-style-inherit') : els.editorPanel.querySelector('.subhead-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox (data)
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isSubheadStyleMaster = false;
+                                }
+                            });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.subhead-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isSubheadStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) {
+                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                            }
+                        } else {
+                            block._isSubheadStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle subhead style inherit checkbox - toggle field visibility
+                if (inp.classList.contains('subhead-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.subhead-style-fields') : els.editorPanel.querySelector('.subhead-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.subhead-style-master') : els.editorPanel.querySelector('.subhead-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
                         if (fieldsDiv) {
@@ -737,27 +801,33 @@ function renderEditor() {
                 // Handle drop cap style master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('dropcap-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.dropcap-style-fields');
-                        const inheritCheckbox = els.editorPanel.querySelector('.dropcap-style-inherit');
+                        // Find ALL fields divs in the collapsible section (one per panel)
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDivs = container ? container.querySelectorAll('.dropcap-style-fields') : els.editorPanel.querySelectorAll('.dropcap-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.dropcap-style-inherit') : els.editorPanel.querySelector('.dropcap-style-inherit');
 
                         if (e.target.checked) {
-                            // Uncheck all other blocks' master checkbox
+                            // Uncheck all other blocks' master checkbox (data)
                             state.blocks.forEach((b, idx) => {
                                 if (idx !== state.selectedBlockIndex) {
                                     b._isDropCapStyleMaster = false;
                                 }
                             });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.dropcap-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
+                                }
+                            });
                             // Set this block as master
                             block._isDropCapStyleMaster = true;
                             // Master always has active fields
-                            if (fieldsDiv) {
-                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                            }
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
                         } else {
                             block._isDropCapStyleMaster = false;
                             // If inherit is checked, dim the fields
-                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
-                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            if (inheritCheckbox && inheritCheckbox.checked) {
+                                fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
                             }
                         }
                     });
@@ -766,18 +836,18 @@ function renderEditor() {
                 // Handle drop cap style inherit checkbox - toggle field visibility
                 if (inp.classList.contains('dropcap-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.dropcap-style-fields');
-                        const masterCheckbox = els.editorPanel.querySelector('.dropcap-style-master');
+                        // Find ALL fields divs in the collapsible section (one per panel)
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDivs = container ? container.querySelectorAll('.dropcap-style-fields') : els.editorPanel.querySelectorAll('.dropcap-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.dropcap-style-master') : els.editorPanel.querySelector('.dropcap-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
-                        if (fieldsDiv) {
-                            if (e.target.checked && !isMaster) {
-                                // Inheriting and not master - dim the fields
-                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
-                            } else {
-                                // Not inheriting or is master - show fields
-                                fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                            }
+                        if (e.target.checked && !isMaster) {
+                            // Inheriting and not master - dim the fields
+                            fieldsDivs.forEach(fd => fd.classList.add('opacity-50', 'pointer-events-none'));
+                        } else {
+                            // Not inheriting or is master - show fields
+                            fieldsDivs.forEach(fd => fd.classList.remove('opacity-50', 'pointer-events-none'));
                         }
 
                         // Set the value explicitly to true/false
@@ -788,14 +858,22 @@ function renderEditor() {
                 // Handle background color master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('bgcolor-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.bgcolor-style-fields');
-                        const inheritCheckbox = els.editorPanel.querySelector('.bgcolor-style-inherit');
+                        // Find fields div relative to the checkbox's container
+                        const container = e.target.closest('.mb-3');
+                        const fieldsDiv = container ? container.querySelector('.bgcolor-style-fields') : els.editorPanel.querySelector('.bgcolor-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.bgcolor-style-inherit') : els.editorPanel.querySelector('.bgcolor-style-inherit');
 
                         if (e.target.checked) {
-                            // Uncheck all other blocks' master checkbox
+                            // Uncheck all other blocks' master checkbox (data)
                             state.blocks.forEach((b, idx) => {
                                 if (idx !== state.selectedBlockIndex) {
                                     b._isBgColorMaster = false;
+                                }
+                            });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.bgcolor-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
                                 }
                             });
                             // Set this block as master
@@ -817,8 +895,10 @@ function renderEditor() {
                 // Handle background color inherit checkbox - toggle field visibility
                 if (inp.classList.contains('bgcolor-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.bgcolor-style-fields');
-                        const masterCheckbox = els.editorPanel.querySelector('.bgcolor-style-master');
+                        // Find fields div relative to the checkbox's container
+                        const container = e.target.closest('.mb-3');
+                        const fieldsDiv = container ? container.querySelector('.bgcolor-style-fields') : els.editorPanel.querySelector('.bgcolor-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.bgcolor-style-master') : els.editorPanel.querySelector('.bgcolor-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
                         if (fieldsDiv) {
@@ -839,14 +919,22 @@ function renderEditor() {
                 // Handle caption style master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('caption-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.caption-style-fields');
-                        const inheritCheckbox = els.editorPanel.querySelector('.caption-style-inherit');
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.caption-style-fields') : els.editorPanel.querySelector('.caption-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.caption-style-inherit') : els.editorPanel.querySelector('.caption-style-inherit');
 
                         if (e.target.checked) {
-                            // Uncheck all other blocks' master checkbox
+                            // Uncheck all other blocks' master checkbox (data)
                             state.blocks.forEach((b, idx) => {
                                 if (idx !== state.selectedBlockIndex) {
                                     b._isCaptionStyleMaster = false;
+                                }
+                            });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.caption-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
                                 }
                             });
                             // Set this block as master
@@ -868,8 +956,10 @@ function renderEditor() {
                 // Handle caption style inherit checkbox - toggle field visibility
                 if (inp.classList.contains('caption-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.caption-style-fields');
-                        const masterCheckbox = els.editorPanel.querySelector('.caption-style-master');
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.caption-style-fields') : els.editorPanel.querySelector('.caption-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.caption-style-master') : els.editorPanel.querySelector('.caption-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
                         if (fieldsDiv) {
@@ -890,14 +980,22 @@ function renderEditor() {
                 // Handle pull quote style master checkbox - ensure mutual exclusivity
                 if (inp.classList.contains('pullquote-style-master')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.pullquote-style-fields');
-                        const inheritCheckbox = els.editorPanel.querySelector('.pullquote-style-inherit');
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.pullquote-style-fields') : els.editorPanel.querySelector('.pullquote-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.pullquote-style-inherit') : els.editorPanel.querySelector('.pullquote-style-inherit');
 
                         if (e.target.checked) {
-                            // Uncheck all other blocks' master checkbox
+                            // Uncheck all other blocks' master checkbox (data)
                             state.blocks.forEach((b, idx) => {
                                 if (idx !== state.selectedBlockIndex) {
                                     b._isPullQuoteStyleMaster = false;
+                                }
+                            });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.pullquote-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
                                 }
                             });
                             // Set this block as master
@@ -919,8 +1017,10 @@ function renderEditor() {
                 // Handle pull quote style inherit checkbox - toggle field visibility
                 if (inp.classList.contains('pullquote-style-inherit')) {
                     inp.addEventListener('change', (e) => {
-                        const fieldsDiv = els.editorPanel.querySelector('.pullquote-style-fields');
-                        const masterCheckbox = els.editorPanel.querySelector('.pullquote-style-master');
+                        // Find fields div relative to the checkbox's collapsible section
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.pullquote-style-fields') : els.editorPanel.querySelector('.pullquote-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.pullquote-style-master') : els.editorPanel.querySelector('.pullquote-style-master');
                         const isMaster = masterCheckbox && masterCheckbox.checked;
 
                         if (fieldsDiv) {
