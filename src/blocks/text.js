@@ -587,8 +587,13 @@ export const TextBlock = {
     let effectiveSubheadStyle = b.subheadStyle || {};
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.subheadStyle) {
-        effectiveSubheadStyle = masterBlock.subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          effectiveSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          effectiveSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
 
@@ -811,8 +816,13 @@ export const TextBlock = {
     let effectiveSubheadStyle = b.subheadStyle || {};
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.subheadStyle) {
-        effectiveSubheadStyle = masterBlock.subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          effectiveSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          effectiveSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
 

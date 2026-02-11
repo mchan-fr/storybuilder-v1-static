@@ -500,8 +500,13 @@ export const SplitPanelBlock = {
     let inheritedSubheadStyle = null;
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
-        inheritedSubheadStyle = masterBlock.panels[0].subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          inheritedSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          inheritedSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
 
@@ -567,9 +572,21 @@ export const SplitPanelBlock = {
     // Generate unique ID for this block
     const blockId = 'split-preview-' + Math.random().toString(36).substr(2, 9);
 
+    // Panel 1's subhead style for internal inheritance
+    const panel1SubheadStyle = panel1.subheadStyle || { size: '24', weight: 'normal', italic: false, color: '#d1d5db', font: 'IBM Plex Sans, sans-serif' };
+
     // Build panel content
     const buildPanelContent = (panel, panelIdx) => {
-      const effectiveSubheadStyle = inheritedSubheadStyle || panel.subheadStyle;
+      // Subhead style: external inheritance > internal Panel 1→2 inheritance > panel's own style
+      let effectiveSubheadStyle;
+      if (inheritedSubheadStyle) {
+        effectiveSubheadStyle = inheritedSubheadStyle;
+      } else if ((b._isSubheadStyleMaster || b._inheritSubheadStyle !== false) && panelIdx === 1) {
+        // Panel 2 inherits from Panel 1 when block is master or inheriting
+        effectiveSubheadStyle = panel1SubheadStyle;
+      } else {
+        effectiveSubheadStyle = panel.subheadStyle;
+      }
       const subheadStyle = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal' });
       const effectiveBodyStyle = inheritedBodyStyle || panel.textStyle;
       const textStyleStr = buildInlineStyle(effectiveBodyStyle, { color: '#ffffff', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal' });
@@ -729,8 +746,13 @@ export const SplitPanelBlock = {
     let inheritedSubheadStyle = null;
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
-        inheritedSubheadStyle = masterBlock.panels[0].subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          inheritedSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          inheritedSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
 
@@ -793,12 +815,24 @@ export const SplitPanelBlock = {
       ...(panel1.pullQuoteStyle || {})
     };
 
+    // Panel 1's subhead style for internal inheritance
+    const panel1SubheadStyle = panel1.subheadStyle || { size: '24', weight: 'normal', italic: false, color: '#d1d5db', font: 'IBM Plex Sans, sans-serif' };
+
     // Collect all drop cap styles
     let allDropCapCss = '';
 
     // Build panel content for export
     const buildPanelContent = (panel, panelIdx) => {
-      const effectiveSubheadStyle = inheritedSubheadStyle || panel.subheadStyle;
+      // Subhead style: external inheritance > internal Panel 1→2 inheritance > panel's own style
+      let effectiveSubheadStyle;
+      if (inheritedSubheadStyle) {
+        effectiveSubheadStyle = inheritedSubheadStyle;
+      } else if ((b._isSubheadStyleMaster || b._inheritSubheadStyle !== false) && panelIdx === 1) {
+        // Panel 2 inherits from Panel 1 when block is master or inheriting
+        effectiveSubheadStyle = panel1SubheadStyle;
+      } else {
+        effectiveSubheadStyle = panel.subheadStyle;
+      }
       const subheadStyle = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal' });
       const effectiveBodyStyle = inheritedBodyStyle || panel.textStyle;
       const textStyleStr = buildInlineStyle(effectiveBodyStyle, { color: '#ffffff', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal' });

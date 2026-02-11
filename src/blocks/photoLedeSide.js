@@ -433,11 +433,6 @@ export const PhotoLedeSideBlock = {
     const effectiveSubheadStyle = getEffectiveStyle(b, blocks, 'subheadStyle', '_isSubheadStyleMaster', '_inheritSubheadStyle', true);
     const effectivePullQuoteStyle = getEffectivePullQuoteStyle(b, blocks);
 
-    // Debug: log what photoLedeSide preview is receiving
-    console.log('[PLS Preview] _inheritPullQuoteStyle:', b._inheritPullQuoteStyle);
-    console.log('[PLS Preview] effectivePullQuoteStyle:', effectivePullQuoteStyle);
-    console.log('[PLS Preview] effectivePullQuoteStyle.bgColor:', effectivePullQuoteStyle.bgColor);
-
     const subheadStyleStr = buildInlineStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
     const pullQuoteStyleStr = buildInlineStyle(effectivePullQuoteStyle, { color: '#ffffff', size: '24', font: 'IBM Plex Sans, sans-serif', weight: '500', leading: '1.8' });
     const pullQuoteBgColor = effectivePullQuoteStyle.bgColor || '#3d3314';
@@ -771,7 +766,6 @@ export const PhotoLedeSideBlock = {
   },
 
   set(block, key, value) {
-    console.log('[PLS set] key:', key, 'value:', value);
     if (key.includes('.')) {
       const [parent, child] = key.split('.');
       if (!block[parent]) block[parent] = {};
@@ -793,6 +787,5 @@ export const PhotoLedeSideBlock = {
         };
       }
     }
-    console.log('[PLS set] after set, block._inheritPullQuoteStyle:', block._inheritPullQuoteStyle);
   }
 };

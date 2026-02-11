@@ -592,8 +592,13 @@ export const PhotoLedeBlock = {
     let effectiveSubheadStyle = b.subheadStyle || {};
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.subheadStyle) {
-        effectiveSubheadStyle = masterBlock.subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          effectiveSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          effectiveSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
     const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
@@ -790,8 +795,13 @@ export const PhotoLedeBlock = {
     let effectiveSubheadStyle = b.subheadStyle || {};
     if (b._inheritSubheadStyle !== false) {
       const masterBlock = blocks.find(blk => blk._isSubheadStyleMaster && blk !== b);
-      if (masterBlock && masterBlock.subheadStyle) {
-        effectiveSubheadStyle = masterBlock.subheadStyle;
+      if (masterBlock) {
+        // Check for subheadStyle in panels (split-panel) or directly on block (text/photoLede/photoLedeSide)
+        if (masterBlock.panels && masterBlock.panels[0] && masterBlock.panels[0].subheadStyle) {
+          effectiveSubheadStyle = masterBlock.panels[0].subheadStyle;
+        } else if (masterBlock.subheadStyle) {
+          effectiveSubheadStyle = masterBlock.subheadStyle;
+        }
       }
     }
     const subheadStyle = buildStyle(effectiveSubheadStyle, { color: '#d1d5db', size: '24', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.5' });
