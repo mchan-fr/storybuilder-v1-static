@@ -386,9 +386,21 @@
             debugModeBtn: document.getElementById('debugModeBtn'),
         };
 
-        // Populate block type dropdown
-        els.blockType.innerHTML = Object.values(BLOCKS)
-            .map(b => `<option value="${b.type}">${b.title}</option>`)
+        // Populate block type dropdown (explicit order)
+        const blockOrder = [
+            'full-bleed',
+            'gallery',
+            'hero',
+            'split-layout',
+            'photo-lede',
+            'photo-lede-side',
+            'split-panel',
+            'text',
+            'zoom-photo'
+        ];
+        els.blockType.innerHTML = blockOrder
+            .filter(type => BLOCKS[type])
+            .map(type => `<option value="${type}">${BLOCKS[type].title}</option>`)
             .join('');
 
         // Render blocks list

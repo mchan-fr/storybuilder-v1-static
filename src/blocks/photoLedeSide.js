@@ -28,7 +28,7 @@ import {
 
 export const PhotoLedeSideBlock = {
   type: 'photo-lede-side',
-  title: 'Photo Lede Side (image beside text)',
+  title: 'Media-vertical (+ text)',
 
   defaults() {
     return {

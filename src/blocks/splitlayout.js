@@ -19,7 +19,7 @@ import {
 
 export const SplitLayoutBlock = {
   type: 'split-layout',
-  title: 'Split Layout (vertical image + text panel)',
+  title: 'Hero-vertical (+ head)',
 
   defaults() {
     return {

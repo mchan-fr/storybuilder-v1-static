@@ -2,7 +2,7 @@ import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml
 
 export const PhotoLedeBlock = {
   type: 'photo-lede',
-  title: 'Photo Lede (optional photo + drop cap text)',
+  title: 'Media-horizontal (+ text)',
 
   defaults() {
     return {

@@ -20,7 +20,7 @@ import {
 
 export const SplitPanelBlock = {
   type: 'split-panel',
-  title: 'Split Panel (alternating image/text)',
+  title: 'Split panel vertical reveal (+ text)',
 
   defaults() {
     return {
