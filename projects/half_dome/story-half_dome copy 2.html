@@ -1,74 +1,18 @@
-// File: src/preview.js
-import { BLOCKS } from './blocks/index.js';
-import { initZoomRuntime } from './zoomRuntime.js';
-import { initFadeRuntime } from './fadeRuntime.js';
-import { calculateExpectedTime, getEffectiveExpectedTime } from './lib/expectedTime.js';
-
-/* ---------- helpers ---------- */
-function initStickyReveal(root) {
-  const containers = root.querySelectorAll('.sb-sticky-reveal');
-  containers.forEach((c) => {
-    const lines = Array.from(c.querySelectorAll('.reveal-line'));
-    lines.forEach((el, i) =>
-      setTimeout(() => el.classList.add('visible'), 250 + i * 350)
-    );
-  });
-}
-
-function hydrateInlineScripts(root) {
-  const scripts = root.querySelectorAll('script');
-  scripts.forEach((old) => {
-    const s = document.createElement('script');
-    [...old.attributes].forEach((a) => {
-      if (a.name !== 'type') s.setAttribute(a.name, a.value);
-    });
-    s.textContent = old.textContent || '';
-    old.replaceWith(s);
-  });
-}
-
-/* ============================================================
-   F A D E   T R A N S I T I O N (pair-based only when _wipeOverPrev)
-   ============================================================ */
-function buildBlocksWithFadePairs({ state, isPreview }) {
-  const out = [];
-  const blocks = state.blocks || [];
-
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    const mod = BLOCKS[b.type];
-    if (!mod) continue;
-
-    const rawHtml = isPreview
-      ? (mod.preview ? mod.preview({ block: b, project: state.project || '', blocks }) : '')
-      : (mod.exportHTML ? mod.exportHTML({ block: b, blocks }) : '');
-
-    // Wrap with data-block-index for preview scrolling
-    const html = isPreview
-      ? `<div data-block-index="${i}">${rawHtml}</div>`
-      : rawHtml;
-
-    if (!b._wipeOverPrev || out.length === 0) {
-      out.push(html);
-      continue;
-    }
-
-    // Pair this block over the previous
-    const heightVh = Math.max(100, Number(b._wipeHeight || 200));
-    const prevHtml = out.pop() || '';
-    const pair = `
-      <div class="sb-fadepair" style="--fadeH:${heightVh}vh">
-        <section class="sb-fade-prev">${prevHtml}</section>
-        <section class="sb-fade-next">${html}</section>
-      </div>
-    `;
-    out.push(pair);
-  }
-  return out;
-}
-
-/* ---------- BASE CSS ---------- */
-const BASE_CSS = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hiking Half Dome</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+  <meta property="og:title" content="Hiking Half Dome">
+  <meta property="og:description" content="A multimedia story by Marcus Chan">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="author" content="Marcus Chan">
+  <meta name="reading-time" content="2 min read">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
 *{box-sizing:border-box}
 html,body{
   min-height:100%;
@@ -147,7 +91,7 @@ img,video{display:block;max-width:100%;height:auto}
 .pls-mobile{display:none}
 .pls-image{height:100vh;flex-shrink:0}
 .pls-media{width:100%;height:100%;object-fit:cover}
-.pls-text{height:100vh;display:flex;align-items:center;justify-content:center;padding:0 1.5rem;box-sizing:border-box}
+.pls-text{height:100vh;display:flex;align-items:center;justify-content:center}
 
 /* ========================================
    PHOTO LEDE - DESKTOP
@@ -159,7 +103,7 @@ img,video{display:block;max-width:100%;height:auto}
 .photo-lede-photo[data-desktop-width="w-full"]{max-width:100%}
 .photo-lede-photo img{border-radius:0.5rem}
 .photo-lede-caption{margin-top:1rem;text-align:center}
-.photo-lede-text{margin:0 auto;padding:0 1.5rem;box-sizing:border-box}
+.photo-lede-text{margin:0 auto}
 .photo-lede-text[data-desktop-width="max-w-md"]{max-width:28rem}
 .photo-lede-text[data-desktop-width="max-w-lg"]{max-width:32rem}
 .photo-lede-text[data-desktop-width="max-w-4xl"]{max-width:56rem}
@@ -987,81 +931,101 @@ img,video{display:block;max-width:100%;height:auto}
     left: 0;
   }
 }
-`;
-
-/* ---------- RUNTIME SCRIPTS ---------- */
-const STICKY_RUNTIME = `
+</style>
+  </head>
+  <body>
+    <div id="progress-bar" style="position:fixed;top:0;left:0;height:3px;background:#fbbf24;width:0%;z-index:9999;transition:width 0.1s;"></div>
+    <div data-sb-block="0" data-sb-type="split-layout" data-sb-expected="4" data-sb-expected-std="4"><section class="sb-split-layout fullbleed overflow-hidden flex" style="position:relative;z-index:3;height:100vh;padding-top:0;padding-bottom:0;"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div><div style="position:relative;z-index:1;display:flex;width:100%;height:100%;"><div class="flex flex-col justify-center items-center p-12" style="width:40%;background-color:#000000;"><div style="transform:translate(0px,0px);"><h1 style="color:#ffffff;font-size:70px;font-family:system-ui;font-weight:700;font-style:normal;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.55);">Hiking<br/>Half Dome<br/>With My Kids</h1></div></div><div class="relative" style="width:60%;height:100vh;"><img class="media" src="media/009.jpeg" alt=""></div></div></section></div>
+<div data-sb-block="1" data-sb-type="text" data-sb-expected="28" data-sb-expected-std="28"><style>.text-block-drop-cap-txt-f4cmw9::first-letter{float:left;font-size:86px !important;line-height:73px !important;padding-right:10px;margin-top:2px;color:#121212 !important;font-weight:bold;}.text-block-drop-cap-txt-f4cmw9::first-line{font-size:30px !important;font-weight:600 !important;color:#111827 !important;}.text-block-section a {
+  color: #0052a3;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.text-block-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="text-block-section relative pt-16 pb-2" data-fade-scroll="true" style="position:relative;z-index:3;background-color:#d0cdcd;"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#d0cdcd;z-index:0;"></div><div class="relative z-10 px-8 max-w-4xl mx-auto" style="position:relative;z-index:1;"><div style="margin-bottom:24px;"><div style="color:#374151;font-size:20px;font-family:system-ui;font-weight:400;font-style:normal;line-height:1.6;">By Marcus Chan</div><div style="font-size:16px;font-weight:400;color:#6b7280;margin-top:4px;">Yosemite, Calif. <span style="color:#6b7280;opacity:0.6;padding:0 8px;">|</span> August 8, 2025 <span style="color:#6b7280;opacity:0.6;padding:0 8px;">|</span> 2 min read</div></div><p class="text-block-drop-cap-txt-f4cmw9" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">Sometimes as a parent, you have to go the extra mile to get quality time with your kids. Make that 16 extra miles. That's the round-trip distance of hiking from Yosemite's Happy Isles to the top of the iconic Half Dome. I had done this famously scenic and strenuous hike twice before and had no plans for a third. But my daughter and son really, really wanted to do it. And what better way to bond than to experience the exhilaration and exhaustion of doing The Dome together? So off we went.</p></div></section></div>
+<div data-sb-block="2" data-sb-type="photo-lede-side" data-sb-expected="4" data-sb-expected-std="4"><style>.photo-lede-side-drop-cap-pls-r1duixtqb::first-letter{float:left;font-size:80px !important;line-height:68px !important;padding-right:10px;margin-top:2px;color:#070603 !important;font-weight:bold;}.photo-lede-side-drop-cap-pls-r1duixtqb::first-line{font-size:28px !important;font-weight:700 !important;color:#3c3939 !important;}.pls-section a {
+  color: #0052a3;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.pls-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="pls-section pt-16 pb-16" style="position:relative;z-index:3;background-color:#d0cdcd;" data-fade-scroll="true"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#d0cdcd;z-index:0;"></div><div style="position:relative;z-index:1;"><div class="pls-desktop"><div class="pls-image" style="width:50%;"><div style="position:relative;left:50%;transform:translateX(-50%);width:100vw;height:1px;background-color:#8d8d8b;margin-bottom:0px;"></div><img src="media/001.jpeg" class="pls-media" alt=""></div><div class="pls-text" style="width:50%;padding-left:40px;padding-right:0;"><div class="max-w-lg mx-auto"><p class="photo-lede-side-drop-cap-pls-r1duixtqb" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">This was all very last minute, to the point that we didn't have a place to stay the night before the permit date.</p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">So we did the unadvisable -- we left San Francisco at 7 p.m. the day before our permit date, arrived in Yosemite at midnight, and found our way to the Curry Village parking lot. </p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">Sleeping in your car overnight isn't allowed, so I’ll say we "rested" for an hour and a half. That’s clearly not enough rest for a hike like this, but that’s what we had to work with. </p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We got up at 2:45 a.m., in the dead of night, and geared up. (Photo by Griffin)</p></div></div></div><div class="pls-mobile"><div class="pls-mobile-image"><div style="position:relative;left:50%;transform:translateX(-50%);width:100vw;height:1px;background-color:#8d8d8b;margin-bottom:0px;"></div><img src="media/001.jpeg" class="pls-media" alt=""></div><div class="pls-mobile-text"><div class="max-w-lg"><p class="photo-lede-side-drop-cap-pls-r1duixtqb" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">This was all very last minute, to the point that we didn't have a place to stay the night before the permit date.</p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">So we did the unadvisable -- we left San Francisco at 7 p.m. the day before our permit date, arrived in Yosemite at midnight, and found our way to the Curry Village parking lot. </p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">Sleeping in your car overnight isn't allowed, so I’ll say we "rested" for an hour and a half. That’s clearly not enough rest for a hike like this, but that’s what we had to work with. </p><p style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We got up at 2:45 a.m., in the dead of night, and geared up. (Photo by Griffin)</p></div></div></div></div></section></div>
+<div data-sb-block="3" data-sb-type="photo-lede-side" data-sb-expected="4" data-sb-expected-std="4"><style>.photo-lede-side-drop-cap-pls-x5bxz6l52::first-letter{float:left;font-size:56px !important;line-height:47px !important;padding-right:10px;margin-top:2px;color:#fbbf24 !important;font-weight:bold;}.photo-lede-side-drop-cap-pls-x5bxz6l52::first-line{font-size:24px !important;font-weight:600 !important;color:#ffffff !important;}.pls-section a {
+  color: #0052a3;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.pls-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="pls-section pt-16 pb-16" style="position:relative;z-index:3;background-color:#d0cdcd;" data-fade-scroll="true"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#d0cdcd;z-index:0;"></div><div style="position:relative;z-index:1;"><div class="pls-desktop"><div class="pls-text" style="width:40%;padding-left:0;padding-right:40px;"><div class="max-w-lg mx-auto"><p class="photo-lede-side-drop-cap-pls-x5bxz6l52" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We cycled to Happy Isles, where we parked our bikes, then made our way to the Mist Trail. It was 4 a.m., and the top of Half Dome was a "mere" 8.2 miles away.</p></div></div><div class="pls-image" style="width:60%;"><img src="media/002.jpeg" class="pls-media" alt=""></div></div><div class="pls-mobile"><div class="pls-mobile-image"><img src="media/002.jpeg" class="pls-media" alt=""></div><div class="pls-mobile-text"><div class="max-w-lg"><p class="photo-lede-side-drop-cap-pls-x5bxz6l52" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We cycled to Happy Isles, where we parked our bikes, then made our way to the Mist Trail. It was 4 a.m., and the top of Half Dome was a "mere" 8.2 miles away.</p></div></div></div></div></section></div>
+<div data-sb-block="4" data-sb-type="split-panel" data-sb-expected="4" data-sb-expected-std="4"><div class="split-panel-wrapper split-desktop-only" id="split-panel-s4iy7sv0v" style="background-color:#000000;"><div class="split-panel-container" style="background-color:#000000;"><section class="split-panel-row" style="background-color:#000000;"><div class="split-image-sticky"><div class="split-image-content"><img src="" alt=""></div></div><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-4xl"><div class="leading-relaxed" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;"></div></div></div></section><section class="split-panel-row" style="background-color:#000000;"><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-4xl"><div class="leading-relaxed" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;"></div></div></div><div class="split-image-sticky"><div class="split-image-content"><img src="" alt=""></div></div></section></div></div><div class="split-mobile-wrapper split-mobile-only" id="split-panel-s4iy7sv0v-mobile" style="background-color:#000000;"><div class="split-mobile-panel" data-panel="0"><div class="split-mobile-panel-image"><img class="split-mobile-media" src="" alt=""></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-4xl"><div class="leading-relaxed" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;"></div></div></div></div><div class="split-mobile-panel" data-panel="1"><div class="split-mobile-panel-image"><img class="split-mobile-media" src="" alt=""></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-4xl"><div class="leading-relaxed" style="color:#3c3939;font-size:22px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.7;"></div></div></div></div></div></div>
+    <script>
 (function(){
-  function initStickyReveal(root){
-    var containers = (root||document).querySelectorAll('.sb-sticky-reveal');
-    containers.forEach(function(c){
-      var lines = Array.from(c.querySelectorAll('.reveal-line'));
-      lines.forEach(function(el,i){ setTimeout(function(){ el.classList.add('visible'); }, 250 + i*350); });
+  var els = document.querySelectorAll('[data-fade-scroll="true"]');
+  if(!els.length) return;
+  
+  var ticking = false;
+  var scrollCount = 0;
+  
+  function checkVisibility(){
+    if(ticking) return;
+    ticking = true;
+    
+    requestAnimationFrame(function(){
+      var vh = window.innerHeight;
+      
+      for(var i = 0; i < els.length; i++){
+        var el = els[i];
+        if(el.style.opacity === '1') continue;
+        
+        var rect = el.getBoundingClientRect();
+        if(rect.top < vh * 0.85){
+          el.style.opacity = '1';
+        }
+      }
+      
+      ticking = false;
     });
   }
-  document.addEventListener('DOMContentLoaded', function(){ initStickyReveal(document); });
-})();`;
-
-const ZOOM_RUNTIME = `
-(function(){
-  function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
-  function lerp(a,b,t){return a+(b-a)*t}
-  function easeOut(t){return 1-Math.pow(1-t,2)}
-  function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
-  function wire(sec){
-    var pin=sec.querySelector('.sb-zoom-pin');
-    var img=sec.querySelector('.sb-zoom-photo');
-    var panel=sec.querySelector('.sb-zoom-panel');
-    var maxScale=parseFloat(sec.dataset.scaleEnd||'2.6');
-    var fadeInCut=parseFloat(sec.dataset.fadeIn||'0.18');
-    var fadeOutCut=parseFloat(sec.dataset.fadeOut||'0.18');
-    var panelStart=parseFloat(sec.dataset.panelStart||'0.3');
-    var panelEnd=parseFloat(sec.dataset.panelEnd||'0.72');
-    var fx=parseFloat(sec.dataset.focusX||'0.5');
-    var fy=parseFloat(sec.dataset.focusY||'0.5');
-    var ticking=false;
-    function onScroll(){if(!ticking){requestAnimationFrame(update);ticking=true;}}
-    function update(){
-      ticking=false;
-      var r=sec.getBoundingClientRect();
-      var vh=window.innerHeight;
-      if(r.bottom<=-vh||r.top>=vh*1.5){pin.style.display='none';return;}
-      var p=clamp((vh-r.top)/(r.height+vh),0,1);
-      pin.style.display='block';
-      var opacity=1;
-      if(p<fadeInCut){opacity=easeOut(p/Math.max(fadeInCut,0.0001));}
-      else if(p>1-fadeOutCut){var t=(1-p)/Math.max(fadeOutCut,0.0001);opacity=easeOut(t);}
-      var midStart=fadeInCut;
-      var midEnd=1-fadeOutCut;
-      var scaleProgress=clamp((p-midStart)/Math.max(midEnd-midStart,0.0001),0,1);
-      var easedProgress=easeInOut(scaleProgress);
-      var s=lerp(1,maxScale,easedProgress);
-      img.style.transformOrigin=(fx*100)+'% '+(fy*100)+'%';
-      img.style.opacity=opacity.toFixed(4);
-      img.style.transform='translate(-50%,-50%) scale('+s.toFixed(4)+')';
-      if(panel){
-        var showPanel=p>=panelStart&&p<=panelEnd;
-        if(showPanel){
-          var local=(p-panelStart)/Math.max(panelEnd-panelStart,0.0001);
-          var inT=local<0.5?local/0.5:1;
-          var outT=local>0.7?(local-0.7)/0.3:0;
-          var alpha=clamp(easeOut(inT)*(1-outT),0,1);
-          panel.style.opacity=alpha.toFixed(4);
-          var y=lerp(12,0,easeInOut(local));
-          panel.style.transform='translateX(-50%) translateY('+y+'px)';
-        }else{panel.style.opacity='0';}
+  
+  function onScroll(){
+    if(scrollCount === 1){
+      setTimeout(checkVisibility, 50);
+    } else {
+      checkVisibility();
+    }
+    scrollCount++;
+  }
+  
+  setTimeout(function(){
+    var vh = window.innerHeight;
+    for(var i = 0; i < els.length; i++){
+      var el = els[i];
+      var rect = el.getBoundingClientRect();
+      if(rect.top > vh * 0.5){
+        el.style.opacity = '0';
       }
     }
-    window.addEventListener('scroll',onScroll,{passive:true});
-    window.addEventListener('resize',onScroll);
-    window.addEventListener('load',update);
-    update();
-  }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.sb-zoomsec').forEach(wire);});}
-  else{document.querySelectorAll('.sb-zoomsec').forEach(wire);}
-})();`;
-
-const SPLIT_PANEL_RUNTIME = `
+  }, 100);
+  
+  window.addEventListener('scroll', onScroll, {passive: true});
+})();</script>
+    
+    <script>
 function toggleMute(videoId, button) {
   var video = document.getElementById(videoId);
   if (!video) return;
@@ -1161,9 +1125,7 @@ function toggleMute(videoId, button) {
     window.addEventListener('load',checkAndApply);
     checkAndApply();
   });
-})();`;
-
-const SPLIT_MOBILE_RUNTIME = `
+})();</script><script>
 (function(){
   function isMobile() {
     return window.innerWidth <= 1024;
@@ -1233,61 +1195,8 @@ const SPLIT_MOBILE_RUNTIME = `
   } else {
     initMobileSplitPanels();
   }
-})();`;
-
-const BOOT_FADE = `
-(function(){
-  var els = document.querySelectorAll('[data-fade-scroll="true"]');
-  if(!els.length) return;
-  
-  var ticking = false;
-  var scrollCount = 0;
-  
-  function checkVisibility(){
-    if(ticking) return;
-    ticking = true;
-    
-    requestAnimationFrame(function(){
-      var vh = window.innerHeight;
-      
-      for(var i = 0; i < els.length; i++){
-        var el = els[i];
-        if(el.style.opacity === '1') continue;
-        
-        var rect = el.getBoundingClientRect();
-        if(rect.top < vh * 0.85){
-          el.style.opacity = '1';
-        }
-      }
-      
-      ticking = false;
-    });
-  }
-  
-  function onScroll(){
-    if(scrollCount === 1){
-      setTimeout(checkVisibility, 50);
-    } else {
-      checkVisibility();
-    }
-    scrollCount++;
-  }
-  
-  setTimeout(function(){
-    var vh = window.innerHeight;
-    for(var i = 0; i < els.length; i++){
-      var el = els[i];
-      var rect = el.getBoundingClientRect();
-      if(rect.top > vh * 0.5){
-        el.style.opacity = '0';
-      }
-    }
-  }, 100);
-  
-  window.addEventListener('scroll', onScroll, {passive: true});
-})();`;
-
-const AUTO_MUTE_RUNTIME = `
+})();</script>
+    <script>
 (function(){
   var videos = document.querySelectorAll('video');
   if (!videos.length) return;
@@ -1326,147 +1235,23 @@ const AUTO_MUTE_RUNTIME = `
   }, { threshold: 0.1 });
   
   videos.forEach(function(v) { observer.observe(v); });
-})();`;
-
-/* ---------- FULL HTML for PREVIEW IFRAME ---------- */
-function buildFullHtmlPage(bodyContent) {
-  // Use origin as base URL so relative paths resolve correctly in iframe
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin + '/' : '/';
-  return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <base href="${baseUrl}">
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Preview</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-    <style>${BASE_CSS}</style>
-  </head>
-  <body>
-    ${bodyContent}
-    <script>${STICKY_RUNTIME}<\/script>
-    <script>${ZOOM_RUNTIME}<\/script>
-    <script>${SPLIT_PANEL_RUNTIME}<\/script>
-    <script>${SPLIT_MOBILE_RUNTIME}<\/script>
-    <script>${AUTO_MUTE_RUNTIME}<\/script>
-  </body>
-</html>`;
-}
-
-/* ---------- Public API ---------- */
-export function renderPreview({ state, mount, mode = 'iframe', selectedBlockIndex = null }) {
-  if (mode === 'iframe') {
-    const parts = buildBlocksWithFadePairs({ state, isPreview: true });
-    const previewHtml = buildFullHtmlPage(parts.join('\n'));
-
-    mount.style.transform = 'none';
-    mount.style.width = '100%';
-    mount.style.height = '100%';
-
-    mount.innerHTML = '<iframe style="width:100%;height:100%;border:none;"></iframe>';
-    const iframe = mount.querySelector('iframe');
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(previewHtml);
-    iframe.contentDocument.close();
-
-    iframe.addEventListener('load', () => {
-      setTimeout(() => {
-        initFadeRuntime(iframe.contentDocument);
-        // Scroll to and highlight selected block
-        if (selectedBlockIndex !== null) {
-          scrollToBlock(iframe.contentDocument, selectedBlockIndex);
-        }
-      }, 150);
-    });
-  } else {
-    const parts = buildBlocksWithFadePairs({ state, isPreview: true });
-    mount.innerHTML = parts.join('\n');
-
-    initZoomRuntime(mount);
-    initFadeRuntime(mount);
-    hydrateInlineScripts(mount);
-    initStickyReveal(mount);
-
-    // Scroll to and highlight selected block
-    if (selectedBlockIndex !== null) {
-      setTimeout(() => scrollToBlock(mount, selectedBlockIndex), 100);
-    }
-  }
-}
-
-function scrollToBlock(container, index) {
-  const block = container.querySelector(`[data-block-index="${index}"]`);
-  if (!block) return;
-
-  // Scroll to block
-  block.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  // Add highlight effect
-  block.style.outline = '3px solid #3b82f6';
-  block.style.outlineOffset = '2px';
-  block.style.transition = 'outline-color 0.3s ease';
-
-  // Fade out highlight after 1.5 seconds
-  setTimeout(() => {
-    block.style.outlineColor = 'transparent';
-    // Clean up styles after transition
-    setTimeout(() => {
-      block.style.outline = '';
-      block.style.outlineOffset = '';
-      block.style.transition = '';
-    }, 300);
-  }, 1500);
-}
-
-export function buildExportHtml({ state }) {
-  function calculateReadTime(state) {
-    let totalText = '';
-    (state.blocks || []).forEach(b => {
-      if (b.bodyText) totalText += b.bodyText;
-      if (b.text) totalText += b.text;
-      if (b.headline) totalText += b.headline;
-      if (b.subhead) totalText += b.subhead;
-      if (b.panels) {
-        b.panels.forEach(p => {
-          if (p.text) totalText += p.text;
-          if (p.headline) totalText += p.headline;
-        });
-      }
-    });
-    const wordCount = totalText.split(/\s+/).filter(w => w.length > 0).length;
-    return Math.max(1, Math.ceil(wordCount / 200));
-  }
-  
-  const readTime = calculateReadTime(state);
-  
-  (state.blocks || []).forEach(b => {
-    if (b.showByline) {
-      b.readTime = readTime;
-    }
-  });
-  
-  const parts = [];
-  const blocks = state.blocks || [];
-  blocks.forEach((b, index) => {
-    const mod = BLOCKS[b.type];
-    if (!mod?.exportHTML) return;
-    // Wrap block with tracking attributes including expected time
-    const blockHtml = mod.exportHTML({ block: b, blocks });
-    const expectedTime = getEffectiveExpectedTime(b);
-    const standardizedTime = calculateExpectedTime(b);
-    parts.push(`<div data-sb-block="${index}" data-sb-type="${b.type}" data-sb-expected="${expectedTime}" data-sb-expected-std="${standardizedTime}">${blockHtml}</div>`);
-  });
-  const body = parts.join('\n');
-
-  // Generate analytics runtime if configured
-  let analyticsScript = '';
-  if (state.analyticsConfig?.supabaseUrl && state.analyticsConfig?.storyId) {
-    analyticsScript = `
+})();</script>
+    <script>
+window.addEventListener('scroll', function() {
+  var h = document.documentElement;
+  var b = document.body;
+  var st = 'scrollTop';
+  var sh = 'scrollHeight';
+  var percent = (h[st]||b[st]) / ((h[sh]||b[sh]) - h.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = percent + '%';
+}, {passive: true});
+</script>
+    
 <script>
 (function() {
-  const SUPABASE_URL = '${state.analyticsConfig.supabaseUrl}';
-  const SUPABASE_ANON_KEY = '${state.analyticsConfig.supabaseAnonKey}';
-  const STORY_ID = '${state.analyticsConfig.storyId}';
+  const SUPABASE_URL = 'https://bobrvqpasntigqcrerqa.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_buetBM4cFeIFRRFbOURKcA_9Ewwoa8J';
+  const STORY_ID = '77ed37fb-a2a7-4aee-903c-d2a46eb20847';
   const SESSION_ID = 'ses_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
   const blockTimes = new Map();
   let maxScrollDepth = 0;
@@ -1584,47 +1369,6 @@ export function buildExportHtml({ state }) {
   window.addEventListener('beforeunload', sendEngagement);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sendEngagement(); });
 })();
-<\/script>`;
-  }
-
-  const needsZoom  = /class="[^"]*\bsb-zoomsec\b/.test(body);
-  const needsSplit = /class="[^"]*\bsplit-panel-wrapper\b/.test(body) || /class="[^"]*\bsplit-mobile-wrapper\b/.test(body);
-
-  const doctype = '<!DOCTYPE html>';
-  return `${doctype}
-<html lang="en">
-  <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${state.pageTitle || state.project || 'Story Export'}</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
-  <meta property="og:title" content="${state.pageTitle || state.project || 'Story'}">
-  <meta property="og:description" content="A multimedia story by Marcus Chan">
-  <meta property="og:type" content="article">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="author" content="Marcus Chan">
-  <meta name="reading-time" content="${readTime} min read">
-    <script src="https://cdn.tailwindcss.com"><\/script>
-    <style>${BASE_CSS}</style>
-  </head>
-  <body>
-    <div id="progress-bar" style="position:fixed;top:0;left:0;height:3px;background:#fbbf24;width:0%;z-index:9999;transition:width 0.1s;"></div>
-    ${body}
-    <script>${BOOT_FADE}<\/script>
-    ${needsZoom  ? `<script>${ZOOM_RUNTIME}<\/script>`  : ''}
-    ${needsSplit ? `<script>${SPLIT_PANEL_RUNTIME}<\/script><script>${SPLIT_MOBILE_RUNTIME}<\/script>` : ''}
-    <script>${AUTO_MUTE_RUNTIME}<\/script>
-    <script>
-window.addEventListener('scroll', function() {
-  var h = document.documentElement;
-  var b = document.body;
-  var st = 'scrollTop';
-  var sh = 'scrollHeight';
-  var percent = (h[st]||b[st]) / ((h[sh]||b[sh]) - h.clientHeight) * 100;
-  document.getElementById('progress-bar').style.width = percent + '%';
-}, {passive: true});
-<\/script>
-    ${analyticsScript}
+</script>
   </body>
-</html>`;
-}
+</html>

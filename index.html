@@ -7,7 +7,7 @@
     <title>StoryBuilder (Modular)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/storybuilder.css" />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -1043,6 +1043,61 @@ function renderEditor() {
 
                         // Set the value explicitly to true/false
                         block._inheritPullQuoteStyle = e.target.checked;
+                    });
+                }
+
+                // Handle line style master checkbox
+                if (inp.classList.contains('line-style-master')) {
+                    inp.addEventListener('change', (e) => {
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.line-style-fields') : els.editorPanel.querySelector('.line-style-fields');
+                        const inheritCheckbox = container ? container.querySelector('.line-style-inherit') : els.editorPanel.querySelector('.line-style-inherit');
+
+                        if (e.target.checked) {
+                            // Uncheck all other blocks' master checkbox (data)
+                            state.blocks.forEach((b, idx) => {
+                                if (idx !== state.selectedBlockIndex) {
+                                    b._isLineStyleMaster = false;
+                                }
+                            });
+                            // Uncheck all other master checkboxes in DOM
+                            els.editorPanel.querySelectorAll('.line-style-master').forEach(cb => {
+                                if (cb !== e.target) {
+                                    cb.checked = false;
+                                }
+                            });
+                            // Set this block as master
+                            block._isLineStyleMaster = true;
+                            // Master always has active fields
+                            if (fieldsDiv) fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                        } else {
+                            block._isLineStyleMaster = false;
+                            // If inherit is checked, dim the fields
+                            if (inheritCheckbox && inheritCheckbox.checked && fieldsDiv) {
+                                fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                            }
+                        }
+                    });
+                }
+
+                // Handle line style inherit checkbox
+                if (inp.classList.contains('line-style-inherit')) {
+                    inp.addEventListener('change', (e) => {
+                        const container = e.target.closest('.collapsible-content');
+                        const fieldsDiv = container ? container.querySelector('.line-style-fields') : els.editorPanel.querySelector('.line-style-fields');
+                        const masterCheckbox = container ? container.querySelector('.line-style-master') : els.editorPanel.querySelector('.line-style-master');
+                        const isMaster = masterCheckbox && masterCheckbox.checked;
+
+                        if (e.target.checked && !isMaster) {
+                            // Inheriting and not master - dim the fields
+                            if (fieldsDiv) fieldsDiv.classList.add('opacity-50', 'pointer-events-none');
+                        } else {
+                            // Not inheriting or is master - show fields
+                            if (fieldsDiv) fieldsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                        }
+
+                        // Set the value explicitly to true/false
+                        block._inheritLineStyle = e.target.checked;
                     });
                 }
             });

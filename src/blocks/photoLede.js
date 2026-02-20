@@ -1,4 +1,4 @@
-import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml, getLinkStyles, bodyFonts, fontSelectHtml, globalBodyStyle, getEffectivePullQuoteStyle } from '../utils.js';
+import { resolvePreviewPath, resolveExportPath, processBodyText, textToolbarHtml, getLinkStyles, bodyFonts, fontSelectHtml, globalBodyStyle, getEffectivePullQuoteStyle, getEffectiveLineStyle, styleInheritControls } from '../utils.js';
 
 export const PhotoLedeBlock = {
   type: 'photo-lede',
@@ -17,6 +17,16 @@ export const PhotoLedeBlock = {
       image: '',
       video: '',
       imageWidth: 'medium', // 'narrow' | 'medium' | 'wide' | 'full'
+
+      // Line dividers (above/below image)
+      lineStyle: {
+        showTop: false,
+        showBottom: false,
+        color: '#fbbf24',
+        thickness: '2', // '1' = hairline, '2' = thin, '3' = medium, '4' = thick
+        spacingTop: '0', // '0' = none, '15' = tight, '30' = medium, '50' = spacious
+        spacingBottom: '0'
+      },
 
       // Photo caption
       caption: '',
@@ -197,6 +207,64 @@ export const PhotoLedeBlock = {
                   fontSelectHtml(getStyle(captionStyle, 'font', 'IBM Plex Sans, sans-serif')) +
                 '</select>' +
               '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    // SECTION: Line Dividers
+    const lineStyle = b.lineStyle || {};
+    const thicknessOpts = [
+      { value: '1', label: 'Hairline (1px)' },
+      { value: '2', label: 'Thin (2px)' },
+      { value: '3', label: 'Medium (3px)' },
+      { value: '4', label: 'Thick (4px)' }
+    ];
+    const spacingOpts = [
+      { value: '0', label: 'None (0px)' },
+      { value: '15', label: 'Tight (15px)' },
+      { value: '30', label: 'Medium (30px)' },
+      { value: '50', label: 'Spacious (50px)' }
+    ];
+    const lineDividersContent =
+      '<div class="p-2 border rounded bg-slate-50 mb-3">' +
+        '<div class="text-xs font-semibold mb-2">Style</div>' +
+        styleInheritControls(b, '_isLineStyleMaster', '_inheritLineStyle', false, 'line') +
+        '<div class="line-style-fields' + (b._inheritLineStyle === true && !b._isLineStyleMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
+          '<div class="grid grid-cols-2 gap-3 mb-3">' +
+            '<label class="flex items-center gap-2">' +
+              '<input type="checkbox" data-k="lineStyle.showTop" ' + (lineStyle.showTop ? 'checked' : '') + '>' +
+              '<span class="text-sm">Line above image</span>' +
+            '</label>' +
+            '<label class="flex items-center gap-2">' +
+              '<input type="checkbox" data-k="lineStyle.showBottom" ' + (lineStyle.showBottom ? 'checked' : '') + '>' +
+              '<span class="text-sm">Line below image</span>' +
+            '</label>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3 mb-3">' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Line Color</label>' +
+              '<input type="color" data-k="lineStyle.color" value="' + (lineStyle.color || '#fbbf24') + '" class="w-full h-8 border rounded">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Line Thickness</label>' +
+              '<select data-k="lineStyle.thickness" class="w-full border rounded px-2 py-1 text-sm">' +
+                thicknessOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.thickness || '2') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Spacing Above Line</label>' +
+              '<select data-k="lineStyle.spacingTop" class="w-full border rounded px-2 py-1 text-sm">' +
+                spacingOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.spacingTop || '0') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Spacing Below Line</label>' +
+              '<select data-k="lineStyle.spacingBottom" class="w-full border rounded px-2 py-1 text-sm">' +
+                spacingOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.spacingBottom || '0') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -529,6 +597,7 @@ export const PhotoLedeBlock = {
       section('📄 Body Text', bodyTextContent, true) +
       section('👤 Byline', bylineContent, true) +
       section('🔤 Drop Cap & First Line', dropCapContent, true) +
+      section('➖ Line Dividers', lineDividersContent, true) +
       section('🖼️ Media', mediaContent, true) +
       section('💬 Pull Quote', pullQuoteContent, true) +
       section('📰 Subhead', subheadContent, true);
@@ -611,6 +680,21 @@ export const PhotoLedeBlock = {
 
     const textStyle = buildStyle(effectiveTextStyle, { color: '#e5e5e5', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.7' });
 
+    // Get effective line style
+    const effectiveLineStyle = getEffectiveLineStyle(b, blocks);
+    const lineColor = effectiveLineStyle.color || '#fbbf24';
+    const lineThickness = effectiveLineStyle.thickness || '2';
+    const lineSpacingTop = effectiveLineStyle.spacingTop || '0';
+    const lineSpacingBottom = effectiveLineStyle.spacingBottom || '0';
+
+    // Build line HTML (full viewport width) using fullbleed technique
+    const lineTopHtml = effectiveLineStyle.showTop
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-bottom:' + lineSpacingTop + 'px;"></div>'
+      : '';
+    const lineBottomHtml = effectiveLineStyle.showBottom
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-top:' + lineSpacingBottom + 'px;"></div>'
+      : '';
+
     // Build photo section (only if enabled)
     let photoHtml = '';
     if (b.showMedia !== false && (b.image || b.video)) {
@@ -618,12 +702,12 @@ export const PhotoLedeBlock = {
         ? '<video autoplay muted loop playsinline src="' + resolvePreviewPath(b.video, project) + '" class="w-full"></video>'
         : '<img src="' + resolvePreviewPath(b.image, project) + '" class="w-full" alt="">';
 
-      photoHtml = '<div class="photo-lede-photo" data-desktop-width="' + imgWidthClass + '">' +
+      photoHtml = lineTopHtml + '<div class="photo-lede-photo" data-desktop-width="' + imgWidthClass + '">' +
         mediaEl +
         '<div class="photo-lede-caption">' +
           (b.caption ? '<p style="' + captionStyle + 'margin:0;">' + (b.caption || '') + '</p>' : '') +
         '</div>' +
-      '</div>';
+      '</div>' + lineBottomHtml;
     }
 
     // Build pull quote HTML
@@ -733,7 +817,7 @@ export const PhotoLedeBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="background-color:' + bgColor + ';"' + fadeAttr + '>' +
+    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="background-color:' + bgColor + ';overflow:visible;"' + fadeAttr + '>' +
       photoHtml + textHtml + '</section>';
   },
 
@@ -814,6 +898,21 @@ export const PhotoLedeBlock = {
 
     const textStyle = buildStyle(effectiveTextStyle, { color: '#e5e5e5', size: '18', font: 'IBM Plex Sans, sans-serif', weight: 'normal', leading: '1.7' });
 
+    // Get effective line style
+    const effectiveLineStyle = getEffectiveLineStyle(b, blocks);
+    const lineColor = effectiveLineStyle.color || '#fbbf24';
+    const lineThickness = effectiveLineStyle.thickness || '2';
+    const lineSpacingTop = effectiveLineStyle.spacingTop || '0';
+    const lineSpacingBottom = effectiveLineStyle.spacingBottom || '0';
+
+    // Build line HTML (full viewport width) using fullbleed technique
+    const lineTopHtml = effectiveLineStyle.showTop
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-bottom:' + lineSpacingTop + 'px;"></div>'
+      : '';
+    const lineBottomHtml = effectiveLineStyle.showBottom
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-top:' + lineSpacingBottom + 'px;"></div>'
+      : '';
+
     // Build photo section (only if enabled)
     let photoHtml = '';
     if (b.showMedia !== false && (b.image || b.video)) {
@@ -821,12 +920,12 @@ export const PhotoLedeBlock = {
         ? '<video autoplay muted loop playsinline src="' + resolveExportPath(b.video) + '" class="w-full"></video>'
         : '<img src="' + resolveExportPath(b.image) + '" class="w-full" alt="">';
 
-      photoHtml = '<div class="photo-lede-photo" data-desktop-width="' + imgWidthClass + '">' +
+      photoHtml = lineTopHtml + '<div class="photo-lede-photo" data-desktop-width="' + imgWidthClass + '">' +
         mediaEl +
         '<div class="photo-lede-caption">' +
           (b.caption ? '<p style="' + captionStyle + 'margin:0;">' + String(b.caption || '') + '</p>' : '') +
         '</div>' +
-      '</div>';
+      '</div>' + lineBottomHtml;
     }
 
     // Build pull quote HTML
@@ -937,7 +1036,7 @@ export const PhotoLedeBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="position:relative;z-index:3;background-color:' + bgColor + ';"' + fadeAttr + '>' +
+    return styleTag + '<section class="photo-lede-section ' + pt + ' ' + pb + ' px-6" style="position:relative;z-index:3;background-color:' + bgColor + ';overflow:visible;"' + fadeAttr + '>' +
       '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:' + bgColor + ';z-index:0;"></div>' +
       '<div style="position:relative;z-index:1;">' + photoHtml + textHtml + '</div>' +
     '</section>';
@@ -962,6 +1061,18 @@ export const PhotoLedeBlock = {
           leading: '1.8',
           bgColor: '#3d3314',
           borderColor: '#fbbf24'
+        };
+      }
+
+      // When setting as line style master, ensure lineStyle exists with defaults
+      if (key === '_isLineStyleMaster' && value && !block.lineStyle) {
+        block.lineStyle = {
+          showTop: false,
+          showBottom: false,
+          color: '#fbbf24',
+          thickness: '2',
+          spacingTop: '0',
+          spacingBottom: '0'
         };
       }
     }

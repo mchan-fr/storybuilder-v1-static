@@ -22,6 +22,7 @@ import {
   getEffectiveBgColor,
   getEffectiveDropCapSettings,
   getEffectivePullQuoteStyle,
+  getEffectiveLineStyle,
   dropCapCss,
   generateBlockId
 } from '../utils.js';
@@ -45,7 +46,17 @@ export const PhotoLedeSideBlock = {
       sideVideo: '',
       sideImagePosition: 'left', // 'left' | 'right'
       sideImageWidth: '40', // '30' | '40' | '50' | '60'
-      
+
+      // Line dividers (above/below image)
+      lineStyle: {
+        showTop: false,
+        showBottom: false,
+        color: '#fbbf24',
+        thickness: '2', // '1' = hairline, '2' = thin, '3' = medium, '4' = thick
+        spacingTop: '0', // '0' = none, '15' = tight, '30' = medium, '50' = spacious
+        spacingBottom: '0'
+      },
+
       // Byline (optional, appears before body text)
       showByline: false,
       showReadTime: true, // Show reading time in byline (auto-calculated on export)
@@ -412,12 +423,71 @@ export const PhotoLedeSideBlock = {
         '<p class="text-xs text-slate-500 mt-1">Override for analytics. Leave empty for auto.</p>' +
       '</div>';
 
+    // SECTION: Line Dividers
+    const lineStyle = b.lineStyle || {};
+    const thicknessOpts = [
+      { value: '1', label: 'Hairline (1px)' },
+      { value: '2', label: 'Thin (2px)' },
+      { value: '3', label: 'Medium (3px)' },
+      { value: '4', label: 'Thick (4px)' }
+    ];
+    const spacingOpts = [
+      { value: '0', label: 'None (0px)' },
+      { value: '15', label: 'Tight (15px)' },
+      { value: '30', label: 'Medium (30px)' },
+      { value: '50', label: 'Spacious (50px)' }
+    ];
+    const lineDividersContent =
+      '<div class="p-2 border rounded bg-slate-50 mb-3">' +
+        '<div class="text-xs font-semibold mb-2">Style</div>' +
+        styleInheritControls(b, '_isLineStyleMaster', '_inheritLineStyle', false, 'line') +
+        '<div class="line-style-fields' + (b._inheritLineStyle === true && !b._isLineStyleMaster ? ' opacity-50 pointer-events-none' : '') + '">' +
+          '<div class="grid grid-cols-2 gap-3 mb-3">' +
+            '<label class="flex items-center gap-2">' +
+              '<input type="checkbox" data-k="lineStyle.showTop" ' + (lineStyle.showTop ? 'checked' : '') + '>' +
+              '<span class="text-sm">Line above image</span>' +
+            '</label>' +
+            '<label class="flex items-center gap-2">' +
+              '<input type="checkbox" data-k="lineStyle.showBottom" ' + (lineStyle.showBottom ? 'checked' : '') + '>' +
+              '<span class="text-sm">Line below image</span>' +
+            '</label>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3 mb-3">' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Line Color</label>' +
+              '<input type="color" data-k="lineStyle.color" value="' + (lineStyle.color || '#fbbf24') + '" class="w-full h-8 border rounded">' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Line Thickness</label>' +
+              '<select data-k="lineStyle.thickness" class="w-full border rounded px-2 py-1 text-sm">' +
+                thicknessOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.thickness || '2') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-3">' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Spacing Above Line</label>' +
+              '<select data-k="lineStyle.spacingTop" class="w-full border rounded px-2 py-1 text-sm">' +
+                spacingOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.spacingTop || '0') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-xs mb-1">Spacing Below Line</label>' +
+              '<select data-k="lineStyle.spacingBottom" class="w-full border rounded px-2 py-1 text-sm">' +
+                spacingOpts.map(o => '<option value="' + o.value + '" ' + ((lineStyle.spacingBottom || '0') === o.value ? 'selected' : '') + '>' + o.label + '</option>').join('') +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
     // Assemble all sections (alphabetical order, all collapsed)
     return labelFieldHtml(b.label, 'e.g., Opening scene...') +
       collapsibleSection('⚙️ Block Settings', blockSettingsContent, true) +
       collapsibleSection('📄 Body Text', bodyTextContent, true) +
       collapsibleSection('👤 Byline', bylineContent, true) +
       collapsibleSection('🔤 Drop Cap & First Line', dropCapContent, true) +
+      collapsibleSection('➖ Line Dividers', lineDividersContent, true) +
       collapsibleSection('🖼️ Media', mediaContent, true) +
       collapsibleSection('💬 Pull Quote', pullQuoteContent, true) +
       collapsibleSection('📰 Subhead', subheadContent, true);
@@ -550,16 +620,31 @@ export const PhotoLedeSideBlock = {
     // Text width class
     const textWidthClass = textWidthClassMap[b.textWidth || 'medium'];
 
+    // Get effective line style
+    const effectiveLineStyle = getEffectiveLineStyle(b, blocks);
+    const lineColor = effectiveLineStyle.color || '#fbbf24';
+    const lineThickness = effectiveLineStyle.thickness || '2';
+    const lineSpacingTop = effectiveLineStyle.spacingTop || '0';
+    const lineSpacingBottom = effectiveLineStyle.spacingBottom || '0';
+
+    // Build line HTML (full viewport width) using fullbleed technique
+    const lineTopHtml = effectiveLineStyle.showTop
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-bottom:' + lineSpacingTop + 'px;"></div>'
+      : '';
+    const lineBottomHtml = effectiveLineStyle.showBottom
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-top:' + lineSpacingBottom + 'px;"></div>'
+      : '';
+
     // Build side image and text
     const imgWidth = b.sideImageWidth || '40';
     const textWidth = 100 - parseInt(imgWidth);
-    
-    const mediaHtml = (b.sideVideo && b.sideVideo.trim()) 
+
+    const mediaHtml = (b.sideVideo && b.sideVideo.trim())
       ? '<video autoplay muted loop playsinline src="' + resolvePreviewPath(b.sideVideo, project) + '" class="pls-media"></video>'
       : '<img src="' + resolvePreviewPath(b.sideImage, project) + '" class="pls-media" alt="">';
-    
+
     const imageHtml = '<div class="pls-image" style="width:' + imgWidth + '%;">' + mediaHtml + '</div>';
-    const textHtml = '<div class="pls-text" style="width:' + textWidth + '%;padding-left:' + (b.sideImagePosition === 'left' ? '40px' : '0') + ';padding-right:' + (b.sideImagePosition === 'right' ? '40px' : '0') + ';"><div class="' + textWidthClass + ' mx-auto">' + textContentHtml + '</div></div>';
+    const textHtml = '<div class="pls-text" style="width:' + textWidth + '%;padding-left:' + (b.sideImagePosition === 'left' ? '40px' : '1.5rem') + ';padding-right:' + (b.sideImagePosition === 'right' ? '40px' : '1.5rem') + ';"><div class="' + textWidthClass + ' mx-auto">' + textContentHtml + '</div></div>';
 
     // Desktop layout (respects position setting)
     const desktopContent = '<div class="pls-desktop">' +
@@ -580,7 +665,8 @@ export const PhotoLedeSideBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="background-color:' + bgColor + ';"' + fadeAttr + '>' + desktopContent + mobileContent + '</section>';
+    // Lines are direct children of section for proper full-viewport width
+    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="background-color:' + bgColor + ';overflow:visible;"' + fadeAttr + '>' + lineTopHtml + desktopContent + mobileContent + lineBottomHtml + '</section>';
   },
 
   exportHTML({ block, blocks = [] }) {
@@ -711,10 +797,25 @@ export const PhotoLedeSideBlock = {
     // Text width class
     const textWidthClass = textWidthClassMap[b.textWidth || 'medium'];
 
+    // Get effective line style
+    const effectiveLineStyle = getEffectiveLineStyle(b, blocks);
+    const lineColor = effectiveLineStyle.color || '#fbbf24';
+    const lineThickness = effectiveLineStyle.thickness || '2';
+    const lineSpacingTop = effectiveLineStyle.spacingTop || '0';
+    const lineSpacingBottom = effectiveLineStyle.spacingBottom || '0';
+
+    // Build line HTML (full viewport width) using fullbleed technique
+    const lineTopHtml = effectiveLineStyle.showTop
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-bottom:' + lineSpacingTop + 'px;"></div>'
+      : '';
+    const lineBottomHtml = effectiveLineStyle.showBottom
+      ? '<div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:' + lineThickness + 'px;background-color:' + lineColor + ';margin-top:' + lineSpacingBottom + 'px;"></div>'
+      : '';
+
     // Build side image and text
     const imgWidth = b.sideImageWidth || '40';
     const textWidth = 100 - parseInt(imgWidth);
-    
+
     let mediaHtml;
     if (b.sideVideo && b.sideVideo.trim()) {
       const videoId = 'pls-video-' + Math.random().toString(36).substr(2, 9);
@@ -725,15 +826,15 @@ export const PhotoLedeSideBlock = {
     } else {
       mediaHtml = '<img src="' + resolveExportPath(b.sideImage) + '" class="pls-media" alt="">';
     }
-    
+
     const imageHtml = '<div class="pls-image" style="width:' + imgWidth + '%;">' + mediaHtml + '</div>';
-    const textHtml = '<div class="pls-text" style="width:' + textWidth + '%;padding-left:' + (b.sideImagePosition === 'left' ? '40px' : '0') + ';padding-right:' + (b.sideImagePosition === 'right' ? '40px' : '0') + ';"><div class="' + textWidthClass + ' mx-auto">' + textContentHtml + '</div></div>';
+    const textHtml = '<div class="pls-text" style="width:' + textWidth + '%;padding-left:' + (b.sideImagePosition === 'left' ? '40px' : '1.5rem') + ';padding-right:' + (b.sideImagePosition === 'right' ? '40px' : '1.5rem') + ';"><div class="' + textWidthClass + ' mx-auto">' + textContentHtml + '</div></div>';
 
     // Desktop layout (respects position setting)
-    const desktopContent = '<div class="pls-desktop">' + 
+    const desktopContent = '<div class="pls-desktop">' +
       (b.sideImagePosition === 'left' ? imageHtml + textHtml : textHtml + imageHtml) +
     '</div>';
-    
+
     // Mobile layout (image always on top, with optional overlays)
     // Include mute button for video on mobile
     let mobileMediaHtml;
@@ -745,7 +846,7 @@ export const PhotoLedeSideBlock = {
     } else {
       mobileMediaHtml = '<img src="' + resolveExportPath(b.sideImage) + '" class="pls-media" alt="">';
     }
-    
+
     const overlayHtml = subheadOverlayHtml + bylineOverlayHtml;
     const mobileImageHtml = '<div class="pls-mobile-image">' + mobileMediaHtml + overlayHtml + '</div>';
     const mobileTextHtml = '<div class="pls-mobile-text"><div class="' + textWidthClass + '">' + mobileTextContentHtml + '</div></div>';
@@ -759,9 +860,10 @@ export const PhotoLedeSideBlock = {
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
 
-    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="position:relative;z-index:3;background-color:' + bgColor + ';"' + fadeAttr + '>' +
+    // Lines are direct children of the inner wrapper for proper full-viewport width
+    return styleTag + '<section class="pls-section ' + pt + ' ' + pb + '" style="position:relative;z-index:3;background-color:' + bgColor + ';overflow:visible;"' + fadeAttr + '>' +
       '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:' + bgColor + ';z-index:0;"></div>' +
-      '<div style="position:relative;z-index:1;">' + desktopContent + mobileContent + '</div>' +
+      '<div style="position:relative;z-index:1;">' + lineTopHtml + desktopContent + mobileContent + lineBottomHtml + '</div>' +
     '</section>';
   },
 
@@ -784,6 +886,18 @@ export const PhotoLedeSideBlock = {
           leading: '1.8',
           bgColor: '#3d3314',
           borderColor: '#fbbf24'
+        };
+      }
+
+      // When setting as line style master, ensure lineStyle exists with defaults
+      if (key === '_isLineStyleMaster' && value && !block.lineStyle) {
+        block.lineStyle = {
+          showTop: false,
+          showBottom: false,
+          color: '#fbbf24',
+          thickness: '2',
+          spacingTop: '0',
+          spacingBottom: '0'
         };
       }
     }

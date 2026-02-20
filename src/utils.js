@@ -45,6 +45,7 @@ export const bodyFonts = [
   { value: 'Lora, serif', label: 'Lora', desc: 'Polished storytelling serif' },
   { value: 'Merriweather, serif', label: 'Merriweather', desc: 'Serious long-form serif' },
   { value: 'Montserrat, sans-serif', label: 'Montserrat', desc: 'Headline / branding voice' },
+  { value: 'Newsreader, serif', label: 'Newsreader', desc: 'Editorial / magazine feel' },
   { value: 'system-ui', label: 'system-ui', desc: 'Platform-native feel' },
   { value: 'Times New Roman, serif', label: 'Times New Roman', desc: 'Formal document voice' }
 ];
@@ -665,6 +666,45 @@ export function getEffectiveBgColor(block, blocks, defaultColor = '#000000') {
     }
   }
   return block.bgColor || defaultColor;
+}
+
+/**
+ * Default line style settings
+ */
+const LINE_STYLE_DEFAULTS = {
+  showTop: false,
+  showBottom: false,
+  color: '#fbbf24',
+  thickness: '2',
+  spacingTop: '0',
+  spacingBottom: '0'
+};
+
+/**
+ * Get effective line style from block or master block
+ * Note: Only color and thickness are inherited from master.
+ * showTop, showBottom, spacingTop, spacingBottom remain local to each block.
+ */
+export function getEffectiveLineStyle(block, blocks) {
+  const shouldInherit = block._inheritLineStyle === true || block._inheritLineStyle === 'true';
+  const localStyle = block.lineStyle || {};
+
+  if (shouldInherit && blocks && blocks.length > 0) {
+    const masterBlock = blocks.find(blk => (blk._isLineStyleMaster === true || blk._isLineStyleMaster === 'true' || blk._isLineStyleMaster) && blk !== block);
+
+    if (masterBlock && masterBlock.lineStyle) {
+      // Only inherit color and thickness from master
+      // Keep showTop, showBottom, spacingTop, spacingBottom local to each block
+      return {
+        ...LINE_STYLE_DEFAULTS,
+        ...localStyle,
+        color: masterBlock.lineStyle.color || LINE_STYLE_DEFAULTS.color,
+        thickness: masterBlock.lineStyle.thickness || LINE_STYLE_DEFAULTS.thickness
+      };
+    }
+  }
+
+  return { ...LINE_STYLE_DEFAULTS, ...localStyle };
 }
 
 /**

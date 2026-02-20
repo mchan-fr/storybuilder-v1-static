@@ -660,12 +660,18 @@ export const SplitPanelBlock = {
       let textContent = subheadHtml;
       if (pos === 'top') {
         textContent += inlineImageHtml;
-      }
-      textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
-      if (pos === 'bottom') {
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
+      } else if (pos === 'bottom') {
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
         textContent += inlineImageHtml;
-      } else if (pos === 'middle') {
-        // Already handled above in position logic
+      } else {
+        // middle - insert after first half of paragraphs
+        const midPoint = Math.ceil(bodyParts.length / 2);
+        const firstHalf = bodyParts.slice(0, midPoint).join('');
+        const secondHalf = bodyParts.slice(midPoint).join('');
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + firstHalf + '</div>';
+        textContent += inlineImageHtml;
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + secondHalf + '</div>';
       }
 
       const textWidthClass = textWidthClassMap[panel.textWidth || 'medium'];
@@ -906,10 +912,18 @@ export const SplitPanelBlock = {
       let textContent = subheadHtml;
       if (pos === 'top') {
         textContent += inlineImageHtml;
-      }
-      textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
-      if (pos === 'bottom') {
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
+      } else if (pos === 'bottom') {
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + bodyParts.join('') + '</div>';
         textContent += inlineImageHtml;
+      } else {
+        // middle - insert after first half of paragraphs
+        const midPoint = Math.ceil(bodyParts.length / 2);
+        const firstHalf = bodyParts.slice(0, midPoint).join('');
+        const secondHalf = bodyParts.slice(midPoint).join('');
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + firstHalf + '</div>';
+        textContent += inlineImageHtml;
+        textContent += '<div class="leading-relaxed" style="' + textStyleStr + '">' + secondHalf + '</div>';
       }
 
       return textContent;
