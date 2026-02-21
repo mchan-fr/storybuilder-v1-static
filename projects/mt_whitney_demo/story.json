@@ -1,0 +1,201 @@
+{
+  "project": "mt_whitney_demo",
+  "pageTitle": "Hiking Mt. Whitney (Demo)",
+  "blocks": [
+    {
+      "type": "hero",
+      "image": "projects/mt_whitney_demo/media/09_first_sight.jpeg",
+      "video": "",
+      "overlayDarken": 30,
+      "headline": "Hiking Mt. Whitney",
+      "headlineStyle": {
+        "size": "72",
+        "weight": "bold",
+        "italic": false,
+        "color": "#ffffff",
+        "font": "Newsreader"
+      },
+      "deck": "The highest peak in the contiguous United States",
+      "deckStyle": {
+        "size": "24",
+        "weight": "normal",
+        "italic": true,
+        "color": "#e5e7eb",
+        "font": "Newsreader"
+      },
+      "positionH": "center",
+      "positionV": "end",
+      "textAlign": "center"
+    },
+    {
+      "type": "text",
+      "text": "At 14,505 feet, Mount Whitney stands as the highest summit in the contiguous United States. Located in California's Sierra Nevada range, it draws thousands of hikers each year who seek to stand atop its granite peak.\n\nThis demo story showcases the different block types available in StoryBuilder. Each section demonstrates a different layout option you can use in your own stories.",
+      "textStyle": {
+        "size": "20",
+        "weight": "normal",
+        "italic": false,
+        "color": "#374151",
+        "font": "Newsreader",
+        "leading": "1.8"
+      },
+      "backgroundColor": "#ffffff",
+      "contentWidth": "medium",
+      "paddingTop": "large",
+      "paddingBottom": "medium"
+    },
+    {
+      "type": "full-bleed",
+      "image": "projects/mt_whitney_demo/media/10_above_clouds.jpeg",
+      "video": "",
+      "caption": "Looking down at the clouds from the Whitney Trail",
+      "captionStyle": {
+        "size": "14",
+        "weight": "normal",
+        "italic": true,
+        "color": "#9ca3af"
+      },
+      "captionPosition": "below",
+      "height": "tall"
+    },
+    {
+      "type": "split-layout",
+      "image": "projects/mt_whitney_demo/media/11_Whitney_Griffin_hiking.jpeg",
+      "video": "",
+      "imageSide": "right",
+      "textPanelWidth": "40",
+      "textPanelColor": "#1e3a5f",
+      "contentWidth": "medium",
+      "positionVertical": "center",
+      "headline": "The Long Climb",
+      "headlineStyle": {
+        "size": "42",
+        "weight": "bold",
+        "italic": false,
+        "color": "#ffffff",
+        "font": "Newsreader",
+        "leading": "1.2"
+      },
+      "text": "The most popular route, the Whitney Trail from Whitney Portal, covers 22 miles round-trip with over 6,100 feet of elevation gain. Most hikers complete it in a single long day, starting well before dawn.",
+      "textStyle": {
+        "size": "18",
+        "weight": "normal",
+        "italic": false,
+        "color": "#e5e7eb",
+        "font": "system-ui",
+        "leading": "1.7"
+      }
+    },
+    {
+      "type": "gallery",
+      "slotCount": 2,
+      "template": "two-equal",
+      "media": [
+        {
+          "src": "projects/mt_whitney_demo/media/14_switchbacks02.jpeg",
+          "type": "image",
+          "caption": "The famous 99 switchbacks",
+          "focalPoint": "center"
+        },
+        {
+          "src": "projects/mt_whitney_demo/media/15_switchbacks03.jpeg",
+          "type": "image",
+          "caption": "Looking back down the trail",
+          "focalPoint": "center"
+        }
+      ],
+      "gutter": "small",
+      "captionStyle": {
+        "size": "14",
+        "weight": "normal",
+        "italic": true,
+        "color": "#6b7280"
+      }
+    },
+    {
+      "type": "text",
+      "subhead": "Trail Crest Pass",
+      "subheadStyle": {
+        "size": "28",
+        "weight": "semibold",
+        "italic": false,
+        "color": "#1e3a5f",
+        "font": "Newsreader"
+      },
+      "text": "At 13,600 feet, Trail Crest marks the boundary between Inyo National Forest and Sequoia National Park. This is where day hikers finally see the western slope of the Sierra and realize just how much further they have to go.",
+      "textStyle": {
+        "size": "18",
+        "weight": "normal",
+        "italic": false,
+        "color": "#374151",
+        "font": "system-ui",
+        "leading": "1.8"
+      },
+      "backgroundColor": "#ffffff",
+      "contentWidth": "medium",
+      "paddingTop": "medium",
+      "paddingBottom": "medium"
+    },
+    {
+      "type": "full-bleed",
+      "image": "",
+      "video": "projects/mt_whitney_demo/media/17_Trail_Crest.mp4",
+      "caption": "Video: The view from Trail Crest Pass",
+      "captionStyle": {
+        "size": "14",
+        "weight": "normal",
+        "italic": true,
+        "color": "#9ca3af"
+      },
+      "captionPosition": "below",
+      "height": "tall",
+      "videoAutoplay": true,
+      "videoLoop": true,
+      "videoMuted": true
+    },
+    {
+      "type": "text",
+      "pullQuote": "The last two miles feel like twenty. Every step requires deliberate effort as the thin air makes even breathing a conscious act.",
+      "pullQuoteStyle": {
+        "size": "28",
+        "weight": "normal",
+        "italic": true,
+        "color": "#1e3a5f",
+        "font": "Newsreader"
+      },
+      "backgroundColor": "#f3f4f6",
+      "contentWidth": "medium",
+      "paddingTop": "large",
+      "paddingBottom": "large"
+    },
+    {
+      "type": "full-bleed",
+      "image": "projects/mt_whitney_demo/media/20_danger_sign.jpeg",
+      "video": "",
+      "caption": "Warning signs remind hikers of the altitude risks",
+      "captionStyle": {
+        "size": "14",
+        "weight": "normal",
+        "italic": true,
+        "color": "#9ca3af"
+      },
+      "captionPosition": "below",
+      "height": "medium"
+    },
+    {
+      "type": "text",
+      "text": "This demo project shows just a few of the block types available in StoryBuilder. Explore the tool to discover more options including:\n\n- **Photo Lede** blocks for feature images with text\n- **Zoom on Photo** for scroll-triggered zoom effects\n- **Split Panel** for side-by-side content panels\n- **Multiple gallery layouts** with 2, 3, or 4 images\n\nWhen you're ready, export your story as a standalone HTML file that you can host anywhere.",
+      "textStyle": {
+        "size": "18",
+        "weight": "normal",
+        "italic": false,
+        "color": "#374151",
+        "font": "system-ui",
+        "leading": "1.8"
+      },
+      "backgroundColor": "#ffffff",
+      "contentWidth": "medium",
+      "paddingTop": "large",
+      "paddingBottom": "large"
+    }
+  ]
+}

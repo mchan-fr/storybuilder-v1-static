@@ -2,9 +2,13 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   // Keep root as current directory (index.html is here)
   root: '.',
+
+  // Base path for GitHub Pages deployment
+  // Set to repo name for production, '/' for development
+  base: command === 'build' ? '/storybuilder-v1-static/' : '/',
 
   // Don't use publicDir - we handle static files with plugin
   publicDir: false,
@@ -36,7 +40,9 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html')
+        main: resolve(__dirname, 'index.html'),
+        app: resolve(__dirname, 'app.html'),
+        guide: resolve(__dirname, 'guide.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
@@ -53,4 +59,4 @@ export default defineConfig({
       '@blocks': resolve(__dirname, 'src/blocks')
     }
   }
-});
+}));

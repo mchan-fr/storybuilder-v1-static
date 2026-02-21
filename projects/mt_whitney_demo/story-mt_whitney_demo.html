@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hiking Mt. Whitney (demo version)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+  <meta property="og:title" content="Hiking Mt. Whitney (demo version)">
+  <meta property="og:description" content="A multimedia story by Marcus Chan">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="author" content="Marcus Chan">
+  <meta name="reading-time" content="5 min read">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+*{box-sizing:border-box}
+html,body{
+  min-height:100%;
+  height:auto;
+  margin:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  background:#000;
+  overscroll-behavior:auto;
+}
+img,video{display:block;max-width:100%;height:auto}
+
+.text-shadow{text-shadow:0 2px 8px rgba(0,0,0,.55)}
+.reveal-line{opacity:0;transform:translateY(6px);transition:.35s ease}
+.reveal-line.visible{opacity:1;transform:translateY(0)}
+.fullbleed{width:100vw!important;max-width:100vw!important;margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important}
+.breakout-large{width:56rem;max-width:calc(100vw - 2rem);position:relative;left:50%;transform:translateX(-50%)}
+
+/* ========================================
+   MUTE BUTTON - SHARED STYLES
+   ======================================== */
+.mute-btn{
+  position:absolute;
+  bottom:20px;
+  left:20px;
+  width:44px;
+  height:44px;
+  background:rgba(0,0,0,0.7);
+  border:none;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  transition:background 0.2s ease;
+}
+.mute-btn:hover{background:rgba(0,0,0,0.9)}
+.mute-btn:active{transform:scale(0.95)}
+
+/* Desktop: show desktop mute btn, hide mobile */
+.desktop-mute-btn{display:flex}
+.mobile-mute-btn{display:none}
+
+/* ========================================
+   HERO BLOCK
+   ======================================== */
+.sb-hero{position:relative}
+.sb-hero .hero-image-section{position:relative;height:100vh;min-height:480px}
+.sb-hero .media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.sb-hero .hero-gradient{display:none}
+.sb-hero .overlay{position:absolute;inset:0;display:flex;flex-direction:column;z-index:10;padding:1rem}
+.sb-hero .overlay.items-start{justify-content:flex-start}
+.sb-hero .overlay.items-end{justify-content:flex-end}
+.sb-hero .overlay.items-center{justify-content:center}
+.sb-hero .overlay.justify-start{align-items:flex-start}
+.sb-hero .overlay.justify-end{align-items:flex-end}
+.sb-hero .overlay.justify-center{align-items:center}
+.pt-20{padding-top:5rem}.pb-20{padding-bottom:5rem}.pl-20{padding-left:5rem}.pr-20{padding-right:5rem}
+
+/* Hero Desktop: show desktop overlay, hide mobile elements */
+.sb-hero .desktop-overlay{display:flex}
+.sb-hero .mobile-overlay{display:none}
+.hero-mobile-deck-section{display:none}
+
+/* Hero Mobile Media Support */
+.sb-hero .media-picture{position:absolute;inset:0;width:100%;height:100%}
+.sb-hero .media-picture img{width:100%;height:100%;object-fit:cover}
+.sb-hero .desktop-media{display:block}
+.sb-hero .mobile-media{display:none}
+
+/* ========================================
+   PHOTO LEDE SIDE - DESKTOP
+   ======================================== */
+.pls-desktop{display:flex;gap:0}
+.pls-mobile{display:none}
+.pls-image{height:100vh;flex-shrink:0}
+.pls-media{width:100%;height:100%;object-fit:cover}
+.pls-text{height:100vh;display:flex;align-items:center;justify-content:center;padding:0 1.5rem;box-sizing:border-box}
+
+/* ========================================
+   PHOTO LEDE - DESKTOP
+   ======================================== */
+.photo-lede-photo{margin:0 auto 3rem auto;border-radius:0.5rem;overflow:hidden}
+.photo-lede-photo[data-desktop-width="max-w-2xl"]{max-width:42rem}
+.photo-lede-photo[data-desktop-width="max-w-4xl"]{max-width:56rem}
+.photo-lede-photo[data-desktop-width="max-w-6xl"]{max-width:72rem}
+.photo-lede-photo[data-desktop-width="w-full"]{max-width:100%}
+.photo-lede-photo img{border-radius:0.5rem}
+.photo-lede-caption{margin-top:1rem;text-align:center}
+.photo-lede-text{margin:0 auto;padding:0 1.5rem;box-sizing:border-box}
+.photo-lede-text[data-desktop-width="max-w-md"]{max-width:28rem}
+.photo-lede-text[data-desktop-width="max-w-lg"]{max-width:32rem}
+.photo-lede-text[data-desktop-width="max-w-4xl"]{max-width:56rem}
+.photo-lede-text[data-desktop-width="max-w-6xl"]{max-width:72rem}
+
+/* ========================================
+   SPLIT PANEL - DESKTOP
+   ======================================== */
+@media (min-width: 1025px) {
+  .split-panel-wrapper{width:100%;position:relative}
+  .split-panel-container{position:relative;min-height:200vh}
+  .split-panel-row{position:absolute !important;width:100%;min-height:100vh;display:block !important;flex-direction:row !important}
+  .split-panel-row:first-child{top:0}
+  .split-panel-row:last-child{top:100vh}
+  .split-panel-row::after{content:"";display:table;clear:both}
+  .split-image-sticky{position:fixed !important;top:0;width:50% !important;height:100vh !important;z-index:1;opacity:0;clip-path:inset(100% 0 0 0);transition:clip-path 0s linear,opacity 0.3s ease;will-change:clip-path;transform:translateZ(0);backface-visibility:hidden}
+  
+  .split-panel-row:first-child .split-image-sticky{left:0 !important;right:auto !important}
+  .split-panel-row:last-child .split-image-sticky{right:0 !important;left:auto !important}
+  
+  .split-panel-reversed .split-panel-row:first-child .split-image-sticky{left:auto !important;right:0 !important}
+  .split-panel-reversed .split-panel-row:last-child .split-image-sticky{right:auto !important;left:0 !important}
+  
+  .split-image-content{width:100%;height:100%}
+  .split-image-content img,.split-image-content video{width:100%;height:100%;object-fit:cover;display:block}
+  .split-text-scroll{width:50% !important;min-height:100vh !important;float:left !important;display:flex !important;align-items:center;justify-content:center;padding:3rem;box-sizing:border-box;position:relative !important;z-index:2;-webkit-font-smoothing:antialiased}
+  
+  .split-panel-row:first-child .split-text-scroll{float:right !important}
+  .split-panel-row:last-child .split-text-scroll{float:left !important}
+  
+  .split-panel-reversed .split-panel-row:first-child .split-text-scroll{float:left !important}
+  .split-panel-reversed .split-panel-row:last-child .split-text-scroll{float:right !important}
+  
+  .split-text-inner{width:100%;max-width:800px}
+  .split-panel-wrapper ~ *{position:relative;z-index:3;background:inherit}
+}
+
+/* Desktop/Mobile visibility toggles */
+.split-desktop-only { display: block; }
+.split-mobile-only { display: none; }
+
+/* ========================================
+   SPLIT PANEL - MOBILE STRUCTURE
+   ======================================== */
+.split-mobile-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.split-mobile-images {
+  display: none;
+}
+
+.split-mobile-image {
+  position: relative;
+  width: 100%;
+  height: 75vh;
+  min-height: 350px;
+  max-height: 550px;
+  overflow: hidden;
+}
+
+.split-mobile-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.split-mobile-text {
+  position: relative;
+  z-index: 2;
+}
+
+.split-mobile-text-section {
+  padding: 1.5rem;
+  min-height: auto;
+}
+
+.split-mobile-panel {
+  display: block;
+}
+
+.split-mobile-panel-image {
+  width: 100%;
+  height: 75vh;
+  min-height: 350px;
+  max-height: 550px;
+  overflow: hidden;
+}
+
+.split-mobile-panel-image img,
+.split-mobile-panel-image video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.split-mobile-panel-text {
+  padding: 1.5rem;
+}
+
+.split-mobile-text-inner {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ========================================
+   ZOOM PHOTO - DESKTOP
+   ======================================== */
+.sb-zoomsec{position:relative;height:250vh;overflow:visible}
+.sb-zoom-pin{position:sticky;top:0;height:100vh;width:100%;overflow:hidden}
+.sb-zoom-photo{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;transform:translate(-50%,-50%);object-fit:cover;will-change:transform;transition:none}
+.sb-zoom-vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 150px 60px rgba(0,0,0,0.5);opacity:0;transition:opacity 0.3s ease}
+.sb-zoom-panel{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:1rem 1.5rem;border-radius:8px;max-width:400px;text-align:center;opacity:0;transition:opacity 0.3s ease}
+.sb-zoom-spacer{position:relative;z-index:1}
+
+/* ========================================
+   PAIR FADE EFFECT
+   ======================================== */
+.sb-fadepair{position:relative;height:var(--fadeH,200vh)}
+.sb-fade-prev{position:relative;height:100vh}
+.sb-fade-next{position:sticky;top:0;height:100vh;opacity:var(--fadeOpacity,0);transition:opacity 0.1s linear;will-change:opacity}
+.sb-fade-prev>*{min-height:100vh}.sb-fade-next>*{min-height:100vh}
+
+[data-fade-scroll="true"]{
+  transition:opacity .6s ease-out;
+}
+
+
+/* ========================================
+   MOBILE STYLES (max-width: 1024px)
+   ======================================== */
+
+@media (max-width: 1024px) {
+
+  .desktop-mute-btn { display: none !important; }
+  .mobile-mute-btn { display: flex !important; }
+  
+  .sb-hero .mobile-mute-btn {
+    bottom: 160px !important;
+    left: 1.5rem !important;
+  }
+  
+  .pls-mobile-image .mobile-mute-btn,
+  .split-mobile-panel-image .mobile-mute-btn {
+    bottom: 20px !important;
+    left: 20px !important;
+  }
+  
+  .gallery-mute-btn {
+    display: flex !important;
+    bottom: 20px !important;
+    left: 20px !important;
+  }
+  
+  .gallery-media-cell {
+    position: relative !important;
+  }
+
+  .split-desktop-only { display: none !important; }
+  .split-mobile-only { display: block !important; }
+  
+  .sb-hero.has-mobile-media .desktop-media{display:none}
+  .sb-hero.has-mobile-media .mobile-media{display:block}
+
+  .sb-hero {
+    height: 200vh !important;
+    min-height: 200vh !important;
+    max-height: none !important;
+    display: block !important;
+    position: relative !important;
+    clip: rect(0, auto, auto, 0) !important;
+    clip-path: inset(0) !important;
+  }
+  
+  .sb-hero .hero-image-section {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    z-index: 1 !important;
+  }
+  
+  .sb-hero .hero-image-section .media,
+  .sb-hero .hero-image-section .media-picture,
+  .sb-hero .hero-image-section video.media,
+  .sb-hero .hero-image-section img.media {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+  
+  .sb-hero .hero-image-section .media-picture img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  .sb-hero .hero-gradient {
+    display: block !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60% !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%) !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+  }
+  
+  .sb-hero .desktop-overlay {
+    display: none !important;
+  }
+  
+  .sb-hero .mobile-overlay {
+    display: flex !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 10 !important;
+    padding: 0 !important;
+    padding-bottom: 100px !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: flex-start !important;
+  }
+  
+  .hero-mobile-headline-container {
+    padding: 1.5rem !important;
+    max-width: 90% !important;
+  }
+  
+  .hero-mobile-headline {
+    font-size: clamp(2.5rem, 10vw, 3.5rem) !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8) !important;
+    text-align: left !important;
+  }
+  
+  .sb-hero .sb-hero-desktop-deck {
+    display: none !important;
+  }
+  
+  .hero-mobile-deck-section {
+    display: block !important;
+    position: absolute !important;
+    top: 100vh !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 20 !important;
+    height: 100vh !important;
+    background: #000 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .hero-mobile-deck-text {
+    position: relative !important;
+    top: 50vh !important;
+    transform: translateY(-50%) !important;
+    padding: 0 3rem !important;
+    font-size: 1.375rem !important;
+    line-height: 1.6 !important;
+    text-align: center !important;
+    text-shadow: none !important;
+  }
+
+  .split-mobile-text-inner.max-w-md { max-width: 100%; }
+  .split-mobile-text-inner.max-w-lg { max-width: 100%; }
+  .split-mobile-text-inner.max-w-4xl { max-width: 100%; }
+  .split-mobile-text-inner.max-w-6xl { max-width: 100%; }
+  
+  .split-mobile-text-section h2 {
+    font-size: clamp(1.5rem, 6vw, 2rem) !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .split-mobile-text-section h3 {
+    font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+  }
+  
+  .split-mobile-text-section p {
+    font-size: 1.0625rem !important;
+    line-height: 1.65 !important;
+  }
+  
+  [class*="split-panel-drop-cap"]::first-letter {
+    font-size: 3rem !important;
+    line-height: 2.5rem !important;
+    padding-right: 8px !important;
+  }
+  
+  [class*="split-panel-drop-cap"]::first-line {
+    font-size: 1.25rem !important;
+  }
+  
+  .split-mobile-panel-image {
+    position: relative !important;
+  }
+  
+  .split-mobile-subhead-overlay {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%) !important;
+    padding: 3rem 1.5rem 0.75rem 1.5rem !important;
+    pointer-events: none !important;
+  }
+  
+  .split-mobile-subhead-text {
+    font-size: 1.125rem !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
+    text-align: left !important;
+  }
+  
+  .split-mobile-byline-overlay {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%) !important;
+    padding: 3rem 1.5rem 0.75rem 1.5rem !important;
+    pointer-events: none !important;
+  }
+  
+  .split-mobile-byline-text {
+    font-size: 0.875rem !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
+    text-align: left !important;
+  }
+
+  .pls-desktop {
+    display: none !important;
+  }
+  
+  .pls-mobile {
+    display: block !important;
+  }
+  
+  .pls-mobile-image {
+    position: relative !important;
+    width: 100% !important;
+    height: 75vh !important;
+    min-height: 350px !important;
+    max-height: 550px !important;
+    overflow: hidden !important;
+  }
+  
+  .pls-mobile-image .pls-media,
+  .pls-mobile-image img,
+  .pls-mobile-image video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  .pls-mobile-subhead-overlay {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%) !important;
+    padding: 3rem 1.5rem 0.75rem 1.5rem !important;
+    pointer-events: none !important;
+  }
+  
+  .pls-mobile-subhead-text {
+    font-size: 1.125rem !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
+    text-align: left !important;
+  }
+  
+  .pls-mobile-byline-overlay {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%) !important;
+    padding: 3rem 1.5rem 0.75rem 1.5rem !important;
+    pointer-events: none !important;
+  }
+  
+  .pls-mobile-byline-text {
+    font-size: 1rem !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
+    text-align: left !important;
+  }
+  
+  .pls-mobile-text {
+    padding: 1.5rem !important;
+  }
+  
+  .pls-mobile-text .max-w-md,
+  .pls-mobile-text .max-w-lg,
+  .pls-mobile-text .max-w-4xl,
+  .pls-mobile-text .max-w-6xl {
+    max-width: 100% !important;
+  }
+  
+  .photo-lede-side-drop-cap::first-letter {
+    font-size: 3rem !important;
+    line-height: 2.5rem !important;
+    padding-right: 8px !important;
+  }
+  
+  .photo-lede-side-drop-cap::first-line {
+    font-size: 1.25rem !important;
+  }
+
+  .photo-lede-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  .photo-lede-section.px-6 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  .photo-lede-photo {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  .photo-lede-photo img,
+  .photo-lede-photo video {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    display: block !important;
+  }
+  
+  .photo-lede-caption {
+    padding: 0.5rem 1.5rem !important;
+    text-align: left !important;
+  }
+  
+  .photo-lede-text {
+    padding: 0 1.5rem !important;
+  }
+  
+  .photo-lede-drop-cap::first-letter {
+    font-size: 3rem !important;
+    line-height: 2.5rem !important;
+    padding-right: 8px !important;
+  }
+  
+  .photo-lede-drop-cap::first-line {
+    font-size: 1.25rem !important;
+  }
+
+  .fullbleed {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+  
+  .fullbleed img,
+  .fullbleed video {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 0 !important;
+  }
+  
+  .fullbleed .rounded {
+    border-radius: 0 !important;
+  }
+
+  .sb-zoomsec {
+    height: auto !important;
+    min-height: auto !important;
+  }
+  
+  .sb-zoom-spacer {
+    height: 2rem !important;
+  }
+  
+  .sb-zoom-pin {
+    position: relative !important;
+    height: auto !important;
+  }
+  
+  .sb-zoom-photo {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: auto !important;
+    min-height: auto !important;
+  }
+  
+  .sb-zoom-vignette {
+    display: none !important;
+  }
+  
+  .sb-zoom-panel {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    margin: 1rem;
+    max-width: 100% !important;
+    text-align: left !important;
+  }
+
+  [style*="display:grid"][style*="grid-template-columns"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  [style*="display:grid"] > div {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 250px !important;
+    max-height: 70vh !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  
+  [style*="display:grid"] > div img,
+  [style*="display:grid"] > div video {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 250px !important;
+    object-fit: cover !important;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
+    line-height: 1.15 !important;
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 5vw, 2rem) !important;
+    line-height: 1.2 !important;
+  }
+  
+  h3 {
+    font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+    line-height: 1.25 !important;
+  }
+  
+  p, .leading-relaxed {
+    font-size: 1.0625rem !important;
+    line-height: 1.65 !important;
+  }
+
+  .px-6 {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  .p-12 {
+    padding: 1.5rem !important;
+  }
+  
+  .pt-16, .pt-24 {
+    padding-top: 1.5rem !important;
+  }
+  
+  .pb-16, .pb-24 {
+    padding-bottom: 1.5rem !important;
+  }
+  
+  .pt-4 { padding-top: 1rem !important; }
+  .pb-4 { padding-bottom: 1rem !important; }
+  .pt-8 { padding-top: 1.25rem !important; }
+  .pb-8 { padding-bottom: 1.25rem !important; }
+
+  .max-w-md, .max-w-lg, .max-w-4xl, .max-w-6xl {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  [style*="border-left:4px"] {
+    padding: 1.25rem 1.5rem !important;
+    margin: 1.5rem 0 !important;
+  }
+  
+  [style*="border-left:4px"] p {
+    font-size: 1.125rem !important;
+    line-height: 1.6 !important;
+  }
+
+  button, a[role="button"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body, html {
+    overflow-x: hidden !important;
+  }
+  
+  img, video {
+    max-width: 100% !important;
+  }
+  
+  .breakout-large {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: auto !important;
+    transform: none !important;
+  }
+}
+
+/* ========================================
+   TABLET OVERRIDES (769px - 1024px)
+   Larger text, margins, and image heights for tablets
+   ======================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  
+  /* Hero headline larger for tablets */
+  .hero-mobile-headline {
+    font-size: clamp(3.5rem, 9vw, 5rem) !important;
+  }
+  
+  /* Hero deck text larger */
+  .hero-mobile-deck-text {
+    font-size: 1.625rem !important;
+    line-height: 1.7 !important;
+    padding: 0 6rem !important;
+  }
+  
+  /* PhotoLedeSide mobile text container - flex center */
+  .pls-mobile-text {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 2rem 1.5rem !important;
+  }
+  
+  /* PhotoLedeSide inner div - constrain width */
+  .pls-mobile-text > .max-w-md,
+  .pls-mobile-text > .max-w-lg,
+  .pls-mobile-text > .max-w-4xl,
+  .pls-mobile-text > .max-w-6xl {
+    max-width: 720px !important;
+    width: 100% !important;
+  }
+  
+  /* PhotoLedeSide byline overlay - match text width */
+  .pls-mobile-byline-overlay {
+    display: flex !important;
+    justify-content: center !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  .pls-mobile-byline-overlay .pls-mobile-byline-text {
+    max-width: 720px !important;
+    width: 100% !important;
+  }
+  
+  /* Split panel mobile text container - the actual class used */
+  .split-mobile-panel-text {
+    display: flex !important;
+    justify-content: center !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  /* Split panel inner content */
+  .split-mobile-panel-text > .split-mobile-text-inner {
+    max-width: 720px !important;
+    width: 100% !important;
+  }
+  
+  .split-mobile-text-inner.max-w-md,
+  .split-mobile-text-inner.max-w-lg,
+  .split-mobile-text-inner.max-w-4xl,
+  .split-mobile-text-inner.max-w-6xl {
+    max-width: 720px !important;
+  }
+  
+  /* PhotoLede text - add top padding for spacing from image */
+  .photo-lede-text {
+    padding: 1.5rem !important;
+    max-width: 720px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  .photo-lede-caption {
+    padding: 0.75rem 1.5rem !important;
+    max-width: 720px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Body text larger */
+  p, .leading-relaxed {
+    font-size: 1.25rem !important;
+    line-height: 1.75 !important;
+  }
+  
+  /* Subhead/headline text larger */
+  h2 {
+    font-size: clamp(1.875rem, 5vw, 2.5rem) !important;
+  }
+  
+  h3 {
+    font-size: clamp(1.5rem, 4vw, 2rem) !important;
+    margin-top: 1.5rem !important;
+  }
+  
+  /* Byline text */
+  .pls-mobile-byline-text,
+  .split-mobile-byline-text {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Image/video heights for tablets - allow portrait content to be tall */
+  .pls-mobile-image {
+    height: 85vh !important;
+    min-height: 600px !important;
+    max-height: none !important;
+  }
+  
+  .split-mobile-panel-image {
+    height: 85vh !important;
+    min-height: 600px !important;
+    max-height: none !important;
+  }
+  
+  /* Subhead overlay text */
+  .pls-mobile-subhead-text,
+  .split-mobile-subhead-text {
+    font-size: 1.375rem !important;
+  }
+  
+  /* Split panel text content */
+  .split-mobile-panel-text p,
+  .split-mobile-text-inner p {
+    font-size: 1.25rem !important;
+    line-height: 1.75 !important;
+  }
+  
+  .split-mobile-panel-text h2,
+  .split-mobile-text-inner h2 {
+    font-size: clamp(1.875rem, 5vw, 2.5rem) !important;
+  }
+  
+  .split-mobile-panel-text h3,
+  .split-mobile-text-inner h3 {
+    font-size: clamp(1.5rem, 4vw, 2rem) !important;
+  }
+  
+  /* Gallery items taller */
+  [style*="display:grid"] > div {
+    min-height: 450px !important;
+    max-height: none !important;
+  }
+  
+  [style*="display:grid"] > div img,
+  [style*="display:grid"] > div video {
+    min-height: 450px !important;
+  }
+  
+  /* Photo lede - full width image, constrained text */
+  .photo-lede-section {
+    padding: 0 !important;
+  }
+  
+  /* Drop cap slightly larger */
+  .photo-lede-drop-cap::first-letter,
+  .photo-lede-side-drop-cap::first-letter,
+  [class*="split-panel-drop-cap"]::first-letter {
+    font-size: 4rem !important;
+    line-height: 3rem !important;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 1024px) {
+    .sb-hero .hero-image-section {
+      height: 100vh !important;
+      height: -webkit-fill-available !important;
+    }
+    
+    .hero-mobile-deck-section {
+      height: 100vh !important;
+      height: -webkit-fill-available !important;
+      min-height: 100vh !important;
+      min-height: -webkit-fill-available !important;
+      max-height: 100vh !important;
+      max-height: -webkit-fill-available !important;
+    }
+    
+    .split-mobile-images {
+      height: 80vh !important;
+      height: -webkit-fill-available !important;
+      max-height: 800px !important;
+    }
+  }
+}
+
+/* ========================================
+   ORIENTATION LOCK FOR PHONES
+   Lock to portrait on small screens (phones)
+   ======================================== */
+@media screen and (max-width: 600px) and (orientation: landscape) {
+  html {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+}
+</style>
+  </head>
+  <body>
+    <div id="progress-bar" style="position:fixed;top:0;left:0;height:3px;background:#fbbf24;width:0%;z-index:9999;transition:width 0.1s;"></div>
+    <div data-sb-block="0" data-sb-type="hero" data-sb-expected="4" data-sb-expected-std="4"><section class="sb-hero fullbleed overflow-hidden has-mobile-media" style="position:relative;z-index:3;">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div>
+      <div class="hero-image-section" style="position:relative;z-index:1;">
+        <picture class="media-picture">
+          <source media="(max-width: 1024px)" srcset="media/11_Whitney_Griffin_hiking.jpeg">
+          <img class="media" src="media/10_above_clouds.jpeg" alt="">
+        </picture>
+        <div class="hero-gradient"></div>
+        <div class="overlay desktop-overlay items-end justify-start">
+          <div class="max-w-4xl px-4 pb-20 pl-20" style="transform:translate(0px,0px);">
+            <h1 class="text-left" style="color:#f5a824;font-size:76px;font-family:system-ui;font-weight:700;font-style:normal;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.55);">Hiking Up<br/>To 14,505<br/>With My Kids</h1>
+            <div class="sb-hero-desktop-deck text-left mt-3" style="color:#ffffff;font-size:20px;font-family:system-ui;font-weight:400;font-style:normal;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.55);">We expected a long trek to the top of Mount Whitney.<br/>What we got was a grueling footslog that pushed us to the limits.</div>
+          </div>
+        </div>
+        <div class="overlay mobile-overlay">
+          <div class="hero-mobile-headline-container">
+            <h1 class="hero-mobile-headline" style="color:#f5a824;font-family:system-ui;font-weight:700;font-style:normal;">Hiking Up<br/>To 14,505<br/>With My Kids</h1>
+          </div>
+        </div>
+      </div>
+      <div class="hero-mobile-deck-section"><div class="hero-mobile-deck-text" style="color:#ffffff;font-family:system-ui;font-style:normal;">We expected a long trek to the top of Mount Whitney. What we got was a grueling footslog that pushed us to the limits.</div></div>
+    </section><script>
+(function() {
+  if (window.innerWidth > 1024) return;
+  
+  const hero = document.querySelector('.sb-hero');
+  if (!hero) return;
+  
+  const imageSection = hero.querySelector('.hero-image-section');
+  if (!imageSection) return;
+  
+  let ticking = false;
+  
+  function updateFade() {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const viewportHeight = window.innerHeight;
+    
+    // Fade hero as user scrolls through first viewport
+    const fadeProgress = Math.min(1, scrollY / (viewportHeight * 0.7));
+    imageSection.style.opacity = String(1 - fadeProgress);
+    
+    ticking = false;
+  }
+  
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(updateFade);
+      ticking = true;
+    }
+  }, { passive: true });
+  
+  updateFade();
+})();
+</script></div>
+<div data-sb-block="1" data-sb-type="photo-lede-side" data-sb-expected="4" data-sb-expected-std="4"><style>.photo-lede-side-drop-cap-pls-kxkeebj13::first-letter{float:left;font-size:76px !important;line-height:64px !important;padding-right:10px;margin-top:2px;color:#fbbf24 !important;font-weight:bold;}.photo-lede-side-drop-cap-pls-kxkeebj13::first-line{font-size:24px !important;font-weight:600 !important;color:#ffffff !important;}.pls-section a {
+  color: #e6e6e6;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.pls-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="pls-section pt-16 pb-16" style="position:relative;z-index:3;background-color:#000000;overflow:visible;" data-fade-scroll="true"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#000000;z-index:0;"></div><div style="position:relative;z-index:1;"><div class="pls-desktop"><div class="pls-text" style="width:50%;padding-left:1.5rem;padding-right:40px;"><div class="max-w-lg mx-auto"><div style="margin-bottom:36px;"><div style="color:#cbd0d7;font-size:20px;font-family:IBM Plex Sans, sans-serif;font-weight:400;font-style:normal;line-height:1.6;">By Marcus Chan</div><div style="font-size:14px;font-weight:400;color:#9ca3af;margin-top:4px;">Lone Pine, Calif. <span style="color:#9ca3af;opacity:0.6;padding:0 8px;">|</span> Sept. 20, 2025 <span style="color:#9ca3af;opacity:0.6;padding:0 8px;">|</span> 5 min read</div></div><p class="photo-lede-side-drop-cap-pls-kxkeebj13" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">When we woke up in the wee hours of our big day, we saw something we hadn't seen since we arrived: clear skies.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">For days it had been wet weather around Mount Whitney. It was so bad that just the day before, hikers were forced to turn around near the summit because of blizzard conditions. It's not what you want to hear right before your own attempt.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">This was an important hike to us. My daughter is named after the mountain, and we'd always hoped to reach the summit together. We trained for months, subjecting ourselves to long hikes on ankle-twisting terrain with heavy packs. But we knew Mother Nature would have the final say.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">So to wake up to this view was promising. Energized, my daughter, son Griffin and I began our ascent to 14,505.</p></div></div><div class="pls-image" style="width:50%;"><img src="media/06_stars.JPG" class="pls-media" alt=""></div></div><div class="pls-mobile"><div class="pls-mobile-image"><img src="media/06_stars.JPG" class="pls-media" alt=""><div class="pls-mobile-byline-overlay"><div class="pls-mobile-byline-text" style="color:#cbd0d7;font-size:20px;font-family:IBM Plex Sans, sans-serif;font-weight:400;font-style:normal;line-height:1.6;">By Marcus Chan<div style="font-size:14px;margin-top:4px;">Lone Pine, Calif. <span style="color:#6b7280;padding:0 6px;">|</span> Sept. 20, 2025 <span style="color:#6b7280;padding:0 6px;">|</span> 5 min read</div></div></div></div><div class="pls-mobile-text"><div class="max-w-lg"><p class="photo-lede-side-drop-cap-pls-kxkeebj13" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">When we woke up in the wee hours of our big day, we saw something we hadn't seen since we arrived: clear skies.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">For days it had been wet weather around Mount Whitney. It was so bad that just the day before, hikers were forced to turn around near the summit because of blizzard conditions. It's not what you want to hear right before your own attempt.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">This was an important hike to us. My daughter is named after the mountain, and we'd always hoped to reach the summit together. We trained for months, subjecting ourselves to long hikes on ankle-twisting terrain with heavy packs. But we knew Mother Nature would have the final say.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">So to wake up to this view was promising. Energized, my daughter, son Griffin and I began our ascent to 14,505.</p></div></div></div></div></section></div>
+<div data-sb-block="2" data-sb-type="photo-lede-side" data-sb-expected="4" data-sb-expected-std="4"><style>.photo-lede-side-drop-cap-pls-myhetr2pj::first-letter{float:left;font-size:56px !important;line-height:47px !important;padding-right:10px;margin-top:2px;color:#fbbf24 !important;font-weight:bold;}.photo-lede-side-drop-cap-pls-myhetr2pj::first-line{font-size:22px !important;font-weight:600 !important;color:#ffffff !important;}.pls-section a {
+  color: #e6e6e6;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.pls-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="pls-section pt-16 pb-16" style="position:relative;z-index:3;background-color:#000000;overflow:visible;" data-fade-scroll="true"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#000000;z-index:0;"></div><div style="position:relative;z-index:1;"><div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:1px;background-color:#4d3d14;margin-bottom:0px;"></div><div class="pls-desktop"><div class="pls-image" style="width:50%;"><div style="position:relative;width:100%;height:100%;"><video id="pls-video-7xqk2y2zs" autoplay muted loop playsinline src="media/03_Whitney_creek.mp4" class="pls-media"></video><button onclick="toggleMute('pls-video-7xqk2y2zs', this)" style="position:absolute;bottom:20px;left:20px;width:44px;height:44px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" opacity="0.3" class="unmuted-path"/><line x1="2" y1="2" x2="22" y2="22" stroke="white" stroke-width="2" class="muted-line" style="display:none;"/></svg></button></div></div><div class="pls-text" style="width:50%;padding-left:40px;padding-right:1.5rem;"><div class="max-w-lg mx-auto"><h3 style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.5;margin-bottom:24px;">2:32 a.m. (half an hour hiking)</h3><p class="photo-lede-side-drop-cap-pls-myhetr2pj" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">There's nothing technically difficult about the main trail when it's free of snow and ice. Still, you have to watch your step on the rocky path, especially at night.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">There's little risk of falling off a cliff during the early parts of the hike. But when you climb above 12,000, the drop-offs become steep, the trail can become slippery and you're much more vulnerable to the elements.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">(Recently, a hiker <a href="https://www.sfgate.com/bayarea/article/california-teen-hiker-coma-mount-whitney-20392404.php" target="_blank" rel="noopener noreferrer">stepped off a cliff</a> and suffered brain injury. <a href="https://www.yahoo.com/news/articles/hiker-killed-slipping-falling-down-172309047.html" target="_blank" rel="noopener noreferrer">Another fell</a> to his death amid severe weather conditions. And another hiker just died, possibly while <a href="https://www.yahoo.com/news/articles/mt-whitney-rescue-team-finds-020254123.html" target="_blank" rel="noopener noreferrer">taking a shortcut</a> on the long trail.)</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We're early in our hike, up only 8,800 feet.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">(To hear the rushing water, unmute in the lower left corner.)</p></div></div></div><div class="pls-mobile"><div class="pls-mobile-image"><video id="pls-mobile-video-6iuiefz2n" autoplay muted loop playsinline src="media/03_Whitney_creek.mp4" class="pls-media"></video><button onclick="toggleMute('pls-mobile-video-6iuiefz2n', this)" class="mute-btn mobile-mute-btn" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" opacity="0.3" class="unmuted-path"/><line x1="2" y1="2" x2="22" y2="22" stroke="white" stroke-width="2" class="muted-line" style="display:none;"/></svg></button></div><div class="pls-mobile-text"><div class="max-w-lg"><h3 style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.5;margin-bottom:24px;">2:32 a.m. (half an hour hiking)</h3><p class="photo-lede-side-drop-cap-pls-myhetr2pj" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">There's nothing technically difficult about the main trail when it's free of snow and ice. Still, you have to watch your step on the rocky path, especially at night.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">There's little risk of falling off a cliff during the early parts of the hike. But when you climb above 12,000, the drop-offs become steep, the trail can become slippery and you're much more vulnerable to the elements.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">(Recently, a hiker <a href="https://www.sfgate.com/bayarea/article/california-teen-hiker-coma-mount-whitney-20392404.php" target="_blank" rel="noopener noreferrer">stepped off a cliff</a> and suffered brain injury. <a href="https://www.yahoo.com/news/articles/hiker-killed-slipping-falling-down-172309047.html" target="_blank" rel="noopener noreferrer">Another fell</a> to his death amid severe weather conditions. And another hiker just died, possibly while <a href="https://www.yahoo.com/news/articles/mt-whitney-rescue-team-finds-020254123.html" target="_blank" rel="noopener noreferrer">taking a shortcut</a> on the long trail.)</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We're early in our hike, up only 8,800 feet.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">(To hear the rushing water, unmute in the lower left corner.)</p></div></div></div><div style="width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);height:1px;background-color:#4d3d14;margin-top:0px;"></div></div></section></div>
+<div data-sb-block="3" data-sb-type="split-panel" data-sb-expected="4" data-sb-expected-std="4"><style>.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}</style><div class="split-panel-wrapper split-desktop-only split-panel-reversed" id="split-panel-9h4udzr69" style="background-color:#000000;"><div class="split-panel-container" style="background-color:#000000;"><section class="split-panel-row" style="background-color:#000000;"><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">6:04 a.m. (4 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">Daylight comes. After hiking for hours by headlamp, the rising sun reveals the hard, jagged landscape we've been traversing. I feel like I've been transported. We're close to 11,000 feet.</p><p class="mb-4 ">We've been moving at a steady pace, but I know Griffin wants to hike faster (because he can). For the sake of the rest of us, he'll have to cool his heels.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Far off in the distance (upper left corner of the photo), we catch our first glimpse of the famous golden hue (or "alpenglow") of the main Mount Whitney massif. That's about 13,000 feet.</p><p class="mb-4 ">It's where we're headed.</p></div></div></div><div class="split-image-sticky"><div class="split-image-content"><img src="media/09_first_sight.jpeg" alt=""></div></div></section><section class="split-panel-row" style="background-color:#000000;"><div class="split-image-sticky"><div class="split-image-content"><img src="media/11_Whitney_Griffin_hiking.jpeg" alt=""></div></div><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">7:26 a.m. (5-1/2 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">The clear skies didn't last for long. A sea of clouds slowly creeps up behind us. We're at an elevation of around 11,700 feet.</p><p class="mb-4 ">The sun is out, yet it feels colder. The altitude is making us breathe harder.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">We run into only one other person on this leg of the trail. It's a tall, young guy who passes us, but then takes a wrong turn, and ends up behind us.</p><p class="mb-4 ">Even though this is a well-worn path, it's not always obvious which way to go. That's why we have GPS-enabled maps on our phones (I'm using FarOut).</p></div></div></div></section></div></div><div class="split-mobile-wrapper split-mobile-only" id="split-panel-9h4udzr69-mobile" style="background-color:#000000;"><div class="split-mobile-panel" data-panel="0"><div class="split-mobile-panel-image"><img class="split-mobile-media" src="media/09_first_sight.jpeg" alt=""></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">6:04 a.m. (4 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">Daylight comes. After hiking for hours by headlamp, the rising sun reveals the hard, jagged landscape we've been traversing. I feel like I've been transported. We're close to 11,000 feet.</p><p class="mb-4 ">We've been moving at a steady pace, but I know Griffin wants to hike faster (because he can). For the sake of the rest of us, he'll have to cool his heels.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Far off in the distance (upper left corner of the photo), we catch our first glimpse of the famous golden hue (or "alpenglow") of the main Mount Whitney massif. That's about 13,000 feet.</p><p class="mb-4 ">It's where we're headed.</p></div></div></div></div><div class="split-mobile-panel" data-panel="1"><div class="split-mobile-panel-image"><img class="split-mobile-media" src="media/11_Whitney_Griffin_hiking.jpeg" alt=""></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">7:26 a.m. (5-1/2 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">The clear skies didn't last for long. A sea of clouds slowly creeps up behind us. We're at an elevation of around 11,700 feet.</p><p class="mb-4 ">The sun is out, yet it feels colder. The altitude is making us breathe harder.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">We run into only one other person on this leg of the trail. It's a tall, young guy who passes us, but then takes a wrong turn, and ends up behind us.</p><p class="mb-4 ">Even though this is a well-worn path, it's not always obvious which way to go. That's why we have GPS-enabled maps on our phones (I'm using FarOut).</p></div></div></div></div></div></div>
+<div data-sb-block="4" data-sb-type="full-bleed" data-sb-expected="4" data-sb-expected-std="4"><section class="fullbleed" style="position:relative;z-index:3;padding-top:0;padding-bottom:0;" data-fade-scroll="true">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background:#000;z-index:0;"></div>
+      <div style="position:relative;z-index:1;">
+        <img class="w-full" style="display:block;" src="media/12_near_Trail_Camp.jpeg">
+        
+      </div>
+    </section></div>
+<div data-sb-block="5" data-sb-type="text" data-sb-expected="38" data-sb-expected-std="38"><style>.text-block-drop-cap-txt-e3mduf::first-letter{float:left;font-size:56px !important;line-height:47px !important;padding-right:10px;margin-top:2px;color:#fbbf24 !important;font-weight:bold;}.text-block-drop-cap-txt-e3mduf::first-line{font-size:22px !important;font-weight:600 !important;color:#ffffff !important;}.text-block-section a {
+  color: #e6e6e6;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-thickness 0.15s ease, opacity 0.15s ease;
+}
+.text-block-section a:hover {
+  text-decoration-thickness: 2px;
+  opacity: 0.85;
+}</style><section class="text-block-section relative pt-16 pb-16" style="position:relative;z-index:3;background-color:#000000;"><div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#000000;z-index:0;"></div><div class="relative z-10 px-8 max-w-4xl mx-auto" style="position:relative;z-index:1;"><h3 style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.5;margin-bottom:24px;">8:37 a.m. (6-1/2 hours hiking)</h3><p class="text-block-drop-cap-txt-e3mduf" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We make it to Trail Camp, which is above 12,000 feet. We started our hike at just under 8,400 feet.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">At this elevation, the Cleveland Clinic says you shouldn't ascend more than 1,640 feet per day. We've already doubled that amount. To reach the summit, we'll more than triple the recommended daily limit.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We're 6 miles in with 5 more hard miles to go to reach the top, starting with a section known as the "99 switchbacks." It's more than 2 miles long and ascends around 1,800 feet. It can become dangerous when there's snow or ice (it's where the two recent fatalities occurred). We packed micro-spikes just in case.</p><p style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;margin-bottom:20px;">We take a short breather by a small lake and gird ourselves for what's to come.</p></div></section></div>
+<div data-sb-block="6" data-sb-type="gallery" data-sb-expected="4" data-sb-expected-std="4"><section class="fullbleed" style="position:relative;z-index:3;background-color:#000000;padding-top:0;padding-bottom:50px;">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:#000000;z-index:0;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="display:grid;grid-template-columns:50vw 1fr;grid-template-rows:repeat(2, 50vh);gap:30px;width:100%;height:auto;"><div class="gallery-media-cell" style="grid-column:1;grid-row:1 / 3;position:relative;overflow:hidden;min-height:200px;"><img src="media/13_Tarn.JPG" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block;" alt=""><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:#e5e5e5;font-size:16px;padding:20px 12px 12px;text-align:center;">We take a break by the tarn next to Trail Camp.</div></div><div class="gallery-media-cell" style="grid-column:2;grid-row:1;position:relative;overflow:hidden;min-height:200px;"><img src="media/14_switchbacks02.jpeg" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block;" alt=""><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:#e5e5e5;font-size:16px;padding:20px 12px 12px;text-align:center;">Whitney and Griffin on the 99 Switchbacks.</div></div><div class="gallery-media-cell" style="grid-column:2;grid-row:2;position:relative;overflow:hidden;min-height:200px;"><img src="media/15_switchbacks03.jpeg" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block;" alt=""><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:#e5e5e5;font-size:16px;padding:20px 12px 12px;text-align:center;">The clouds stay at bay for now.</div></div></div>
+      </div>
+    </section></div>
+<div data-sb-block="7" data-sb-type="split-panel" data-sb-expected="4" data-sb-expected-std="4"><style>.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}</style><div class="split-panel-wrapper split-desktop-only" id="split-panel-cealinqit" style="background-color:#000000;"><div class="split-panel-container" style="background-color:#000000;"><section class="split-panel-row" style="background-color:#000000;"><div class="split-image-sticky"><div class="split-image-content"><div style="position:relative;width:100%;height:100%;"><video id="split-panel-cealinqit-video-0" autoplay muted loop playsinline src="media/17_Trail_Crest.mp4" style="width:100%;height:100%;object-fit:cover;"></video><button onclick="toggleMute('split-panel-cealinqit-video-0', this)" style="position:absolute;bottom:20px;left:20px;width:44px;height:44px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div></div></div><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">12:45 p.m. (almost 11 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">We reach Trail Crest at 13,654 feet. It's significant on several fronts.</p><p class="mb-4 ">First, it marks the end of the 99 switchbacks and the start of the toughest leg: 2.8 miles to the summit.</p><p class="mb-4 ">Second, this is where blizzard conditions the day before forced hikers to abandon their summit bid. As you can see, there's little protection from storms or strong winds along the narrow ridge.</p><p class="mb-4 ">And third, this is roughly where Whitney and I turned back last year during our first attempt together. On that occasion, the altitude made Whitney feel ill. She was determined to push on, but I didn't think it was safe, so we descended.</p><p class="mb-4 ">She felt much better today.</p></div></div></div></section><section class="split-panel-row" style="background-color:#000000;"><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Don't Look Down</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">Remember when I said it gets a bit more risky above 12,000 feet? This is what I meant.</p><p class="mb-4 ">The video was taken about 4 feet from the middle of the trail. There are many steep drop-offs like this along the last leg.</p><p class="mb-4 ">On top of that, if you see dark clouds coming, this sign below becomes more important. That hissing (bullet #3) may not be a snake.</p></div><div class="mt-10 mb-6 mx-auto " style="max-width:24rem;"><img src="media/20_danger_sign.jpeg" class="w-full rounded" alt=""></div></div></div><div class="split-image-sticky"><div class="split-image-content"><div style="position:relative;width:100%;height:100%;"><video id="split-panel-cealinqit-video-1" autoplay muted loop playsinline src="media/19_Trail_Crest_cliff.mp4" style="width:100%;height:100%;object-fit:cover;"></video><button onclick="toggleMute('split-panel-cealinqit-video-1', this)" style="position:absolute;bottom:20px;left:20px;width:44px;height:44px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div></div></div></section></div></div><div class="split-mobile-wrapper split-mobile-only" id="split-panel-cealinqit-mobile" style="background-color:#000000;"><div class="split-mobile-panel" data-panel="0"><div class="split-mobile-panel-image"><video id="split-panel-cealinqit-mobile-video-0" class="split-mobile-media" autoplay muted loop playsinline src="media/17_Trail_Crest.mp4"></video><button onclick="toggleMute('split-panel-cealinqit-mobile-video-0', this)" class="mute-btn mobile-mute-btn" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">12:45 p.m. (almost 11 hours hiking)</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">We reach Trail Crest at 13,654 feet. It's significant on several fronts.</p><p class="mb-4 ">First, it marks the end of the 99 switchbacks and the start of the toughest leg: 2.8 miles to the summit.</p><p class="mb-4 ">Second, this is where blizzard conditions the day before forced hikers to abandon their summit bid. As you can see, there's little protection from storms or strong winds along the narrow ridge.</p><p class="mb-4 ">And third, this is roughly where Whitney and I turned back last year during our first attempt together. On that occasion, the altitude made Whitney feel ill. She was determined to push on, but I didn't think it was safe, so we descended.</p><p class="mb-4 ">She felt much better today.</p></div></div></div></div><div class="split-mobile-panel" data-panel="1"><div class="split-mobile-panel-image"><video id="split-panel-cealinqit-mobile-video-1" class="split-mobile-media" autoplay muted loop playsinline src="media/19_Trail_Crest_cliff.mp4"></video><button onclick="toggleMute('split-panel-cealinqit-mobile-video-1', this)" class="mute-btn mobile-mute-btn" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Don't Look Down</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">Remember when I said it gets a bit more risky above 12,000 feet? This is what I meant.</p><p class="mb-4 ">The video was taken about 4 feet from the middle of the trail. There are many steep drop-offs like this along the last leg.</p><p class="mb-4 ">On top of that, if you see dark clouds coming, this sign below becomes more important. That hissing (bullet #3) may not be a snake.</p></div><div class="mt-10 mb-6 mx-auto " style="max-width:24rem;"><img src="media/20_danger_sign.jpeg" class="w-full rounded" alt=""></div></div></div></div></div></div>
+<div data-sb-block="8" data-sb-type="split-panel" data-sb-expected="4" data-sb-expected-std="4"><style>.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-0::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-0::first-line{font-size:22px;font-weight:600;color:#ffffff;}.split-panel-drop-cap-1::first-letter{float:left;font-size:56px;line-height:47px;padding-right:10px;margin-top:2px;color:#fbbf24;font-weight:bold;}.split-panel-drop-cap-1::first-line{font-size:22px;font-weight:600;color:#ffffff;}</style><div class="split-panel-wrapper split-desktop-only" id="split-panel-mj0ewncvn" style="background-color:#000000;"><div class="split-panel-container" style="background-color:#000000;"><section class="split-panel-row" style="background-color:#000000;"><div class="split-image-sticky"><div class="split-image-content"><div style="position:relative;width:100%;height:100%;"><video id="split-panel-mj0ewncvn-video-0" autoplay muted loop playsinline src="media/22_slow_steps.mp4" style="width:100%;height:100%;object-fit:cover;"></video><button onclick="toggleMute('split-panel-mj0ewncvn-video-0', this)" style="position:absolute;bottom:20px;left:20px;width:44px;height:44px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div></div></div><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Higher and Slower</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">For those who have never felt the enfeebling effects of high altitudes, hiking another 2.8 miles can feel insurmountable.</p><p class="mb-4 ">Each step takes effort and the breathing only gets harder as you climb above 13,500 feet.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Meanwhile, your brain tells you that you've gone too far to turn back, just as your body insists you still have much too far to go.</p><p class="mb-4 ">There's a delicate balance of pushing forward but not endangering yourself or the group.</p></div></div></div></section><section class="split-panel-row" style="background-color:#000000;"><div class="split-text-scroll pt-16 pb-16" style="background-color:#000000;"><div class="split-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Mt. Whitney's 'Windows'</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">Most of the time along the high, narrow ridge, you have the security of a rock wall on one side. But there are a number of short sections known as "windows" where there are no walls, and you feel a bit like you're walking a tightrope.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Granted, it's a tightrope that's roughly 6 feet wide, but if you're already feeling unsteady because of fatigue, it can be a little unsettling. It doesn't help that strong gusts of wind can blow through these windows.</p></div></div></div><div class="split-image-sticky"><div class="split-image-content"><div style="position:relative;width:100%;height:100%;"><video id="split-panel-mj0ewncvn-video-1" autoplay muted loop playsinline src="media/23_dropoffs_either_side.mp4" style="width:100%;height:100%;object-fit:cover;"></video><button onclick="toggleMute('split-panel-mj0ewncvn-video-1', this)" style="position:absolute;bottom:20px;left:20px;width:44px;height:44px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div></div></div></section></div></div><div class="split-mobile-wrapper split-mobile-only" id="split-panel-mj0ewncvn-mobile" style="background-color:#000000;"><div class="split-mobile-panel" data-panel="0"><div class="split-mobile-panel-image"><video id="split-panel-mj0ewncvn-mobile-video-0" class="split-mobile-media" autoplay muted loop playsinline src="media/22_slow_steps.mp4"></video><button onclick="toggleMute('split-panel-mj0ewncvn-mobile-video-0', this)" class="mute-btn mobile-mute-btn" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Higher and Slower</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-0">For those who have never felt the enfeebling effects of high altitudes, hiking another 2.8 miles can feel insurmountable.</p><p class="mb-4 ">Each step takes effort and the breathing only gets harder as you climb above 13,500 feet.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Meanwhile, your brain tells you that you've gone too far to turn back, just as your body insists you still have much too far to go.</p><p class="mb-4 ">There's a delicate balance of pushing forward but not endangering yourself or the group.</p></div></div></div></div><div class="split-mobile-panel" data-panel="1"><div class="split-mobile-panel-image"><video id="split-panel-mj0ewncvn-mobile-video-1" class="split-mobile-media" autoplay muted loop playsinline src="media/23_dropoffs_either_side.mp4"></video><button onclick="toggleMute('split-panel-mj0ewncvn-mobile-video-1', this)" class="mute-btn mobile-mute-btn" aria-label="Toggle mute"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg></button></div><div class="split-mobile-panel-text pt-16 pb-16" style="background-color:#000000;"><div class="split-mobile-text-inner max-w-lg"><h3 class="text-left mb-6" style="color:#f28926;font-size:28px;font-family:Newsreader, serif;font-weight:400;font-style:normal;line-height:1.2;">Mt. Whitney's 'Windows'</h3><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 split-panel-drop-cap-1">Most of the time along the high, narrow ridge, you have the security of a rock wall on one side. But there are a number of short sections known as "windows" where there are no walls, and you feel a bit like you're walking a tightrope.</p></div><div class="leading-relaxed" style="color:#e5e5e5;font-size:19px;font-family:Inter, sans-serif;font-weight:400;font-style:normal;line-height:1.7;"><p class="mb-4 ">Granted, it's a tightrope that's roughly 6 feet wide, but if you're already feeling unsteady because of fatigue, it can be a little unsettling. It doesn't help that strong gusts of wind can blow through these windows.</p></div></div></div></div></div></div>
+    <script>
+(function(){
+  var els = document.querySelectorAll('[data-fade-scroll="true"]');
+  if(!els.length) return;
+  
+  var ticking = false;
+  var scrollCount = 0;
+  
+  function checkVisibility(){
+    if(ticking) return;
+    ticking = true;
+    
+    requestAnimationFrame(function(){
+      var vh = window.innerHeight;
+      
+      for(var i = 0; i < els.length; i++){
+        var el = els[i];
+        if(el.style.opacity === '1') continue;
+        
+        var rect = el.getBoundingClientRect();
+        if(rect.top < vh * 0.85){
+          el.style.opacity = '1';
+        }
+      }
+      
+      ticking = false;
+    });
+  }
+  
+  function onScroll(){
+    if(scrollCount === 1){
+      setTimeout(checkVisibility, 50);
+    } else {
+      checkVisibility();
+    }
+    scrollCount++;
+  }
+  
+  setTimeout(function(){
+    var vh = window.innerHeight;
+    for(var i = 0; i < els.length; i++){
+      var el = els[i];
+      var rect = el.getBoundingClientRect();
+      if(rect.top > vh * 0.5){
+        el.style.opacity = '0';
+      }
+    }
+  }, 100);
+  
+  window.addEventListener('scroll', onScroll, {passive: true});
+})();</script>
+    
+    <script>
+function toggleMute(videoId, button) {
+  var video = document.getElementById(videoId);
+  if (!video) return;
+  video.muted = !video.muted;
+  var mutedLine = button.querySelector('.muted-line');
+  var unmutedPath = button.querySelector('.unmuted-path');
+  if (video.muted) {
+    if (mutedLine) mutedLine.style.display = 'block';
+    if (unmutedPath) unmutedPath.style.opacity = '0.3';
+  } else {
+    if (mutedLine) mutedLine.style.display = 'none';
+    if (unmutedPath) unmutedPath.style.opacity = '1';
+  }
+}
+(function(){
+  var wrappers=document.querySelectorAll('.split-panel-wrapper');
+  if(!wrappers.length)return;
+  
+  wrappers.forEach(function(wrapper){
+    var container=wrapper.querySelector('.split-panel-container');
+    if(!container)return;
+    
+    var rows=container.querySelectorAll('.split-panel-row');
+    if(rows.length<2)return;
+    
+    var firstRow=rows[0];
+    var secondRow=rows[1];
+    
+    var firstImage=firstRow.querySelector('.split-image-sticky');
+    var secondImage=secondRow.querySelector('.split-image-sticky');
+    if(!firstImage||!secondImage)return;
+    
+    function applyMobileStyles(){
+      firstImage.style.display='block';
+      firstImage.style.clipPath='none';
+      firstImage.style.opacity='1';
+      firstImage.style.position='relative';
+      firstImage.style.transform='none';
+      
+      secondImage.style.display='block';
+      secondImage.style.clipPath='none';
+      secondImage.style.opacity='1';
+      secondImage.style.position='relative';
+      secondImage.style.transform='none';
+      
+      firstRow.style.opacity='1';
+      firstRow.style.visibility='visible';
+      secondRow.style.opacity='1';
+      secondRow.style.visibility='visible';
+    }
+    
+    function checkAndApply(){
+      var isMobile = window.innerWidth <= 1024;
+
+      if(isMobile){
+        applyMobileStyles();
+        return;
+      }
+
+      var windowHeight=window.innerHeight;
+      var firstRowRect=firstRow.getBoundingClientRect();
+      var secondRowRect=secondRow.getBoundingClientRect();
+
+      // If split panel is below viewport, hide both images
+      if(firstRowRect.top>=windowHeight){
+        firstImage.style.display='none';
+        secondImage.style.display='none';
+        return;
+      }
+      
+      if(firstRowRect.top<windowHeight&&firstRowRect.bottom>windowHeight*0.01){
+        firstImage.style.display='block';
+        var revealAmount=Math.max(0,Math.min(windowHeight,windowHeight-firstRowRect.top));
+        var clipPercent=(revealAmount/windowHeight)*100;
+        firstImage.style.clipPath='inset('+(100-clipPercent)+'% 0 0 0)';
+        firstImage.style.opacity='1';
+      } else {
+        firstImage.style.display='none';
+      }
+      
+      if(secondRowRect.top<windowHeight&&secondRowRect.bottom>windowHeight*0.01){
+        secondImage.style.display='block';
+        var revealAmount2=Math.max(0,Math.min(windowHeight,windowHeight-secondRowRect.top));
+        var clipPercent2=(revealAmount2/windowHeight)*100;
+        secondImage.style.clipPath='inset('+(100-clipPercent2)+'% 0 0 0)';
+        secondImage.style.opacity='1';
+      } else {
+        secondImage.style.display='none';
+      }
+    }
+    
+    firstImage.style.transition='opacity 0.4s ease';
+    secondImage.style.transition='opacity 0.4s ease';
+    
+    window.addEventListener('scroll',checkAndApply,{passive:true});
+    window.addEventListener('resize',checkAndApply);
+    window.addEventListener('load',checkAndApply);
+    checkAndApply();
+  });
+})();</script><script>
+(function(){
+  function isMobile() {
+    return window.innerWidth <= 1024;
+  }
+  
+  function initMobileSplitPanels() {
+    if (!isMobile()) return;
+    
+    var wrappers = document.querySelectorAll('.split-mobile-wrapper');
+    if (!wrappers.length) return;
+    
+    wrappers.forEach(function(wrapper) {
+      var imagesContainer = wrapper.querySelector('.split-mobile-images');
+      var images = wrapper.querySelectorAll('.split-mobile-image');
+      var textSections = wrapper.querySelectorAll('.split-mobile-text-section');
+      
+      if (!imagesContainer || !images.length || !textSections.length) return;
+      
+      var currentPanel = 0;
+      var ticking = false;
+      
+      function updateActiveImage() {
+        if (!isMobile()) return;
+        
+        var imagesRect = imagesContainer.getBoundingClientRect();
+        var triggerPoint = imagesRect.bottom;
+        
+        var activePanel = 0;
+        
+        for (var i = 0; i < textSections.length; i++) {
+          var section = textSections[i];
+          var rect = section.getBoundingClientRect();
+          
+          if (rect.top <= triggerPoint) {
+            activePanel = i;
+          }
+        }
+        
+        if (activePanel !== currentPanel) {
+          currentPanel = activePanel;
+          
+          for (var j = 0; j < images.length; j++) {
+            images[j].style.opacity = (j === activePanel) ? '1' : '0';
+          }
+        }
+      }
+      
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(function() {
+            updateActiveImage();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
+      
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', updateActiveImage);
+      
+      setTimeout(updateActiveImage, 100);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileSplitPanels);
+  } else {
+    initMobileSplitPanels();
+  }
+})();</script>
+    <script>
+(function(){
+  var videos = document.querySelectorAll('video');
+  if (!videos.length) return;
+  
+  // Firefox autoplay fix - force play on muted autoplay videos
+  videos.forEach(function(v) {
+    if (v.hasAttribute('autoplay') && v.muted) {
+      v.play().catch(function(e) {
+        // Autoplay was prevented, try again on user interaction
+        document.addEventListener('click', function playOnce() {
+          v.play();
+          document.removeEventListener('click', playOnce);
+        }, { once: true });
+      });
+    }
+  });
+  
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) {
+        var video = entry.target;
+        video.muted = true;
+        // Update any associated mute button
+        var container = video.closest('.hero-image-section, .pls-mobile-image, .pls-image, .split-mobile-panel-image, .split-image-content, .gallery-media-cell');
+        if (container) {
+          var btn = container.querySelector('.mute-btn');
+          if (btn) {
+            var mutedLine = btn.querySelector('.muted-line');
+            var unmutedPath = btn.querySelector('.unmuted-path');
+            if (mutedLine) mutedLine.style.display = 'block';
+            if (unmutedPath) unmutedPath.style.opacity = '0.3';
+          }
+        }
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  videos.forEach(function(v) { observer.observe(v); });
+})();</script>
+    <script>
+window.addEventListener('scroll', function() {
+  var h = document.documentElement;
+  var b = document.body;
+  var st = 'scrollTop';
+  var sh = 'scrollHeight';
+  var percent = (h[st]||b[st]) / ((h[sh]||b[sh]) - h.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = percent + '%';
+}, {passive: true});
+</script>
+    
+<script>
+(function() {
+  const SUPABASE_URL = 'https://bobrvqpasntigqcrerqa.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_buetBM4cFeIFRRFbOURKcA_9Ewwoa8J';
+  const STORY_ID = 'a9a86642-b347-45a3-85b6-0ce10c8875e5';
+  const SESSION_ID = 'ses_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  const blockTimes = new Map();
+  let maxScrollDepth = 0;
+
+  async function sendEvent(eventType, data = {}) {
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/analytics_events', {
+        method: 'POST',
+        credentials: 'omit',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          story_id: STORY_ID,
+          session_id: SESSION_ID,
+          event_type: eventType,
+          block_index: data.blockIndex ?? null,
+          block_type: data.blockType ?? null,
+          event_data: data.eventData ?? {},
+          user_agent: navigator.userAgent,
+          viewport_width: window.innerWidth,
+          viewport_height: window.innerHeight,
+          referrer: document.referrer || null
+        })
+      });
+    } catch (e) { console.warn('[Analytics]', e); }
+  }
+
+  sendEvent('page_view');
+
+  const blocks = document.querySelectorAll('[data-sb-block]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const block = entry.target;
+      const index = parseInt(block.dataset.sbBlock);
+      const type = block.dataset.sbType || 'unknown';
+      if (!blockTimes.has(index)) {
+        blockTimes.set(index, { startTime: null, totalTime: 0, visible: false, tracked: false });
+      }
+      const state = blockTimes.get(index);
+      if (entry.isIntersecting) {
+        state.visible = true;
+        state.startTime = Date.now();
+        if (!state.tracked) {
+          state.tracked = true;
+          sendEvent('block_view', { blockIndex: index, blockType: type });
+        }
+      } else {
+        if (state.visible && state.startTime) {
+          state.totalTime += Date.now() - state.startTime;
+        }
+        state.visible = false;
+        state.startTime = null;
+      }
+    });
+  }, { threshold: 0.5 });
+  blocks.forEach(block => observer.observe(block));
+
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const scrollPct = Math.round((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100);
+      if (scrollPct > maxScrollDepth) maxScrollDepth = scrollPct;
+    }, 100);
+  }, { passive: true });
+
+  function sendEngagement() {
+    blockTimes.forEach((st, index) => {
+      if (st.visible && st.startTime) st.totalTime += Date.now() - st.startTime;
+    });
+    const blockElements = document.querySelectorAll('[data-sb-block]');
+    blockTimes.forEach((st, index) => {
+      if (st.totalTime > 1000) {
+        const block = blockElements[index];
+        const expectedTime = parseInt(block?.dataset.sbExpected) || 0;
+        const expectedTimeStd = parseInt(block?.dataset.sbExpectedStd) || 0;
+        const engagementPct = expectedTime > 0 ? Math.round((st.totalTime / 1000 / expectedTime) * 100) : 0;
+        const engagementPctStd = expectedTimeStd > 0 ? Math.round((st.totalTime / 1000 / expectedTimeStd) * 100) : 0;
+        fetch(SUPABASE_URL + '/rest/v1/analytics_events', {
+          method: 'POST', keepalive: true, credentials: 'omit',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            story_id: STORY_ID, session_id: SESSION_ID, event_type: 'block_engage',
+            block_index: index, block_type: block?.dataset.sbType || 'unknown',
+            event_data: {
+              duration_ms: st.totalTime,
+              expected_time_sec: expectedTime,
+              expected_time_std_sec: expectedTimeStd,
+              engagement_pct: engagementPct,
+              engagement_pct_std: engagementPctStd
+            },
+            user_agent: navigator.userAgent, viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight, referrer: document.referrer || null
+          })
+        });
+      }
+    });
+    if (maxScrollDepth > 0) {
+      fetch(SUPABASE_URL + '/rest/v1/analytics_events', {
+        method: 'POST', keepalive: true, credentials: 'omit',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          story_id: STORY_ID, session_id: SESSION_ID, event_type: 'scroll_depth',
+          block_index: null, block_type: null, event_data: { scroll_pct: maxScrollDepth },
+          user_agent: navigator.userAgent, viewport_width: window.innerWidth,
+          viewport_height: window.innerHeight, referrer: document.referrer || null
+        })
+      });
+    }
+  }
+  window.addEventListener('beforeunload', sendEngagement);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sendEngagement(); });
+})();
+</script>
+  </body>
+</html>
