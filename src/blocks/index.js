@@ -3,7 +3,7 @@ import { FullBleedBlock } from './fullBleed.js';
 import { TextBlock } from './text.js';
 import { SplitPanelBlock } from './splitPanel.js';
 import { ZoomPhotoBlock } from './zoomPhoto.js';
-import { SplitLayoutBlock } from './splitLayout.js';
+import { SplitLayoutBlock } from './splitlayout.js';
 import { GalleryBlock } from './gallery.js';  // ← ADD THIS
 import { PhotoLedeBlock } from './photoLede.js';
 import { PhotoLedeSideBlock } from './photoLedeSide.js';
