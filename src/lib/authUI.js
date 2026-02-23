@@ -1,5 +1,8 @@
-import { signIn, signUp, signOut, getUser, onAuthStateChange, resetPassword } from './auth.js';
+import { signIn, signUp, signOut, getUser, onAuthStateChange, resetPassword, updatePassword } from './auth.js';
 import { isSupabaseConfigured } from './supabase.js';
+
+// DEV MODE: Set to true to bypass authentication for local testing
+const DEV_BYPASS_AUTH = false;
 
 /**
  * Auth UI State Manager
@@ -10,12 +13,35 @@ export class AuthUI {
     this.container = containerEl;
     this.onAuthChange = onAuthChange;
     this.user = null;
-    this.mode = 'signin'; // 'signin', 'signup', 'reset'
+    this.mode = 'signin'; // 'signin', 'signup', 'reset', 'update-password'
     this.loading = false;
     this.error = null;
+    this.isRecoveryMode = false;
+
+    // DEV MODE: Bypass auth for local testing
+    if (DEV_BYPASS_AUTH) {
+      this.user = { id: 'dev-user', email: 'dev@localhost' };
+      this.renderDevMode();
+      if (this.onAuthChange) {
+        this.onAuthChange(this.user);
+      }
+      return;
+    }
+
+    // Check URL hash for recovery token BEFORE auth state changes
+    this.checkForRecoveryToken();
 
     // Subscribe to auth changes
     this.subscription = onAuthStateChange((event, session) => {
+      // Handle password recovery flow
+      if (event === 'PASSWORD_RECOVERY' || this.isRecoveryMode) {
+        this.mode = 'update-password';
+        this.isRecoveryMode = true;
+        this.render();
+        // Don't call onAuthChange - user needs to set password first
+        return;
+      }
+
       this.user = session?.user || null;
       this.render();
       if (this.onAuthChange) {
@@ -23,8 +49,30 @@ export class AuthUI {
       }
     });
 
-    // Initial check
-    this.checkUser();
+    // Initial check (skip if in recovery mode)
+    if (!this.isRecoveryMode) {
+      this.checkUser();
+    } else {
+      // Render immediately to show password update form
+      this.render();
+    }
+  }
+
+  renderDevMode() {
+    this.container.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #fef3c7; border-radius: 6px;">
+        <span style="font-size: 12px; color: #92400e;">DEV MODE</span>
+      </div>
+    `;
+  }
+
+  checkForRecoveryToken() {
+    // Supabase includes type=recovery in the URL hash
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      this.isRecoveryMode = true;
+      this.mode = 'update-password';
+    }
   }
 
   async checkUser() {
@@ -89,6 +137,27 @@ export class AuthUI {
     this.render();
   }
 
+  async handleUpdatePassword(newPassword) {
+    this.loading = true;
+    this.error = null;
+    this.render();
+
+    const { error } = await updatePassword(newPassword);
+
+    this.loading = false;
+    if (error) {
+      this.error = error.message;
+    } else {
+      this.mode = 'password-updated';
+      this.isRecoveryMode = false;
+      // Clear URL hash
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+    this.render();
+  }
+
   async handleSignOut() {
     await signOut();
     this.user = null;
@@ -147,6 +216,63 @@ export class AuthUI {
         </div>
       `;
       this.container.querySelector('#auth-back-btn').addEventListener('click', () => this.setMode('signin'));
+      return;
+    }
+
+    if (this.mode === 'update-password') {
+      this.container.innerHTML = `
+        <div class="auth-form" style="padding: 1rem;">
+          <h3 style="margin: 0 0 1rem 0; font-size: 16px; font-weight: 600;">Set New Password</h3>
+          ${this.error ? `<div style="padding: 0.5rem; background: #fef2f2; color: #dc2626; border-radius: 6px; margin-bottom: 1rem; font-size: 13px;">${this.error}</div>` : ''}
+          <form id="auth-form">
+            <div style="margin-bottom: 0.75rem;">
+              <input type="password" id="auth-password" placeholder="New password" required minlength="6"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+              <input type="password" id="auth-password-confirm" placeholder="Confirm password" required minlength="6"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <button type="submit" ${this.loading ? 'disabled' : ''}
+              style="width: 100%; padding: 0.625rem; border: none; background: ${this.loading ? '#9ca3af' : '#3b82f6'}; color: white; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: ${this.loading ? 'wait' : 'pointer'};">
+              ${this.loading ? 'Please wait...' : 'Update Password'}
+            </button>
+          </form>
+        </div>
+      `;
+
+      this.container.querySelector('#auth-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const password = this.container.querySelector('#auth-password').value;
+        const confirmPassword = this.container.querySelector('#auth-password-confirm').value;
+
+        if (password !== confirmPassword) {
+          this.error = 'Passwords do not match';
+          this.render();
+          return;
+        }
+
+        await this.handleUpdatePassword(password);
+      });
+      return;
+    }
+
+    if (this.mode === 'password-updated') {
+      this.container.innerHTML = `
+        <div class="auth-form" style="padding: 1.5rem; background: #f0fdf4; border-radius: 8px; text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 0.5rem;">✓</div>
+          <strong>Password Updated</strong><br>
+          <small>Your password has been successfully changed.</small>
+          <button id="auth-back-btn" style="margin-top: 1rem; padding: 0.5rem 1rem; border: none; background: #3b82f6; color: white; border-radius: 6px; cursor: pointer;">
+            Sign In
+          </button>
+        </div>
+      `;
+      this.container.querySelector('#auth-back-btn').addEventListener('click', async () => {
+        this.isRecoveryMode = false;
+        // Re-check user - they should now be logged in with new password
+        await this.checkUser();
+      });
       return;
     }
 

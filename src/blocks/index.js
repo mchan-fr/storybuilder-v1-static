@@ -4,9 +4,10 @@ import { TextBlock } from './text.js';
 import { SplitPanelBlock } from './splitPanel.js';
 import { ZoomPhotoBlock } from './zoomPhoto.js';
 import { SplitLayoutBlock } from './splitlayout.js';
-import { GalleryBlock } from './gallery.js';  // ← ADD THIS
+import { GalleryBlock } from './gallery.js';
 import { PhotoLedeBlock } from './photoLede.js';
 import { PhotoLedeSideBlock } from './photoLedeSide.js';
+import { CinematicScrollBlock } from './cinematicScroll.js';
 
 export const BLOCKS = {
   [HeroBlock.type]: HeroBlock,
@@ -15,9 +16,10 @@ export const BLOCKS = {
   [SplitPanelBlock.type]: SplitPanelBlock,
   [ZoomPhotoBlock.type]: ZoomPhotoBlock,
   [SplitLayoutBlock.type]: SplitLayoutBlock,
-  [GalleryBlock.type]: GalleryBlock,  // ← ADD THIS
+  [GalleryBlock.type]: GalleryBlock,
   [PhotoLedeBlock.type]: PhotoLedeBlock,
   [PhotoLedeSideBlock.type]: PhotoLedeSideBlock,
+  [CinematicScrollBlock.type]: CinematicScrollBlock,
 };
 
 export function newBlock(type) {

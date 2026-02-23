@@ -90,7 +90,22 @@ export async function resetPassword(email) {
   }
 
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin
+    redirectTo: window.location.origin + '/app.html'
+  });
+
+  return { data, error };
+}
+
+/**
+ * Update user password (used after clicking reset link)
+ */
+export async function updatePassword(newPassword) {
+  if (!isSupabaseConfigured()) {
+    return { error: { message: 'Supabase not configured' } };
+  }
+
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword
   });
 
   return { data, error };

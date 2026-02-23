@@ -2,6 +2,7 @@
 import { BLOCKS } from './blocks/index.js';
 import { initZoomRuntime } from './zoomRuntime.js';
 import { initFadeRuntime } from './fadeRuntime.js';
+import { initCinematicScrollRuntime } from './cinematicScrollRuntime.js';
 import { calculateExpectedTime, getEffectiveExpectedTime } from './lib/expectedTime.js';
 
 /* ---------- helpers ---------- */
@@ -279,6 +280,33 @@ img,video{display:block;max-width:100%;height:auto}
 .sb-zoom-spacer{position:relative;z-index:1}
 
 /* ========================================
+   CINEMATIC SCROLL - DESKTOP
+   ======================================== */
+.sb-cinematic-scroll{position:relative;z-index:1}
+.cs-media-wrap{position:absolute;top:0;left:0;right:0;height:100vh;overflow:hidden;z-index:1}
+.cs-media-wrap.is-fixed{position:fixed}
+.cs-media-wrap.is-bottom{position:absolute;top:auto;bottom:0}
+.cs-media-slide{position:absolute;inset:0;opacity:0;transition:opacity 0.4s ease}
+.cs-media-slide.active{opacity:1}
+.cs-media-slide img,.cs-media-slide video{width:100%;height:100%;object-fit:cover;display:block}
+.cs-placeholder{width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;color:#666;font-size:24px}
+.cs-text-wrap{position:relative;z-index:10;pointer-events:none;padding-top:100vh}
+.cs-text-slide{padding:0 5vw}
+.cs-text-inner{padding:40px;pointer-events:auto}
+.cs-subhead{margin:0 0 1rem 0}
+.cs-text-inner h2{margin:0 0 1rem 0}
+.cs-text-inner div{margin:0}
+
+/* Cinematic Scroll Mobile */
+.sb-cinematic-mobile{display:none}
+.cs-mob-slide{position:relative;min-height:100vh}
+.cs-mob-media{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden}
+.cs-mob-media img,.cs-mob-media video{width:100%;height:100%;object-fit:cover;display:block}
+.cs-mob-text{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:2rem 1.5rem 3rem;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.3) 50%,transparent 100%)}
+.cs-mob-text h2{margin:0 0 1rem 0}
+.cs-mob-text div{margin:0}
+
+/* ========================================
    PAIR FADE EFFECT
    ======================================== */
 .sb-fadepair{position:relative;height:var(--fadeH,200vh)}
@@ -295,7 +323,7 @@ img,video{display:block;max-width:100%;height:auto}
    MOBILE STYLES (max-width: 1024px)
    ======================================== */
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px), (max-aspect-ratio: 3/4) {
 
   .desktop-mute-btn { display: none !important; }
   .mobile-mute-btn { display: flex !important; }
@@ -319,6 +347,16 @@ img,video{display:block;max-width:100%;height:auto}
   
   .gallery-media-cell {
     position: relative !important;
+  }
+
+  /* Cinematic Scroll - keep desktop version on all screens */
+  .sb-cinematic-mobile { display: none !important; }
+  .cs-text-slide { padding: 0 1rem; }
+  .cs-text-inner { padding: 1.5rem; }
+
+  .cs-mob-media .mobile-mute-btn {
+    bottom: 20px !important;
+    left: 20px !important;
   }
 
   .split-desktop-only { display: none !important; }
@@ -945,6 +983,17 @@ img,video{display:block;max-width:100%;height:auto}
     font-size: 4rem !important;
     line-height: 3rem !important;
   }
+
+  /* Cinematic scroll mobile - larger media on tablets */
+  .cs-mob-media {
+    height: 85vh !important;
+    min-height: 600px !important;
+    max-height: none !important;
+  }
+
+  .cs-mob-text {
+    padding: 2.5rem !important;
+  }
 }
 
 @supports (-webkit-touch-callout: none) {
@@ -1059,6 +1108,97 @@ const ZOOM_RUNTIME = `
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.sb-zoomsec').forEach(wire);});}
   else{document.querySelectorAll('.sb-zoomsec').forEach(wire);}
+})();`;
+
+const CINEMATIC_SCROLL_RUNTIME = `
+(function(){
+  function wire(section){
+    if(section.__cinematicBound)return;
+    section.__cinematicBound=true;
+
+    var mediaWrap=section.querySelector('.cs-media-wrap');
+    var mediaSlides=section.querySelectorAll('.cs-media-slide');
+    var textSlides=section.querySelectorAll('.cs-text-slide');
+
+    if(!mediaWrap||!mediaSlides.length)return;
+
+    var slideCount=parseInt(section.dataset.slideCount||'1');
+    var currentSlide=0;
+    var ticking=false;
+
+    function onScroll(){if(!ticking){requestAnimationFrame(update);ticking=true;}}
+
+    function update(){
+      ticking=false;
+      var vh=window.innerHeight;
+      var rect=section.getBoundingClientRect();
+
+      // Control media position: absolute(top) -> fixed -> absolute(bottom)
+      if(rect.top>0){
+        mediaWrap.classList.remove('is-fixed','is-bottom');
+      }else if(rect.bottom>vh){
+        mediaWrap.classList.add('is-fixed');
+        mediaWrap.classList.remove('is-bottom');
+      }else{
+        mediaWrap.classList.remove('is-fixed');
+        mediaWrap.classList.add('is-bottom');
+      }
+
+      // Multi-slide crossfades
+      if(slideCount>1){
+        var bestSlide=0;
+        var bestScore=-1;
+
+        for(var i=0;i<textSlides.length;i++){
+          var textInner=textSlides[i].querySelector('.cs-text-inner');
+          if(!textInner)continue;
+
+          var r=textInner.getBoundingClientRect();
+          var top=Math.max(0,r.top);
+          var bottom=Math.min(vh,r.bottom);
+          var visibleHeight=Math.max(0,bottom-top);
+          var visibility=visibleHeight/r.height;
+
+          var centerY=(r.top+r.bottom)/2;
+          var positionScore=1-Math.abs(centerY-vh*0.6)/vh;
+          var score=visibility*0.7+positionScore*0.3;
+
+          if(score>bestScore&&visibility>0.1){
+            bestScore=score;
+            bestSlide=i;
+          }
+
+          if(r.bottom<vh*0.3&&i<slideCount-1){
+            var nextInner=textSlides[i+1]?textSlides[i+1].querySelector('.cs-text-inner'):null;
+            if(nextInner&&nextInner.getBoundingClientRect().top<vh){
+              bestSlide=Math.max(bestSlide,i+1);
+            }
+          }
+        }
+
+        if(bestSlide!==currentSlide){
+          currentSlide=bestSlide;
+          for(var j=0;j<mediaSlides.length;j++){
+            if(j===currentSlide){mediaSlides[j].classList.add('active');}
+            else{mediaSlides[j].classList.remove('active');}
+          }
+        }
+      }
+    }
+
+    window.addEventListener('scroll',onScroll,{passive:true});
+    window.addEventListener('resize',onScroll);
+    mediaSlides[0].classList.add('active');
+    onScroll();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){
+      document.querySelectorAll('.sb-cinematic-scroll').forEach(wire);
+    });
+  }else{
+    document.querySelectorAll('.sb-cinematic-scroll').forEach(wire);
+  }
 })();`;
 
 const SPLIT_PANEL_RUNTIME = `
@@ -1346,6 +1486,7 @@ function buildFullHtmlPage(bodyContent) {
     ${bodyContent}
     <script>${STICKY_RUNTIME}<\/script>
     <script>${ZOOM_RUNTIME}<\/script>
+    <script>${CINEMATIC_SCROLL_RUNTIME}<\/script>
     <script>${SPLIT_PANEL_RUNTIME}<\/script>
     <script>${SPLIT_MOBILE_RUNTIME}<\/script>
     <script>${AUTO_MUTE_RUNTIME}<\/script>
@@ -1383,6 +1524,7 @@ export function renderPreview({ state, mount, mode = 'iframe', selectedBlockInde
     mount.innerHTML = parts.join('\n');
 
     initZoomRuntime(mount);
+    initCinematicScrollRuntime(mount);
     initFadeRuntime(mount);
     hydrateInlineScripts(mount);
     initStickyReveal(mount);
@@ -1589,6 +1731,7 @@ export function buildExportHtml({ state }) {
 
   const needsZoom  = /class="[^"]*\bsb-zoomsec\b/.test(body);
   const needsSplit = /class="[^"]*\bsplit-panel-wrapper\b/.test(body) || /class="[^"]*\bsplit-mobile-wrapper\b/.test(body);
+  const needsCinematic = /class="[^"]*\bsb-cinematic-scroll\b/.test(body);
 
   const doctype = '<!DOCTYPE html>';
   return `${doctype}
@@ -1612,6 +1755,7 @@ export function buildExportHtml({ state }) {
     ${body}
     <script>${BOOT_FADE}<\/script>
     ${needsZoom  ? `<script>${ZOOM_RUNTIME}<\/script>`  : ''}
+    ${needsCinematic ? `<script>${CINEMATIC_SCROLL_RUNTIME}<\/script>` : ''}
     ${needsSplit ? `<script>${SPLIT_PANEL_RUNTIME}<\/script><script>${SPLIT_MOBILE_RUNTIME}<\/script>` : ''}
     <script>${AUTO_MUTE_RUNTIME}<\/script>
     <script>

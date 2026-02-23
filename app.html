@@ -186,6 +186,12 @@
             color: #7e22ce;
         }
 
+        /* Cinematic Scroll - teal */
+        .badge-cinematic-scroll {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
         .preview-toggle {
             display: flex;
             background: #f3f4f6;
@@ -391,6 +397,7 @@
 
         // Populate block type dropdown (explicit order)
         const blockOrder = [
+            'cinematic-scroll',
             'full-bleed',
             'gallery',
             'hero',
@@ -1192,6 +1199,44 @@ function renderEditor() {
                 });
             });
 
+            // Cinematic Scroll block: Slide count buttons
+            els.editorPanel.querySelectorAll('.slide-count-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const newCount = parseInt(btn.dataset.slideCount);
+                    const currentCount = block.slides ? block.slides.length : 1;
+
+                    // Warn if slides will be removed
+                    if (block.slides && block.slides.length > newCount) {
+                        if (!confirm(`Switching to ${newCount} slides will remove extra slides. Continue?`)) {
+                            return;
+                        }
+                    }
+
+                    // Ensure slides array exists and has correct length
+                    if (!block.slides) block.slides = [];
+                    while (block.slides.length < newCount) {
+                        block.slides.push({
+                            media: '',
+                            video: '',
+                            poster: '',
+                            focusX: 0.5,
+                            focusY: 0.5,
+                            headline: '',
+                            headlineStyle: { size: '42', weight: 'bold', color: '#ffffff', font: 'system-ui' },
+                            text: '',
+                            textStyle: { size: '18', weight: 'normal', color: '#e5e5e5', font: 'system-ui', leading: '1.7' },
+                            textPosition: 'center'
+                        });
+                    }
+                    // Trim if reducing
+                    if (block.slides.length > newCount) {
+                        block.slides = block.slides.slice(0, newCount);
+                    }
+
+                    renderEditor();
+                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                });
+            });
 
 
             // Handle panel add/remove buttons (add this after the input listeners in renderEditor)
