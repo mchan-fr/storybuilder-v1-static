@@ -15,9 +15,11 @@ export function resolvePreviewPath(inputPath, projectFolder) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;
 
-  // Paths starting with "projects/" are bundled demo/sample paths - serve directly
+  // Paths starting with "projects/" are bundled demo/sample paths - serve with base URL
   if (inputPath.startsWith('projects/')) {
-    return inputPath;
+    // import.meta.env.BASE_URL is '/' in dev, '/storybuilder-v1-static/' in production
+    const base = import.meta.env.BASE_URL || '/';
+    return base + inputPath;
   }
 
   // Check blob URL cache first (populated by resolveAllMediaPaths before render)
