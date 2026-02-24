@@ -35,8 +35,17 @@ export class StoriesUI {
 
   async loadDemoStory() {
     try {
-      const response = await fetch('projects/mt_whitney_demo/story.json');
+      // Try relative path first (works in dev), fall back to base-aware path
+      let response = await fetch('projects/mt_whitney_demo/story.json');
+      if (!response.ok) {
+        // Try with base path for production (GitHub Pages)
+        response = await fetch('./projects/mt_whitney_demo/story.json');
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const data = await response.json();
+      console.log('Demo story loaded:', data.pageTitle, 'with', data.blocks?.length, 'blocks');
       return data;
     } catch (err) {
       console.error('Failed to load demo story:', err);
@@ -208,7 +217,7 @@ export class StoriesUI {
                     ${story.isDemo ? '<span style="font-size: 10px; background: #fbbf24; color: #78350f; padding: 1px 5px; border-radius: 3px;">DEMO</span>' : ''}
                     ${story.title || 'Untitled'}
                   </div>
-                  ${!story.isDemo ? `<div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>` : '<div style="font-size: 11px; color: #6b7280;">Sample project to explore <span style="color: #dc2626;">(can\'t save)</span></div>'}
+                  ${!story.isDemo ? `<div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>` : '<div style="font-size: 11px; color: #6b7280;">Sample project to explore, edit <span style="color: #dc2626;">(can\'t save)</span></div>'}
                 </div>
                 ${!story.isDemo ? `
                   <button class="story-delete-btn" data-id="${story.id}" style="padding: 0.25rem 0.5rem; font-size: 11px; border: none; background: transparent; color: #ef4444; cursor: pointer; flex-shrink: 0;">
