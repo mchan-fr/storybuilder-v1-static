@@ -97,10 +97,28 @@ export function clearBlobUrlCache() {
   blobUrlCache.clear();
 }
 
+/**
+ * Resolve path for export HTML
+ * If File System API is connected, prepends the selected folder name (e.g., "media/")
+ * so exported HTML works when placed next to the media folder
+ */
 export function resolveExportPath(inputPath) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;
-  return (inputPath || '').replace(/^\.?\/*/, '');
+
+  // Clean the path
+  const cleanPath = (inputPath || '').replace(/^\.?\/*/, '');
+
+  // If File System API is connected, prepend the folder name
+  const folderName = fileSystem.getDirectoryName();
+  if (folderName && fileSystem.hasDirectoryAccess()) {
+    // Don't double-prepend if path already starts with folder name
+    if (!cleanPath.startsWith(folderName + '/')) {
+      return folderName + '/' + cleanPath;
+    }
+  }
+
+  return cleanPath;
 }
 
 export function dl(name, text) {
