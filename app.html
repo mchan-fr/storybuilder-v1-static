@@ -303,6 +303,14 @@
                 <!-- Cloud Stories Section -->
                 <div id="storiesContainer" class="border-b border-gray-300 bg-white px-4 py-2"></div>
 
+                <!-- Demo Mode Banner (hidden by default) -->
+                <div id="demoBanner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2">
+                    <div class="flex items-center gap-2 text-amber-800 text-xs">
+                        <span class="font-semibold">DEMO MODE</span>
+                        <span class="text-amber-600">Changes won't be saved. Start a new project to save your work.</span>
+                    </div>
+                </div>
+
                 <div class="p-4 border-b border-gray-300 bg-gray-50">
                     <h2 class="font-semibold text-gray-900 mb-3">Story Blocks</h2>
                     <div class="space-y-2">
@@ -367,7 +375,7 @@
         import { dl, setPreviewZoom, initTextToolbars, resolveAllMediaPaths, clearBlobUrlCache } from './src/utils.js';
         import { BLOCKS, newBlock } from './src/blocks/index.js';
         import { AuthUI } from './src/lib/authUI.js';
-        import { StoriesUI } from './src/lib/storiesUI.js';
+        import { StoriesUI, isInDemoMode } from './src/lib/storiesUI.js';
         import { AnalyticsUI } from './src/lib/analyticsUI.js';
         import * as fileSystem from './src/lib/fileSystem.js';
 
@@ -407,6 +415,8 @@
             selectMediaFolderBtn: document.getElementById('selectMediaFolder'),
             mediaFolderLabel: document.getElementById('mediaFolderLabel'),
             mediaFolderStatus: document.getElementById('mediaFolderStatus'),
+            // Demo banner
+            demoBanner: document.getElementById('demoBanner'),
         };
 
         // Populate block type dropdown (explicit order)
@@ -1495,13 +1505,21 @@ function renderEditor() {
         // Initialize Stories UI first (so we can pass it to Auth)
         const storiesUI = new StoriesUI(els.storiesContainer, {
             // Called when user loads a story from cloud
-            onLoad: (storyData) => {
+            onLoad: (storyData, options = {}) => {
                 state.project = storyData.project || '';
                 state.pageTitle = storyData.title || '';
                 state.blocks = storyData.blocks || [];
                 state.selectedBlockIndex = null;
                 els.projectInput.value = state.project;
                 els.pageTitleInput.value = state.pageTitle;
+
+                // Show/hide demo banner
+                if (options.isDemo) {
+                    els.demoBanner.classList.remove('hidden');
+                } else {
+                    els.demoBanner.classList.add('hidden');
+                }
+
                 renderBlocksList();
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
@@ -1511,6 +1529,7 @@ function renderEditor() {
                 state.project = '';
                 state.pageTitle = '';
                 state.blocks = [];
+                els.demoBanner.classList.add('hidden');
                 state.selectedBlockIndex = null;
                 els.projectInput.value = '';
                 els.pageTitleInput.value = '';

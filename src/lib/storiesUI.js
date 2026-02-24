@@ -9,6 +9,13 @@ const DEMO_STORY = {
   updated_at: '2024-01-01'
 };
 
+// Track if currently viewing demo (can't save)
+let isDemoMode = false;
+
+export function isInDemoMode() {
+  return isDemoMode;
+}
+
 /**
  * Stories UI Manager
  * Handles rendering story list and save/load operations
@@ -72,14 +79,18 @@ export class StoriesUI {
       const demoData = await this.loadDemoStory();
       this.loading = false;
       if (demoData) {
-        this.currentStoryId = null; // Don't set current ID so "Save" creates new
-        this.onLoad(demoData);
+        isDemoMode = true;
+        this.currentStoryId = null;
+        this.onLoad(demoData, { isDemo: true });
       } else {
         alert('Error loading demo story');
       }
       this.render();
       return;
     }
+
+    // Loading a real story exits demo mode
+    isDemoMode = false;
 
     if (!this.userId) return;
 
@@ -164,6 +175,7 @@ export class StoriesUI {
   }
 
   handleNew() {
+    isDemoMode = false;
     this.currentStoryId = null;
     this.onNew();
     this.render();
@@ -196,7 +208,7 @@ export class StoriesUI {
                     ${story.isDemo ? '<span style="font-size: 10px; background: #fbbf24; color: #78350f; padding: 1px 5px; border-radius: 3px;">DEMO</span>' : ''}
                     ${story.title || 'Untitled'}
                   </div>
-                  ${!story.isDemo ? `<div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>` : '<div style="font-size: 11px; color: #a16207;">Sample project to explore</div>'}
+                  ${!story.isDemo ? `<div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>` : '<div style="font-size: 11px; color: #6b7280;">Sample project to explore <span style="color: #dc2626;">(can\'t save)</span></div>'}
                 </div>
                 ${!story.isDemo ? `
                   <button class="story-delete-btn" data-id="${story.id}" style="padding: 0.25rem 0.5rem; font-size: 11px; border: none; background: transparent; color: #ef4444; cursor: pointer; flex-shrink: 0;">
@@ -213,7 +225,11 @@ export class StoriesUI {
           <button id="stories-new-btn" style="padding: 0.4rem 0.75rem; border: 1px solid #d1d5db; background: white; border-radius: 5px; font-size: 12px; cursor: pointer; white-space: nowrap;">
             + New
           </button>
-          ${this.userId ? `
+          ${isDemoMode ? `
+            <div style="flex: 1; padding: 0.4rem 0.5rem; font-size: 11px; color: #9ca3af; text-align: center; background: #f3f4f6; border-radius: 5px;">
+              Demo mode
+            </div>
+          ` : this.userId ? `
             <button id="stories-save-btn" ${this.saving ? 'disabled' : ''} style="flex: 1; padding: 0.4rem 0.75rem; border: none; background: ${this.saving ? '#9ca3af' : '#3b82f6'}; color: white; border-radius: 5px; font-size: 12px; cursor: ${this.saving ? 'wait' : 'pointer'};">
               ${this.saving ? 'Saving...' : 'Save'}
             </button>
