@@ -1,6 +1,14 @@
 import { loadStories, loadStory, saveStory, deleteStory, duplicateStory } from './stories.js';
 import { isSupabaseConfigured } from './supabase.js';
 
+// Bundled demo story that all users can access
+const DEMO_STORY = {
+  id: '__demo__',
+  title: 'Mt. Whitney Demo',
+  isDemo: true,
+  updated_at: '2024-01-01'
+};
+
 /**
  * Stories UI Manager
  * Handles rendering story list and save/load operations
@@ -16,6 +24,17 @@ export class StoriesUI {
     this.onLoad = options.onLoad || (() => {});
     this.onNew = options.onNew || (() => {});
     this.getState = options.getState || (() => ({}));
+  }
+
+  async loadDemoStory() {
+    try {
+      const response = await fetch('projects/mt_whitney_demo/story.json');
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Failed to load demo story:', err);
+      return null;
+    }
   }
 
   setUser(user) {
@@ -45,10 +64,24 @@ export class StoriesUI {
   }
 
   async handleLoad(storyId) {
-    if (!this.userId) return;
-
     this.loading = true;
     this.render();
+
+    // Handle demo story specially
+    if (storyId === '__demo__') {
+      const demoData = await this.loadDemoStory();
+      this.loading = false;
+      if (demoData) {
+        this.currentStoryId = null; // Don't set current ID so "Save" creates new
+        this.onLoad(demoData);
+      } else {
+        alert('Error loading demo story');
+      }
+      this.render();
+      return;
+    }
+
+    if (!this.userId) return;
 
     const { data, error } = await loadStory(storyId, this.userId);
 
@@ -137,24 +170,13 @@ export class StoriesUI {
   }
 
   render() {
-    if (!isSupabaseConfigured()) {
-      this.container.innerHTML = '';
-      return;
-    }
-
-    if (!this.userId) {
-      this.container.innerHTML = `
-        <div style="padding: 0.75rem; text-align: center; color: #6b7280; font-size: 13px;">
-          Sign in to save stories to the cloud
-        </div>
-      `;
-      return;
-    }
-
     const formatDate = (dateStr) => {
       const d = new Date(dateStr);
       return d.toLocaleDateString();
     };
+
+    // Build list of all stories (demo + user stories)
+    const allStories = [DEMO_STORY, ...this.stories];
 
     this.container.innerHTML = `
       <div class="stories-ui" style="padding: 0.5rem;">
@@ -167,21 +189,20 @@ export class StoriesUI {
 
           <!-- Dropdown menu (hidden by default) -->
           <div id="stories-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #d1d5db; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; max-height: 280px; overflow-y: auto; margin-top: 4px;">
-            ${this.stories.length === 0 ? `
-              <div style="padding: 0.75rem; text-align: center; color: #9ca3af; font-size: 13px;">
-                No saved stories
-              </div>
-            ` : this.stories.map(story => `
-              <div class="story-option" data-id="${story.id}" style="padding: 0.625rem 0.75rem; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; ${story.id === this.currentStoryId ? 'background: #eff6ff;' : ''}">
+            ${allStories.map(story => `
+              <div class="story-option" data-id="${story.id}" style="padding: 0.625rem 0.75rem; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; ${story.id === this.currentStoryId ? 'background: #eff6ff;' : ''} ${story.isDemo ? 'background: #fefce8;' : ''}">
                 <div style="flex: 1; min-width: 0;">
-                  <div style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <div style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                    ${story.isDemo ? '<span style="font-size: 10px; background: #fbbf24; color: #78350f; padding: 1px 5px; border-radius: 3px;">DEMO</span>' : ''}
                     ${story.title || 'Untitled'}
                   </div>
-                  <div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>
+                  ${!story.isDemo ? `<div style="font-size: 11px; color: #9ca3af;">${formatDate(story.updated_at)}</div>` : '<div style="font-size: 11px; color: #a16207;">Sample project to explore</div>'}
                 </div>
-                <button class="story-delete-btn" data-id="${story.id}" style="padding: 0.25rem 0.5rem; font-size: 11px; border: none; background: transparent; color: #ef4444; cursor: pointer; flex-shrink: 0;">
-                  ✕
-                </button>
+                ${!story.isDemo ? `
+                  <button class="story-delete-btn" data-id="${story.id}" style="padding: 0.25rem 0.5rem; font-size: 11px; border: none; background: transparent; color: #ef4444; cursor: pointer; flex-shrink: 0;">
+                    ✕
+                  </button>
+                ` : ''}
               </div>
             `).join('')}
           </div>
@@ -192,14 +213,20 @@ export class StoriesUI {
           <button id="stories-new-btn" style="padding: 0.4rem 0.75rem; border: 1px solid #d1d5db; background: white; border-radius: 5px; font-size: 12px; cursor: pointer; white-space: nowrap;">
             + New
           </button>
-          <button id="stories-save-btn" ${this.saving ? 'disabled' : ''} style="flex: 1; padding: 0.4rem 0.75rem; border: none; background: ${this.saving ? '#9ca3af' : '#3b82f6'}; color: white; border-radius: 5px; font-size: 12px; cursor: ${this.saving ? 'wait' : 'pointer'};">
-            ${this.saving ? 'Saving...' : 'Save'}
-          </button>
-          ${this.currentStoryId ? `
-            <button id="stories-saveas-btn" style="padding: 0.4rem 0.75rem; border: 1px solid #d1d5db; background: white; border-radius: 5px; font-size: 12px; cursor: pointer; white-space: nowrap; color: #6b7280;">
-              Save As
+          ${this.userId ? `
+            <button id="stories-save-btn" ${this.saving ? 'disabled' : ''} style="flex: 1; padding: 0.4rem 0.75rem; border: none; background: ${this.saving ? '#9ca3af' : '#3b82f6'}; color: white; border-radius: 5px; font-size: 12px; cursor: ${this.saving ? 'wait' : 'pointer'};">
+              ${this.saving ? 'Saving...' : 'Save'}
             </button>
-          ` : ''}
+            ${this.currentStoryId ? `
+              <button id="stories-saveas-btn" style="padding: 0.4rem 0.75rem; border: 1px solid #d1d5db; background: white; border-radius: 5px; font-size: 12px; cursor: pointer; white-space: nowrap; color: #6b7280;">
+                Save As
+              </button>
+            ` : ''}
+          ` : `
+            <div style="flex: 1; padding: 0.4rem 0.5rem; font-size: 11px; color: #6b7280; text-align: center;">
+              Sign in to save
+            </div>
+          `}
         </div>
       </div>
     `;
