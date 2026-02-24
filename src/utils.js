@@ -1,12 +1,102 @@
-export const isAbs = (u) => /^https?:\/\//i.test(u) || /^data:/.test(u) || (u || '').startsWith('/');
+import * as fileSystem from './lib/fileSystem.js';
+
+export const isAbs = (u) => /^https?:\/\//i.test(u) || /^data:/.test(u) || (u || '').startsWith('/') || (u || '').startsWith('blob:');
 export const safe = (s) => (s || '').replace(/[^a-z0-9-_]/gi, '');
 
+// Cache for resolved blob URLs in current session
+// This is populated before preview rendering and checked by resolvePreviewPath
+const blobUrlCache = new Map();
+
+/**
+ * Resolve path for preview - returns path string
+ * Checks blob URL cache first (for File System API), then falls back to project path
+ */
 export function resolvePreviewPath(inputPath, projectFolder) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;
+
+  // Check blob URL cache first (populated by resolveAllMediaPaths before render)
+  if (blobUrlCache.has(inputPath)) {
+    return blobUrlCache.get(inputPath);
+  }
+
+  // Fallback to project folder path
   const p = safe(projectFolder || '');
   return 'projects/' + p + '/' + (inputPath || '').replace(/^\.?\/*/, '');
 }
+
+/**
+ * Pre-resolve all media paths in blocks for preview
+ * Call this before rendering preview to populate the blob URL cache
+ * @param {Array} blocks - Array of block data
+ * @param {string} projectFolder - Project folder name (fallback)
+ * @returns {Promise<void>}
+ */
+export async function resolveAllMediaPaths(blocks, projectFolder) {
+  // Only resolve if File System API is connected
+  if (!fileSystem.hasDirectoryAccess()) {
+    return;
+  }
+
+  const pathsToResolve = new Set();
+
+  // Collect all media paths from blocks
+  (blocks || []).forEach(block => {
+    // Common media fields
+    ['media', 'video', 'poster', 'mobileMedia', 'mobileVideo', 'mobilePoster', 'image', 'embeddedImage'].forEach(field => {
+      if (block[field] && !isAbs(block[field])) pathsToResolve.add(block[field]);
+    });
+
+    // Slides (cinematic-scroll, galleries)
+    (block.slides || []).forEach(slide => {
+      if (slide.media && !isAbs(slide.media)) pathsToResolve.add(slide.media);
+      if (slide.video && !isAbs(slide.video)) pathsToResolve.add(slide.video);
+      if (slide.poster && !isAbs(slide.poster)) pathsToResolve.add(slide.poster);
+    });
+
+    // Gallery media array
+    (block.media || []).forEach(m => {
+      const src = typeof m === 'string' ? m : m?.src;
+      if (src && !isAbs(src)) pathsToResolve.add(src);
+    });
+
+    // Panels (split-panel)
+    (block.panels || []).forEach(panel => {
+      if (panel.image && !isAbs(panel.image)) pathsToResolve.add(panel.image);
+      if (panel.video && !isAbs(panel.video)) pathsToResolve.add(panel.video);
+      if (panel.embeddedImage && !isAbs(panel.embeddedImage)) pathsToResolve.add(panel.embeddedImage);
+    });
+  });
+
+  // Resolve all paths in parallel and populate cache
+  const pathArray = Array.from(pathsToResolve);
+  const results = await Promise.all(
+    pathArray.map(async (path) => {
+      // Check cache first
+      if (blobUrlCache.has(path)) {
+        return { path, url: blobUrlCache.get(path) };
+      }
+      // Get blob URL from file system
+      const blobUrl = await fileSystem.getFileUrl(path);
+      return { path, url: blobUrl };
+    })
+  );
+
+  // Update cache with results
+  results.forEach(({ path, url }) => {
+    if (url) {
+      blobUrlCache.set(path, url);
+    }
+  });
+}
+
+/**
+ * Clear the blob URL cache (call when switching folders)
+ */
+export function clearBlobUrlCache() {
+  blobUrlCache.clear();
+}
+
 export function resolveExportPath(inputPath) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;

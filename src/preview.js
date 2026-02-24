@@ -4,6 +4,7 @@ import { initZoomRuntime } from './zoomRuntime.js';
 import { initFadeRuntime } from './fadeRuntime.js';
 import { initCinematicScrollRuntime } from './cinematicScrollRuntime.js';
 import { calculateExpectedTime, getEffectiveExpectedTime } from './lib/expectedTime.js';
+import { resolveAllMediaPaths } from './utils.js';
 
 /* ---------- helpers ---------- */
 function initStickyReveal(root) {
@@ -1495,7 +1496,10 @@ function buildFullHtmlPage(bodyContent) {
 }
 
 /* ---------- Public API ---------- */
-export function renderPreview({ state, mount, mode = 'iframe', selectedBlockIndex = null }) {
+export async function renderPreview({ state, mount, mode = 'iframe', selectedBlockIndex = null }) {
+  // Pre-resolve all media paths to blob URLs if File System API is connected
+  await resolveAllMediaPaths(state.blocks, state.project);
+
   if (mode === 'iframe') {
     const parts = buildBlocksWithFadePairs({ state, isPreview: true });
     const previewHtml = buildFullHtmlPage(parts.join('\n'));

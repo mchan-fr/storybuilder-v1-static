@@ -252,16 +252,25 @@
 
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <div class="flex items-center gap-3">
-                        <label class="text-sm font-semibold text-gray-700">Project Folder:</label>
-                        <input id="projectFolder" type="text" placeholder="e.g., mt_whitney"
-                            class="px-3 py-2 border border-blue-200 bg-white rounded-lg text-sm w-48 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <!-- Media Folder Access (File System API) -->
+                    <div class="flex items-center gap-2">
+                        <button id="selectMediaFolder"
+                            class="px-3 py-2 bg-white border border-green-300 rounded-lg hover:bg-green-50 text-sm font-medium text-green-700 flex items-center gap-2"
+                            title="Select your local media folder (Chrome/Edge only)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                            </svg>
+                            <span id="mediaFolderLabel">Select Media Folder</span>
+                        </button>
+                        <span id="mediaFolderStatus" class="text-xs text-gray-500 hidden"></span>
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-sm font-semibold text-gray-700">Page Title:</label>
                         <input id="pageTitle" type="text" placeholder="e.g., Hiking Mount Whitney"
                             class="px-3 py-2 border border-blue-200 bg-white rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
+                    <!-- Hidden project folder for backwards compatibility -->
+                    <input id="projectFolder" type="hidden" value="">
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -355,11 +364,12 @@
     <!-- App bootstrap -->
     <script type="module">
         import { renderPreview, buildExportHtml } from './src/preview.js';
-        import { dl, setPreviewZoom, initTextToolbars } from './src/utils.js';
+        import { dl, setPreviewZoom, initTextToolbars, resolveAllMediaPaths, clearBlobUrlCache } from './src/utils.js';
         import { BLOCKS, newBlock } from './src/blocks/index.js';
         import { AuthUI } from './src/lib/authUI.js';
         import { StoriesUI } from './src/lib/storiesUI.js';
         import { AnalyticsUI } from './src/lib/analyticsUI.js';
+        import * as fileSystem from './src/lib/fileSystem.js';
 
         const state = {
             project: '',
@@ -375,7 +385,7 @@
             editorPanel: document.getElementById('editorPanel'),
             preview: document.getElementById('preview'),
             projectInput: document.getElementById('projectFolder'),
-            pageTitleInput: document.getElementById('pageTitle'), // NEW
+            pageTitleInput: document.getElementById('pageTitle'),
             authContainer: document.getElementById('authContainer'),
             storiesContainer: document.getElementById('storiesContainer'),
             analyticsBtn: document.getElementById('analyticsBtn'),
@@ -393,6 +403,10 @@
             loadInp: document.getElementById('loadJson'),
             previewModeBtn: document.getElementById('previewModeBtn'),
             debugModeBtn: document.getElementById('debugModeBtn'),
+            // File System API elements
+            selectMediaFolderBtn: document.getElementById('selectMediaFolder'),
+            mediaFolderLabel: document.getElementById('mediaFolderLabel'),
+            mediaFolderStatus: document.getElementById('mediaFolderStatus'),
         };
 
         // Populate block type dropdown (explicit order)
@@ -1361,10 +1375,102 @@ function renderEditor() {
             state.project = els.projectInput.value.trim();
         });
 
-        // NEW: Page title input listener
+        // Page title input listener
         els.pageTitleInput.addEventListener('input', () => {
             state.pageTitle = els.pageTitleInput.value.trim();
         });
+
+        // ============================================
+        // File System Access API (Chrome/Edge only)
+        // ============================================
+
+        // Update UI based on File System API support
+        function updateFileSystemUI() {
+            if (!fileSystem.isFileSystemSupported()) {
+                els.selectMediaFolderBtn.disabled = true;
+                els.selectMediaFolderBtn.title = 'File System API not supported (use Chrome or Edge)';
+                els.selectMediaFolderBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                els.mediaFolderStatus.textContent = 'Chrome/Edge required';
+                els.mediaFolderStatus.classList.remove('hidden');
+                els.mediaFolderStatus.classList.add('text-amber-600');
+            } else if (fileSystem.hasDirectoryAccess()) {
+                const folderName = fileSystem.getDirectoryName();
+                els.mediaFolderLabel.textContent = folderName || 'Connected';
+                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                els.selectMediaFolderBtn.classList.add('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                els.selectMediaFolderBtn.title = 'Click to change folder, or right-click to disconnect';
+                els.mediaFolderStatus.textContent = 'Using local files';
+                els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
+                els.mediaFolderStatus.classList.add('text-green-600');
+            } else {
+                els.mediaFolderLabel.textContent = 'Select Media Folder';
+                els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
+                els.mediaFolderStatus.classList.add('hidden');
+            }
+        }
+
+        // Handle folder selection (left-click)
+        els.selectMediaFolderBtn.addEventListener('click', async () => {
+            if (!fileSystem.isFileSystemSupported()) {
+                alert('File System Access API is not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            const result = await fileSystem.requestFolderAccess();
+
+            if (result.success) {
+                // Clear old blob URL cache when switching folders
+                clearBlobUrlCache();
+
+                // Persist the handle for future sessions
+                await fileSystem.persistDirectoryHandle();
+
+                // Update UI
+                updateFileSystemUI();
+
+                // Re-render preview with new file access
+                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+            } else if (result.error && result.error !== 'Folder selection cancelled') {
+                alert('Error accessing folder: ' + result.error);
+            }
+        });
+
+        // Handle folder disconnect (right-click)
+        els.selectMediaFolderBtn.addEventListener('contextmenu', (e) => {
+            if (!fileSystem.hasDirectoryAccess()) return;
+
+            e.preventDefault();
+            if (confirm('Disconnect from the media folder?')) {
+                fileSystem.disconnect();
+                clearBlobUrlCache();
+                updateFileSystemUI();
+                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+            }
+        });
+
+        // Try to restore previous folder access on load
+        async function restoreFileSystemAccess() {
+            if (!fileSystem.isFileSystemSupported()) {
+                updateFileSystemUI();
+                return;
+            }
+
+            const restored = await fileSystem.restoreDirectoryHandle();
+            if (restored) {
+                // Need to re-request permission (browser security)
+                const hasPermission = await fileSystem.requestPermissionIfNeeded();
+                if (!hasPermission) {
+                    // Permission denied, disconnect
+                    fileSystem.disconnect();
+                }
+            }
+            updateFileSystemUI();
+        }
+
+        // Initialize file system UI
+        restoreFileSystemAccess();
 
         // ============================================
         // Auth & Cloud Storage Integration
