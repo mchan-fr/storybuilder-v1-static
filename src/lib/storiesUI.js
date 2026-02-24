@@ -46,6 +46,12 @@ export class StoriesUI {
       }
       const data = await response.json();
       console.log('Demo story loaded:', data.pageTitle, 'with', data.blocks?.length, 'blocks');
+      // Debug: log first block to verify content is correct
+      if (data.blocks?.[0]) {
+        console.log('First block type:', data.blocks[0].type);
+        console.log('First block headline:', data.blocks[0].headline);
+        console.log('First block image:', data.blocks[0].image);
+      }
       return data;
     } catch (err) {
       console.error('Failed to load demo story:', err);

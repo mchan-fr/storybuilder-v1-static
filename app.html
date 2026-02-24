@@ -1507,11 +1507,17 @@ function renderEditor() {
             // Called when user loads a story from cloud
             onLoad: (storyData, options = {}) => {
                 state.project = storyData.project || '';
-                state.pageTitle = storyData.title || '';
+                state.pageTitle = storyData.pageTitle || storyData.title || '';
                 state.blocks = storyData.blocks || [];
                 state.selectedBlockIndex = null;
                 els.projectInput.value = state.project;
                 els.pageTitleInput.value = state.pageTitle;
+
+                // Debug: verify blocks are correctly assigned
+                console.log('onLoad: state.blocks count:', state.blocks.length);
+                if (state.blocks[0]) {
+                    console.log('onLoad: First block in state:', state.blocks[0].type, state.blocks[0].headline);
+                }
 
                 // Show/hide demo banner
                 if (options.isDemo) {

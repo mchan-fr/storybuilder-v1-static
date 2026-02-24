@@ -36,6 +36,12 @@ function buildBlocksWithFadePairs({ state, isPreview }) {
   const out = [];
   const blocks = state.blocks || [];
 
+  // Debug: log blocks being rendered
+  if (isPreview && blocks.length > 0) {
+    console.log('Preview: rendering', blocks.length, 'blocks');
+    console.log('Preview: block 0 type:', blocks[0]?.type, 'headline:', blocks[0]?.headline);
+  }
+
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
     const mod = BLOCKS[b.type];
