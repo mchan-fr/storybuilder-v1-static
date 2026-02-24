@@ -1392,22 +1392,35 @@ function renderEditor() {
                 els.selectMediaFolderBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 els.mediaFolderStatus.textContent = 'Chrome/Edge required';
                 els.mediaFolderStatus.classList.remove('hidden');
-                els.mediaFolderStatus.classList.add('text-amber-600');
+                els.mediaFolderStatus.classList.add('text-amber-600', 'text-green-600');
             } else if (fileSystem.hasDirectoryAccess()) {
                 const folderName = fileSystem.getDirectoryName();
                 els.mediaFolderLabel.textContent = folderName || 'Connected';
-                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
                 els.selectMediaFolderBtn.classList.add('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
                 els.selectMediaFolderBtn.title = 'Click to change folder, or right-click to disconnect';
                 els.mediaFolderStatus.textContent = 'Using local files';
                 els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
                 els.mediaFolderStatus.classList.add('text-green-600');
+                fileSystem.clearStoredFolderName();
             } else {
-                els.mediaFolderLabel.textContent = 'Select Media Folder';
-                els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
-                els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
-                els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
-                els.mediaFolderStatus.classList.add('hidden');
+                // Check if there's a stored folder that needs reconnecting
+                const storedName = fileSystem.getStoredFolderName();
+                if (storedName) {
+                    els.mediaFolderLabel.textContent = `Reconnect "${storedName}"`;
+                    els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                    els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                    els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
+                    els.mediaFolderStatus.textContent = 'Click to reconnect';
+                    els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
+                    els.mediaFolderStatus.classList.add('text-amber-600');
+                } else {
+                    els.mediaFolderLabel.textContent = 'Select Media Folder';
+                    els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                    els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                    els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
+                    els.mediaFolderStatus.classList.add('hidden');
+                }
             }
         }
 
@@ -1439,11 +1452,12 @@ function renderEditor() {
 
         // Handle folder disconnect (right-click)
         els.selectMediaFolderBtn.addEventListener('contextmenu', (e) => {
-            if (!fileSystem.hasDirectoryAccess()) return;
+            if (!fileSystem.hasDirectoryAccess() && !fileSystem.getStoredFolderName()) return;
 
             e.preventDefault();
             if (confirm('Disconnect from the media folder?')) {
                 fileSystem.disconnect();
+                fileSystem.clearStoredFolderName();
                 clearBlobUrlCache();
                 updateFileSystemUI();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
@@ -1457,13 +1471,15 @@ function renderEditor() {
                 return;
             }
 
-            const restored = await fileSystem.restoreDirectoryHandle();
+            const { restored, name } = await fileSystem.restoreDirectoryHandle();
             if (restored) {
                 // Need to re-request permission (browser security)
                 const hasPermission = await fileSystem.requestPermissionIfNeeded();
                 if (!hasPermission) {
-                    // Permission denied, disconnect
+                    // Permission denied - keep handle but show reconnect UI
+                    // Don't disconnect completely, just note we need permission
                     fileSystem.disconnect();
+                    // Folder name is stored, UI will show "Reconnect" button
                 }
             }
             updateFileSystemUI();

@@ -15,6 +15,11 @@ export function resolvePreviewPath(inputPath, projectFolder) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;
 
+  // Paths starting with "projects/" are bundled demo/sample paths - serve directly
+  if (inputPath.startsWith('projects/')) {
+    return inputPath;
+  }
+
   // Check blob URL cache first (populated by resolveAllMediaPaths before render)
   if (blobUrlCache.has(inputPath)) {
     return blobUrlCache.get(inputPath);
@@ -105,6 +110,12 @@ export function clearBlobUrlCache() {
 export function resolveExportPath(inputPath) {
   if (!inputPath) return '';
   if (isAbs(inputPath)) return inputPath;
+
+  // Paths starting with "projects/" are bundled demo paths - keep as-is
+  // (Note: users should replace these with their own media paths before exporting)
+  if (inputPath.startsWith('projects/')) {
+    return inputPath;
+  }
 
   // Clean the path
   const cleanPath = (inputPath || '').replace(/^\.?\/*/, '');

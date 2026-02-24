@@ -3,6 +3,7 @@
 
 let directoryHandle = null;
 let fileCache = new Map(); // Cache blob URLs to avoid re-reading files
+let storedFolderName = null; // Track name of stored folder that needs reconnecting
 
 /**
  * Check if File System Access API is supported
@@ -23,6 +24,13 @@ export function hasDirectoryAccess() {
  */
 export function getDirectoryName() {
   return directoryHandle?.name || null;
+}
+
+/**
+ * Get stored folder name that needs reconnecting (if any)
+ */
+export function getStoredFolderName() {
+  return storedFolderName;
 }
 
 /**
@@ -186,6 +194,7 @@ export async function persistDirectoryHandle() {
 /**
  * Restore directory handle from IndexedDB
  * User will need to re-grant permission
+ * Returns: { restored: boolean, name: string | null }
  */
 export async function restoreDirectoryHandle() {
   try {
@@ -196,12 +205,20 @@ export async function restoreDirectoryHandle() {
 
     if (handle) {
       directoryHandle = handle;
-      return true;
+      storedFolderName = handle.name; // Remember name for UI
+      return { restored: true, name: handle.name };
     }
   } catch (err) {
     console.warn('Could not restore directory handle:', err);
   }
-  return false;
+  return { restored: false, name: null };
+}
+
+/**
+ * Clear stored folder name (call after successful reconnection or explicit disconnect)
+ */
+export function clearStoredFolderName() {
+  storedFolderName = null;
 }
 
 // IndexedDB helper
