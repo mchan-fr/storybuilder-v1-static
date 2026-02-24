@@ -3,7 +3,10 @@
     "allow": [
       "Bash(curl:*)",
       "Bash(npx esbuild:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
