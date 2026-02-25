@@ -49,8 +49,15 @@ export async function resolveAllMediaPaths(blocks, projectFolder) {
 
   // Collect all media paths from blocks
   (blocks || []).forEach(block => {
-    // Common media fields
-    ['media', 'video', 'poster', 'mobileMedia', 'mobileVideo', 'mobilePoster', 'image', 'embeddedImage'].forEach(field => {
+    // All possible media fields across block types
+    const mediaFields = [
+      'media', 'video', 'poster', 'image', 'embeddedImage',
+      'mobileMedia', 'mobileVideo', 'mobilePoster',
+      'imageMobile', 'videoMobile',  // hero
+      'sideImage', 'sideVideo',       // photo-lede-side
+      'media1', 'media1Video', 'media2', 'media2Video'  // split-panel
+    ];
+    mediaFields.forEach(field => {
       if (block[field] && !isAbs(block[field])) pathsToResolve.add(block[field]);
     });
 
@@ -71,6 +78,7 @@ export async function resolveAllMediaPaths(blocks, projectFolder) {
     (block.panels || []).forEach(panel => {
       if (panel.image && !isAbs(panel.image)) pathsToResolve.add(panel.image);
       if (panel.video && !isAbs(panel.video)) pathsToResolve.add(panel.video);
+      if (panel.inlineImage && !isAbs(panel.inlineImage)) pathsToResolve.add(panel.inlineImage);
       if (panel.embeddedImage && !isAbs(panel.embeddedImage)) pathsToResolve.add(panel.embeddedImage);
     });
   });
