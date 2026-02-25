@@ -1510,7 +1510,7 @@ function renderEditor() {
         // Initialize Stories UI first (so we can pass it to Auth)
         const storiesUI = new StoriesUI(els.storiesContainer, {
             // Called when user loads a story from cloud
-            onLoad: (storyData, options = {}) => {
+            onLoad: async (storyData, options = {}) => {
                 state.project = storyData.project || '';
                 state.pageTitle = storyData.pageTitle || storyData.title || '';
                 state.blocks = storyData.blocks || [];
@@ -1518,17 +1518,23 @@ function renderEditor() {
                 els.projectInput.value = state.project;
                 els.pageTitleInput.value = state.pageTitle;
 
-                // Debug: verify blocks are correctly assigned
-                console.log('onLoad: state.blocks count:', state.blocks.length);
-                if (state.blocks[0]) {
-                    console.log('onLoad: First block in state:', state.blocks[0].type, state.blocks[0].headline);
-                }
-
                 // Show/hide demo banner
                 if (options.isDemo) {
                     els.demoBanner.classList.remove('hidden');
                 } else {
                     els.demoBanner.classList.add('hidden');
+                }
+
+                // Auto-reconnect media folder if we have a stored handle
+                const storedFolder = fileSystem.getStoredFolderName();
+                if (storedFolder && !fileSystem.hasDirectoryAccess()) {
+                    // Automatically trigger reconnect - browser will show permission prompt
+                    const result = await fileSystem.reconnectFolder();
+                    if (result.success) {
+                        clearBlobUrlCache();
+                        await fileSystem.persistDirectoryHandle();
+                        updateFileSystemUI();
+                    }
                 }
 
                 renderBlocksList();
