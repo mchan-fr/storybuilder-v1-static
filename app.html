@@ -1395,7 +1395,7 @@ function renderEditor() {
         // ============================================
 
         // Update UI based on File System API support
-        function updateFileSystemUI() {
+        async function updateFileSystemUI() {
             if (!fileSystem.isFileSystemSupported()) {
                 els.selectMediaFolderBtn.disabled = true;
                 els.selectMediaFolderBtn.title = 'File System API not supported (use Chrome or Edge)';
@@ -1403,7 +1403,14 @@ function renderEditor() {
                 els.mediaFolderStatus.textContent = 'Chrome/Edge required';
                 els.mediaFolderStatus.classList.remove('hidden');
                 els.mediaFolderStatus.classList.add('text-amber-600', 'text-green-600');
-            } else if (fileSystem.hasDirectoryAccess()) {
+                return;
+            }
+
+            // Check if we have a handle AND permission
+            const hasHandle = fileSystem.hasDirectoryAccess();
+            const hasPermission = hasHandle ? await fileSystem.verifyPermission() : false;
+
+            if (hasHandle && hasPermission) {
                 const folderName = fileSystem.getDirectoryName();
                 els.mediaFolderLabel.textContent = folderName || 'Connected';
                 els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
@@ -1413,24 +1420,22 @@ function renderEditor() {
                 els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
                 els.mediaFolderStatus.classList.add('text-green-600');
                 fileSystem.clearStoredFolderName();
+            } else if (hasHandle || fileSystem.getStoredFolderName()) {
+                // Have a handle but no permission, or have stored folder name - show reconnect
+                const folderName = fileSystem.getDirectoryName() || fileSystem.getStoredFolderName();
+                els.mediaFolderLabel.textContent = `Reconnect "${folderName}"`;
+                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
+                els.mediaFolderStatus.textContent = 'Click to reconnect';
+                els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
+                els.mediaFolderStatus.classList.add('text-amber-600');
             } else {
-                // Check if there's a stored folder that needs reconnecting
-                const storedName = fileSystem.getStoredFolderName();
-                if (storedName) {
-                    els.mediaFolderLabel.textContent = `Reconnect "${storedName}"`;
-                    els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
-                    els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                    els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
-                    els.mediaFolderStatus.textContent = 'Click to reconnect';
-                    els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
-                    els.mediaFolderStatus.classList.add('text-amber-600');
-                } else {
-                    els.mediaFolderLabel.textContent = 'Select Media Folder';
-                    els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                    els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
-                    els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
-                    els.mediaFolderStatus.classList.add('hidden');
-                }
+                els.mediaFolderLabel.textContent = 'Select Media Folder';
+                els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
+                els.mediaFolderStatus.classList.add('hidden');
             }
         }
 
@@ -1455,7 +1460,7 @@ function renderEditor() {
                 await fileSystem.persistDirectoryHandle();
 
                 // Update UI
-                updateFileSystemUI();
+                await updateFileSystemUI();
 
                 // Re-render preview with new file access
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
@@ -1465,7 +1470,7 @@ function renderEditor() {
         });
 
         // Handle folder disconnect (right-click)
-        els.selectMediaFolderBtn.addEventListener('contextmenu', (e) => {
+        els.selectMediaFolderBtn.addEventListener('contextmenu', async (e) => {
             if (!fileSystem.hasDirectoryAccess() && !fileSystem.getStoredFolderName()) return;
 
             e.preventDefault();
@@ -1473,7 +1478,7 @@ function renderEditor() {
                 fileSystem.disconnect();
                 fileSystem.clearStoredFolderName();
                 clearBlobUrlCache();
-                updateFileSystemUI();
+                await updateFileSystemUI();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
             }
         });
@@ -1481,23 +1486,15 @@ function renderEditor() {
         // Try to restore previous folder access on load
         async function restoreFileSystemAccess() {
             if (!fileSystem.isFileSystemSupported()) {
-                updateFileSystemUI();
+                await updateFileSystemUI();
                 return;
             }
 
             // Restore handle from IndexedDB (but don't request permission yet - requires user gesture)
             const { restored, name } = await fileSystem.restoreDirectoryHandle();
-            if (restored) {
-                // Check if we already have permission (from previous grant that's still valid)
-                const hasPermission = await fileSystem.verifyPermission();
-                if (!hasPermission) {
-                    // No permission yet - show reconnect UI (user must click to grant)
-                    // Keep handle but note we need permission
-                    fileSystem.disconnect();
-                    // storedFolderName is preserved, UI will show "Reconnect [name]" button
-                }
-            }
-            updateFileSystemUI();
+            // Don't call disconnect() - keep the handle so reconnectFolder() can use it
+            // The UI will show "Reconnect" if we have a handle but no permission
+            await updateFileSystemUI();
         }
 
         // Initialize file system UI
@@ -1525,15 +1522,16 @@ function renderEditor() {
                     els.demoBanner.classList.add('hidden');
                 }
 
-                // Auto-reconnect media folder if we have a stored handle
-                const storedFolder = fileSystem.getStoredFolderName();
-                if (storedFolder && !fileSystem.hasDirectoryAccess()) {
+                // Auto-reconnect media folder if we have a handle but no permission
+                const hasHandle = fileSystem.hasDirectoryAccess();
+                const hasPermission = hasHandle ? await fileSystem.verifyPermission() : false;
+                if (hasHandle && !hasPermission) {
                     // Automatically trigger reconnect - browser will show permission prompt
                     const result = await fileSystem.reconnectFolder();
                     if (result.success) {
                         clearBlobUrlCache();
                         await fileSystem.persistDirectoryHandle();
-                        updateFileSystemUI();
+                        await updateFileSystemUI();
                     }
                 }
 
