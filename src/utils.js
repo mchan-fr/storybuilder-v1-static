@@ -68,11 +68,13 @@ export async function resolveAllMediaPaths(blocks, projectFolder) {
       if (slide.poster && !isAbs(slide.poster)) pathsToResolve.add(slide.poster);
     });
 
-    // Gallery media array
-    (block.media || []).forEach(m => {
-      const src = typeof m === 'string' ? m : m?.src;
-      if (src && !isAbs(src)) pathsToResolve.add(src);
-    });
+    // Gallery media array (only if media is an array, not a string)
+    if (Array.isArray(block.media)) {
+      block.media.forEach(m => {
+        const src = typeof m === 'string' ? m : m?.src;
+        if (src && !isAbs(src)) pathsToResolve.add(src);
+      });
+    }
 
     // Panels (split-panel)
     (block.panels || []).forEach(panel => {
