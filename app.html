@@ -1526,16 +1526,23 @@ function renderEditor() {
                     els.demoBanner.classList.add('hidden');
                 }
 
-                // Auto-reconnect media folder if we have a handle but no permission
-                const hasHandle = fileSystem.hasDirectoryAccess();
-                const hasPermission = hasHandle ? await fileSystem.verifyPermission() : false;
-                if (hasHandle && !hasPermission) {
-                    // Automatically trigger reconnect - browser will show permission prompt
-                    const result = await fileSystem.reconnectFolder();
-                    if (result.success) {
-                        clearBlobUrlCache();
-                        await fileSystem.persistDirectoryHandle();
-                        await updateFileSystemUI();
+                // Check if project has media that needs local folder access
+                const hasLocalMedia = state.blocks.some(b => {
+                    const paths = [b.image, b.video, b.sideImage, b.sideVideo, b.media, b.media1, b.media2, b.media1Video, b.media2Video];
+                    return paths.some(p => p && !p.startsWith('http') && !p.startsWith('blob:') && !p.startsWith('projects/'));
+                });
+
+                const hasAccess = fileSystem.hasDirectoryAccess() && await fileSystem.verifyPermission();
+
+                if (hasLocalMedia && !hasAccess) {
+                    // Prompt user to select media folder
+                    if (confirm('This project uses local media files. Select your media folder to view images.')) {
+                        const result = await fileSystem.requestFolderAccess();
+                        if (result.success) {
+                            clearBlobUrlCache();
+                            await fileSystem.persistDirectoryHandle();
+                            await updateFileSystemUI();
+                        }
                     }
                 }
 
