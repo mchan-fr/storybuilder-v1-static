@@ -1441,7 +1441,11 @@ function renderEditor() {
                 return;
             }
 
-            const result = await fileSystem.requestFolderAccess();
+            // If there's a stored folder needing reconnection, try to reconnect first
+            const hasStoredFolder = fileSystem.getStoredFolderName();
+            const result = hasStoredFolder
+                ? await fileSystem.reconnectFolder()
+                : await fileSystem.requestFolderAccess();
 
             if (result.success) {
                 // Clear old blob URL cache when switching folders
@@ -1481,15 +1485,16 @@ function renderEditor() {
                 return;
             }
 
+            // Restore handle from IndexedDB (but don't request permission yet - requires user gesture)
             const { restored, name } = await fileSystem.restoreDirectoryHandle();
             if (restored) {
-                // Need to re-request permission (browser security)
-                const hasPermission = await fileSystem.requestPermissionIfNeeded();
+                // Check if we already have permission (from previous grant that's still valid)
+                const hasPermission = await fileSystem.verifyPermission();
                 if (!hasPermission) {
-                    // Permission denied - keep handle but show reconnect UI
-                    // Don't disconnect completely, just note we need permission
+                    // No permission yet - show reconnect UI (user must click to grant)
+                    // Keep handle but note we need permission
                     fileSystem.disconnect();
-                    // Folder name is stored, UI will show "Reconnect" button
+                    // storedFolderName is preserved, UI will show "Reconnect [name]" button
                 }
             }
             updateFileSystemUI();

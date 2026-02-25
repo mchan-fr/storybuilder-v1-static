@@ -60,6 +60,35 @@ export async function requestFolderAccess() {
 }
 
 /**
+ * Try to reconnect to a previously stored folder
+ * First attempts to re-request permission on the stored handle
+ * Falls back to showDirectoryPicker if that fails
+ * Returns { success: boolean, name?: string, error?: string }
+ */
+export async function reconnectFolder() {
+  if (!isFileSystemSupported()) {
+    return { success: false, error: 'File System Access API not supported' };
+  }
+
+  // If we have a stored handle, try to get permission for it
+  if (directoryHandle) {
+    try {
+      const permission = await directoryHandle.requestPermission({ mode: 'read' });
+      if (permission === 'granted') {
+        clearCache();
+        storedFolderName = null;
+        return { success: true, name: directoryHandle.name };
+      }
+    } catch {
+      // Permission request failed, fall through to picker
+    }
+  }
+
+  // Fall back to picking a new folder
+  return requestFolderAccess();
+}
+
+/**
  * Verify we still have permission to the directory
  */
 export async function verifyPermission() {
