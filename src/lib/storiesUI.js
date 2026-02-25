@@ -202,8 +202,8 @@ export class StoriesUI {
       return d.toLocaleDateString();
     };
 
-    // Build list of all stories (demo + user stories)
-    const allStories = [DEMO_STORY, ...this.stories];
+    // Build list of user stories (demo removed)
+    const allStories = [...this.stories];
 
     this.container.innerHTML = `
       <div class="stories-ui" style="padding: 0.5rem;">

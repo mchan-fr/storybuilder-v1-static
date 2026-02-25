@@ -1,843 +1,350 @@
 {
   "pageTitle": "Hiking Mt. Whitney (demo version)",
-  "author": "Marcus Chan",
-  "readTime": "5 min read",
   "project": "mt_whitney_demo",
   "blocks": [
     {
       "type": "hero",
+      "image": "projects/mt_whitney_demo/media/10_above_clouds.jpeg",
+      "imageMobile": "projects/mt_whitney_demo/media/11_Whitney_Griffin_hiking.jpeg",
+      "video": "",
+      "videoMobile": "",
       "headline": "Hiking Up<br/>To 14,505<br/>With My Kids",
       "headlineStyle": {
         "size": "76",
         "weight": "bold",
+        "italic": false,
         "color": "#f5a824",
         "font": "system-ui",
-        "style": "normal"
+        "align": "left",
+        "leading": "1.2"
       },
       "deck": "We expected a long trek to the top of Mount Whitney.<br/>What we got was a grueling footslog that pushed us to the limits.",
       "deckStyle": {
         "size": "20",
         "weight": "normal",
+        "italic": false,
         "color": "#ffffff",
         "font": "system-ui",
-        "style": "normal"
+        "align": "left"
       },
-      "image": "projects/mt_whitney_demo/media/10_above_clouds.jpeg",
-      "mobileImage": "projects/mt_whitney_demo/media/11_Whitney_Griffin_hiking.jpeg",
-      "video": "",
-      "poster": "",
-      "focusX": 0.5,
-      "focusY": 0.5,
-      "overlayOpacity": 0,
-      "textPosition": "bottom-left",
-      "offsetX": 0,
-      "offsetY": 0
+      "positionVertical": "bottom",
+      "positionHorizontal": "left",
+      "offsetVertical": 0,
+      "offsetHorizontal": 0
     },
     {
       "type": "photo-lede-side",
       "bgColor": "#000000",
-      "image": "projects/mt_whitney_demo/media/06_stars.JPG",
-      "video": "",
-      "poster": "",
-      "mobileVideo": "",
-      "mobilePoster": "",
-      "focusX": 0.5,
-      "focusY": 0.5,
-      "imageWidth": "50",
-      "textWidth": "max-w-lg",
-      "textPadding": {
-        "top": 16,
-        "bottom": 16
-      },
-      "imagePosition": "right",
-      "byline": {
-        "text": "By Marcus Chan",
-        "style": {
-          "size": "20",
-          "weight": "normal",
-          "color": "#cbd0d7",
-          "font": "IBM Plex Sans, sans-serif",
-          "style": "normal"
-        }
-      },
-      "location": "Lone Pine, Calif.",
-      "date": "Sept. 20, 2025",
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "sideImage": "projects/mt_whitney_demo/media/06_stars.JPG",
+      "sideVideo": "",
+      "sideImagePosition": "right",
+      "sideImageWidth": "50",
+      "showByline": true,
+      "showReadTime": true,
+      "bylineText": "By Marcus Chan",
+      "bylineDateline": "Lone Pine, Calif.",
+      "bylineDate": "Sept. 20, 2025",
       "readTime": "5 min read",
+      "bylineStyle": {
+        "size": "20",
+        "weight": "normal",
+        "color": "#cbd0d7",
+        "font": "IBM Plex Sans, sans-serif"
+      },
       "subhead": "",
       "subheadStyle": {
         "size": "28",
         "weight": "normal",
+        "italic": false,
         "color": "#f28926",
-        "font": "Newsreader, serif",
-        "style": "normal"
+        "font": "Newsreader, serif"
       },
-      "body": [
-        {
-          "text": "When we woke up in the wee hours of our big day, we saw something we hadn't seen since we arrived: clear skies.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "For days it had been wet weather around Mount Whitney. It was so bad that just the day before, hikers were forced to turn around near the summit because of blizzard conditions. It's not what you want to hear right before your own attempt.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "This was an important hike to us. My daughter is named after the mountain, and we'd always hoped to reach the summit together. We trained for months, subjecting ourselves to long hikes on ankle-twisting terrain with heavy packs. But we knew Mother Nature would have the final say.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "So to wake up to this view was promising. Energized, my daughter, son Griffin and I began our ascent to 14,505.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        }
-      ],
-      "dropCap": {
-        "enabled": true,
-        "size": "76",
-        "lineHeight": "64",
-        "color": "#fbbf24",
-        "firstLineSize": "24",
-        "firstLineColor": "#ffffff"
+      "bodyText": "When we woke up in the wee hours of our big day, we saw something we hadn't seen since we arrived: clear skies.\n\nFor days it had been wet weather around Mount Whitney. It was so bad that just the day before, hikers were forced to turn around near the summit because of blizzard conditions. It's not what you want to hear right before your own attempt.\n\nThis was an important hike to us. My daughter is named after the mountain, and we'd always hoped to reach the summit together. We trained for months, subjecting ourselves to long hikes on ankle-twisting terrain with heavy packs. But we knew Mother Nature would have the final say.\n\nSo to wake up to this view was promising. Energized, my daughter, son Griffin and I began our ascent to 14,505.",
+      "textWidth": "narrow",
+      "textStyle": {
+        "size": "19",
+        "weight": "normal",
+        "color": "#e5e5e5",
+        "font": "Inter, sans-serif",
+        "leading": "1.7"
       },
-      "dividerTop": false,
-      "dividerBottom": false,
-      "dividerColor": "#4d3d14"
+      "showDropCap": true,
+      "dropCapColor": "#fbbf24",
+      "dropCapSize": "76",
+      "firstLineSize": "24",
+      "firstLineWeight": "600",
+      "firstLineColor": "#ffffff",
+      "lineStyle": {
+        "showTop": false,
+        "showBottom": false,
+        "color": "#4d3d14"
+      }
     },
     {
       "type": "photo-lede-side",
       "bgColor": "#000000",
-      "image": "",
-      "video": "projects/mt_whitney_demo/media/03_Whitney_creek.mp4",
-      "poster": "",
-      "mobileVideo": "projects/mt_whitney_demo/media/03_Whitney_creek.mp4",
-      "mobilePoster": "",
-      "focusX": 0.5,
-      "focusY": 0.5,
-      "imageWidth": "50",
-      "textWidth": "max-w-lg",
-      "textPadding": {
-        "top": 16,
-        "bottom": 16
-      },
-      "imagePosition": "left",
-      "byline": {
-        "text": "",
-        "style": {
-          "size": "20",
-          "weight": "normal",
-          "color": "#cbd0d7",
-          "font": "IBM Plex Sans, sans-serif",
-          "style": "normal"
-        }
-      },
-      "location": "",
-      "date": "",
-      "readTime": "",
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "sideImage": "",
+      "sideVideo": "projects/mt_whitney_demo/media/03_Whitney_creek.mp4",
+      "sideImagePosition": "left",
+      "sideImageWidth": "50",
+      "showByline": false,
+      "showReadTime": false,
+      "bylineText": "",
+      "bylineDateline": "",
+      "bylineDate": "",
       "subhead": "2:32 a.m. (half an hour hiking)",
       "subheadStyle": {
         "size": "28",
         "weight": "normal",
+        "italic": false,
         "color": "#f28926",
-        "font": "Newsreader, serif",
-        "style": "normal"
+        "font": "Newsreader, serif"
       },
-      "body": [
-        {
-          "text": "There's nothing technically difficult about the main trail when it's free of snow and ice. Still, you have to watch your step on the rocky path, especially at night.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "There's little risk of falling off a cliff during the early parts of the hike. But when you climb above 12,000, the drop-offs become steep, the trail can become slippery and you're much more vulnerable to the elements.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "(Recently, a hiker <a href=\"https://www.sfgate.com/bayarea/article/california-teen-hiker-coma-mount-whitney-20392404.php\" target=\"_blank\" rel=\"noopener noreferrer\">stepped off a cliff</a> and suffered brain injury. <a href=\"https://www.yahoo.com/news/articles/hiker-killed-slipping-falling-down-172309047.html\" target=\"_blank\" rel=\"noopener noreferrer\">Another fell</a> to his death amid severe weather conditions. And another hiker just died, possibly while <a href=\"https://www.yahoo.com/news/articles/mt-whitney-rescue-team-finds-020254123.html\" target=\"_blank\" rel=\"noopener noreferrer\">taking a shortcut</a> on the long trail.)",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "We're early in our hike, up only 8,800 feet.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "(To hear the rushing water, unmute in the lower left corner.)",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        }
-      ],
-      "dropCap": {
-        "enabled": true,
-        "size": "56",
-        "lineHeight": "47",
-        "color": "#fbbf24",
-        "firstLineSize": "22",
-        "firstLineColor": "#ffffff"
+      "bodyText": "There's nothing technically difficult about the main trail when it's free of snow and ice. Still, you have to watch your step on the rocky path, especially at night.\n\nThere's little risk of falling off a cliff during the early parts of the hike. But when you climb above 12,000, the drop-offs become steep, the trail can become slippery and you're much more vulnerable to the elements.\n\n(Recently, a hiker <a href=\"https://www.sfgate.com/bayarea/article/california-teen-hiker-coma-mount-whitney-20392404.php\" target=\"_blank\" rel=\"noopener noreferrer\">stepped off a cliff</a> and suffered brain injury. <a href=\"https://www.yahoo.com/news/articles/hiker-killed-slipping-falling-down-172309047.html\" target=\"_blank\" rel=\"noopener noreferrer\">Another fell</a> to his death amid severe weather conditions. And another hiker just died, possibly while <a href=\"https://www.yahoo.com/news/articles/mt-whitney-rescue-team-finds-020254123.html\" target=\"_blank\" rel=\"noopener noreferrer\">taking a shortcut</a> on the long trail.)\n\nWe're early in our hike, up only 8,800 feet.\n\n(To hear the rushing water, unmute in the lower left corner.)",
+      "textWidth": "narrow",
+      "textStyle": {
+        "size": "19",
+        "weight": "normal",
+        "color": "#e5e5e5",
+        "font": "Inter, sans-serif",
+        "leading": "1.7"
       },
-      "dividerTop": true,
-      "dividerBottom": true,
-      "dividerColor": "#4d3d14"
+      "showDropCap": true,
+      "dropCapColor": "#fbbf24",
+      "dropCapSize": "56",
+      "firstLineSize": "22",
+      "firstLineWeight": "600",
+      "firstLineColor": "#ffffff",
+      "lineStyle": {
+        "showTop": true,
+        "showBottom": true,
+        "color": "#4d3d14"
+      }
     },
     {
       "type": "split-panel",
       "bgColor": "#000000",
-      "reversed": true,
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "startMediaRight": true,
+      "media1": "projects/mt_whitney_demo/media/09_first_sight.jpeg",
+      "media1Video": "",
+      "media2": "projects/mt_whitney_demo/media/11_Whitney_Griffin_hiking.jpeg",
+      "media2Video": "",
       "panels": [
         {
-          "image": "projects/mt_whitney_demo/media/09_first_sight.jpeg",
-          "video": "",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "6:04 a.m. (4 hours hiking)",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "Daylight comes. After hiking for hours by headlamp, the rising sun reveals the hard, jagged landscape we've been traversing. I feel like I've been transported. We're close to 11,000 feet.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "We've been moving at a steady pace, but I know Griffin wants to hike faster (because he can). For the sake of the rest of us, he'll have to cool his heels.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [
-            {
-              "text": "Far off in the distance (upper left corner of the photo), we catch our first glimpse of the famous golden hue (or \"alpenglow\") of the main Mount Whitney massif. That's about 13,000 feet.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "It's where we're headed.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "Daylight comes. After hiking for hours by headlamp, the rising sun reveals the hard, jagged landscape we've been traversing. I feel like I've been transported. We're close to 11,000 feet.\n\nWe've been moving at a steady pace, but I know Griffin wants to hike faster (because he can). For the sake of the rest of us, he'll have to cool his heels.\n\nFar off in the distance (upper left corner of the photo), we catch our first glimpse of the famous golden hue (or \"alpenglow\") of the main Mount Whitney massif. That's about 13,000 feet.\n\nIt's where we're headed.",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
+          "inlineImage": "",
+          "inlineImagePosition": "top",
+          "inlineImageWidth": "medium",
+          "inlineImageCaption": ""
         },
         {
-          "image": "projects/mt_whitney_demo/media/11_Whitney_Griffin_hiking.jpeg",
-          "video": "",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "7:26 a.m. (5-1/2 hours hiking)",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "The clear skies didn't last for long. A sea of clouds slowly creeps up behind us. We're at an elevation of around 11,700 feet.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "The sun is out, yet it feels colder. The altitude is making us breathe harder.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [
-            {
-              "text": "We run into only one other person on this leg of the trail. It's a tall, young guy who passes us, but then takes a wrong turn, and ends up behind us.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "Even though this is a well-worn path, it's not always obvious which way to go. That's why we have GPS-enabled maps on our phones (I'm using FarOut).",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "The clear skies didn't last for long. A sea of clouds slowly creeps up behind us. We're at an elevation of around 11,700 feet.\n\nThe sun is out, yet it feels colder. The altitude is making us breathe harder.\n\nWe run into only one other person on this leg of the trail. It's a tall, young guy who passes us, but then takes a wrong turn, and ends up behind us.\n\nEven though this is a well-worn path, it's not always obvious which way to go. That's why we have GPS-enabled maps on our phones (I'm using FarOut).",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
+          "inlineImage": "",
+          "inlineImagePosition": "top",
+          "inlineImageWidth": "medium",
+          "inlineImageCaption": ""
         }
       ]
     },
     {
       "type": "full-bleed",
-      "bgColor": "#000000",
-      "image": "projects/mt_whitney_demo/media/12_near_Trail_Camp.jpeg",
-      "video": "",
+      "media": "projects/mt_whitney_demo/media/12_near_Trail_Camp.jpeg",
       "poster": "",
-      "mobileVideo": "",
-      "mobilePoster": "",
-      "focusX": 0.5,
-      "focusY": 0.5,
       "caption": "",
-      "captionStyle": {
-        "size": "14",
-        "weight": "normal",
-        "color": "#9ca3af",
-        "font": "system-ui",
-        "style": "normal"
-      },
-      "paddingTop": 0,
-      "paddingBottom": 0
+      "captionStyle": { "color": "#e5e5e5", "size": "14" },
+      "captionPosition": "on",
+      "paddingTop": "none",
+      "paddingBottom": "none"
     },
     {
       "type": "text",
       "bgColor": "#000000",
-      "textWidth": "max-w-4xl",
-      "textPadding": {
-        "top": 16,
-        "bottom": 16
-      },
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "showByline": false,
       "subhead": "8:37 a.m. (6-1/2 hours hiking)",
       "subheadStyle": {
         "size": "28",
         "weight": "normal",
+        "italic": false,
         "color": "#f28926",
-        "font": "Newsreader, serif",
-        "style": "normal"
+        "font": "Newsreader, serif"
       },
-      "body": [
-        {
-          "text": "We make it to Trail Camp, which is above 12,000 feet. We started our hike at just under 8,400 feet.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "At this elevation, the Cleveland Clinic says you shouldn't ascend more than 1,640 feet per day. We've already doubled that amount. To reach the summit, we'll more than triple the recommended daily limit.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "We're 6 miles in with 5 more hard miles to go to reach the top, starting with a section known as the \"99 switchbacks.\" It's more than 2 miles long and ascends around 1,800 feet. It can become dangerous when there's snow or ice (it's where the two recent fatalities occurred). We packed micro-spikes just in case.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        },
-        {
-          "text": "We take a short breather by a small lake and gird ourselves for what's to come.",
-          "style": {
-            "size": "19",
-            "weight": "normal",
-            "color": "#e5e5e5",
-            "font": "Inter, sans-serif",
-            "style": "normal",
-            "leading": "1.7"
-          }
-        }
-      ],
-      "dropCap": {
-        "enabled": true,
-        "size": "56",
-        "lineHeight": "47",
-        "color": "#fbbf24",
-        "firstLineSize": "22",
-        "firstLineColor": "#ffffff"
-      }
+      "bodyText": "We make it to Trail Camp, which is above 12,000 feet. We started our hike at just under 8,400 feet.\n\nAt this elevation, the Cleveland Clinic says you shouldn't ascend more than 1,640 feet per day. We've already doubled that amount. To reach the summit, we'll more than triple the recommended daily limit.\n\nWe're 6 miles in with 5 more hard miles to go to reach the top, starting with a section known as the \"99 switchbacks.\" It's more than 2 miles long and ascends around 1,800 feet. It can become dangerous when there's snow or ice (it's where the two recent fatalities occurred). We packed micro-spikes just in case.\n\nWe take a short breather by a small lake and gird ourselves for what's to come.",
+      "textWidth": "medium",
+      "textStyle": {
+        "size": "19",
+        "weight": "normal",
+        "color": "#e5e5e5",
+        "font": "Inter, sans-serif",
+        "leading": "1.7"
+      },
+      "showDropCap": true,
+      "dropCapColor": "#fbbf24",
+      "dropCapSize": "56",
+      "firstLineSize": "22",
+      "firstLineWeight": "600",
+      "firstLineColor": "#ffffff"
     },
     {
       "type": "gallery",
-      "bgColor": "#000000",
-      "paddingTop": 0,
-      "paddingBottom": 50,
-      "layout": "1-2",
-      "items": [
+      "slotCount": 3,
+      "template": "1-2",
+      "media": [
         {
-          "image": "projects/mt_whitney_demo/media/13_Tarn.JPG",
-          "video": "",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
+          "src": "projects/mt_whitney_demo/media/13_Tarn.JPG",
+          "type": "image",
           "caption": "We take a break by the tarn next to Trail Camp.",
-          "captionStyle": {
-            "size": "16",
-            "color": "#e5e5e5"
-          }
+          "focalPoint": "center"
         },
         {
-          "image": "projects/mt_whitney_demo/media/14_switchbacks02.jpeg",
-          "video": "",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
+          "src": "projects/mt_whitney_demo/media/14_switchbacks02.jpeg",
+          "type": "image",
           "caption": "Whitney and Griffin on the 99 Switchbacks.",
-          "captionStyle": {
-            "size": "16",
-            "color": "#e5e5e5"
-          }
+          "focalPoint": "center"
         },
         {
-          "image": "projects/mt_whitney_demo/media/15_switchbacks03.jpeg",
-          "video": "",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
+          "src": "projects/mt_whitney_demo/media/15_switchbacks03.jpeg",
+          "type": "image",
           "caption": "The clouds stay at bay for now.",
-          "captionStyle": {
-            "size": "16",
-            "color": "#e5e5e5"
-          }
+          "focalPoint": "center"
         }
       ],
-      "gap": 30
+      "gapSize": "medium",
+      "paddingTop": "none",
+      "paddingBottom": "medium",
+      "bgColor": "#000000",
+      "captionStyle": { "color": "#e5e5e5", "size": "16" }
     },
     {
       "type": "split-panel",
       "bgColor": "#000000",
-      "reversed": false,
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "startMediaRight": false,
+      "media1": "",
+      "media1Video": "projects/mt_whitney_demo/media/17_Trail_Crest.mp4",
+      "media2": "",
+      "media2Video": "projects/mt_whitney_demo/media/19_Trail_Crest_cliff.mp4",
       "panels": [
         {
-          "image": "",
-          "video": "projects/mt_whitney_demo/media/17_Trail_Crest.mp4",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "12:45 p.m. (almost 11 hours hiking)",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "We reach Trail Crest at 13,654 feet. It's significant on several fronts.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "First, it marks the end of the 99 switchbacks and the start of the toughest leg: 2.8 miles to the summit.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "Second, this is where blizzard conditions the day before forced hikers to abandon their summit bid. As you can see, there's little protection from storms or strong winds along the narrow ridge.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "And third, this is roughly where Whitney and I turned back last year during our first attempt together. On that occasion, the altitude made Whitney feel ill. She was determined to push on, but I didn't think it was safe, so we descended.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "She felt much better today.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [],
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "We reach Trail Crest at 13,654 feet. It's significant on several fronts.\n\nFirst, it marks the end of the 99 switchbacks and the start of the toughest leg: 2.8 miles to the summit.\n\nSecond, this is where blizzard conditions the day before forced hikers to abandon their summit bid. As you can see, there's little protection from storms or strong winds along the narrow ridge.\n\nAnd third, this is roughly where Whitney and I turned back last year during our first attempt together. On that occasion, the altitude made Whitney feel ill. She was determined to push on, but I didn't think it was safe, so we descended.\n\nShe felt much better today.",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
+          "inlineImage": "",
+          "inlineImagePosition": "top",
+          "inlineImageWidth": "medium",
+          "inlineImageCaption": ""
         },
         {
-          "image": "",
-          "video": "projects/mt_whitney_demo/media/19_Trail_Crest_cliff.mp4",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "Don't Look Down",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "Remember when I said it gets a bit more risky above 12,000 feet? This is what I meant.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "The video was taken about 4 feet from the middle of the trail. There are many steep drop-offs like this along the last leg.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "On top of that, if you see dark clouds coming, this sign below becomes more important. That hissing (bullet #3) may not be a snake.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [],
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "Remember when I said it gets a bit more risky above 12,000 feet? This is what I meant.\n\nThe video was taken about 4 feet from the middle of the trail. There are many steep drop-offs like this along the last leg.\n\nOn top of that, if you see dark clouds coming, this sign below becomes more important. That hissing (bullet #3) may not be a snake.",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
           "inlineImage": "projects/mt_whitney_demo/media/20_danger_sign.jpeg",
-          "inlineImageWidth": "max-w-sm",
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "inlineImagePosition": "bottom",
+          "inlineImageWidth": "small",
+          "inlineImageCaption": ""
         }
       ]
     },
     {
       "type": "split-panel",
       "bgColor": "#000000",
-      "reversed": false,
+      "paddingTop": "medium",
+      "paddingBottom": "medium",
+      "startMediaRight": false,
+      "media1": "",
+      "media1Video": "projects/mt_whitney_demo/media/22_slow_steps.mp4",
+      "media2": "",
+      "media2Video": "projects/mt_whitney_demo/media/23_dropoffs_either_side.mp4",
       "panels": [
         {
-          "image": "",
-          "video": "projects/mt_whitney_demo/media/22_slow_steps.mp4",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "Higher and Slower",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "For those who have never felt the enfeebling effects of high altitudes, hiking another 2.8 miles can feel insurmountable.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "Each step takes effort and the breathing only gets harder as you climb above 13,500 feet.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [
-            {
-              "text": "Meanwhile, your brain tells you that you've gone too far to turn back, just as your body insists you still have much too far to go.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            },
-            {
-              "text": "There's a delicate balance of pushing forward but not endangering yourself or the group.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "For those who have never felt the enfeebling effects of high altitudes, hiking another 2.8 miles can feel insurmountable.\n\nEach step takes effort and the breathing only gets harder as you climb above 13,500 feet.\n\nMeanwhile, your brain tells you that you've gone too far to turn back, just as your body insists you still have much too far to go.\n\nThere's a delicate balance of pushing forward but not endangering yourself or the group.",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
+          "inlineImage": "",
+          "inlineImagePosition": "top",
+          "inlineImageWidth": "medium",
+          "inlineImageCaption": ""
         },
         {
-          "image": "",
-          "video": "projects/mt_whitney_demo/media/23_dropoffs_either_side.mp4",
-          "poster": "",
-          "focusX": 0.5,
-          "focusY": 0.5,
           "subhead": "Mt. Whitney's 'Windows'",
-          "subheadStyle": {
-            "size": "28",
-            "weight": "normal",
-            "color": "#f28926",
-            "font": "Newsreader, serif",
-            "style": "normal",
-            "align": "left"
-          },
-          "body": [
-            {
-              "text": "Most of the time along the high, narrow ridge, you have the security of a rock wall on one side. But there are a number of short sections known as \"windows\" where there are no walls, and you feel a bit like you're walking a tightrope.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "body2": [
-            {
-              "text": "Granted, it's a tightrope that's roughly 6 feet wide, but if you're already feeling unsteady because of fatigue, it can be a little unsettling. It doesn't help that strong gusts of wind can blow through these windows.",
-              "style": {
-                "size": "19",
-                "weight": "normal",
-                "color": "#e5e5e5",
-                "font": "Inter, sans-serif",
-                "style": "normal",
-                "leading": "1.7"
-              }
-            }
-          ],
-          "textWidth": "max-w-lg",
-          "textPadding": {
-            "top": 16,
-            "bottom": 16
-          },
-          "dropCap": {
-            "enabled": true,
-            "size": "56",
-            "lineHeight": "47",
-            "color": "#fbbf24",
-            "firstLineSize": "22",
-            "firstLineColor": "#ffffff"
-          },
-          "mobileSubhead": false
+          "subheadStyle": { "size": "28", "weight": "normal", "italic": false, "color": "#f28926", "font": "Newsreader, serif" },
+          "bodyText": "Most of the time along the high, narrow ridge, you have the security of a rock wall on one side. But there are a number of short sections known as \"windows\" where there are no walls, and you feel a bit like you're walking a tightrope.\n\nGranted, it's a tightrope that's roughly 6 feet wide, but if you're already feeling unsteady because of fatigue, it can be a little unsettling. It doesn't help that strong gusts of wind can blow through these windows.",
+          "textWidth": "medium",
+          "textStyle": { "size": "19", "weight": "normal", "italic": false, "color": "#e5e5e5", "font": "Inter, sans-serif", "leading": "1.7" },
+          "showDropCap": true,
+          "dropCapColor": "#fbbf24",
+          "dropCapSize": "56",
+          "firstLineSize": "22",
+          "firstLineWeight": "600",
+          "firstLineColor": "#ffffff",
+          "pullQuote": "",
+          "pullQuotePosition": "0",
+          "inlineImage": "",
+          "inlineImagePosition": "top",
+          "inlineImageWidth": "medium",
+          "inlineImageCaption": ""
         }
       ]
     }
