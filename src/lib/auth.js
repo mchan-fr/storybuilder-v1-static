@@ -89,8 +89,10 @@ export async function resetPassword(email) {
     return { error: { message: 'Supabase not configured' } };
   }
 
+  // Use current page URL (without hash) to handle GitHub Pages base path correctly
+  const redirectUrl = window.location.origin + window.location.pathname;
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/app.html'
+    redirectTo: redirectUrl
   });
 
   return { data, error };
