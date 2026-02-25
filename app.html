@@ -1420,22 +1420,26 @@ function renderEditor() {
                 els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
                 els.mediaFolderStatus.classList.add('text-green-600');
                 fileSystem.clearStoredFolderName();
-            } else if (hasHandle || fileSystem.getStoredFolderName()) {
-                // Have a handle but no permission, or have stored folder name - show reconnect
-                const folderName = fileSystem.getDirectoryName() || fileSystem.getStoredFolderName();
-                els.mediaFolderLabel.textContent = `Reconnect "${folderName}"`;
-                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
-                els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
-                els.mediaFolderStatus.textContent = 'Click to reconnect';
-                els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
-                els.mediaFolderStatus.classList.add('text-amber-600');
             } else {
-                els.mediaFolderLabel.textContent = 'Select Media Folder';
-                els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
-                els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
-                els.mediaFolderStatus.classList.add('hidden');
+                // Check if we have a handle that needs reconnection
+                const folderName = fileSystem.getDirectoryName() || fileSystem.getStoredFolderName();
+                if (hasHandle && folderName) {
+                    // Have a handle but no permission - show reconnect
+                    els.mediaFolderLabel.textContent = `Reconnect "${folderName}"`;
+                    els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                    els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                    els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
+                    els.mediaFolderStatus.textContent = 'Click to reconnect';
+                    els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
+                    els.mediaFolderStatus.classList.add('text-amber-600');
+                } else {
+                    // No handle or no valid name - show select button
+                    els.mediaFolderLabel.textContent = 'Select Media Folder';
+                    els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                    els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                    els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
+                    els.mediaFolderStatus.classList.add('hidden');
+                }
             }
         }
 

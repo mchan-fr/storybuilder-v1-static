@@ -228,14 +228,18 @@ export async function persistDirectoryHandle() {
 export async function restoreDirectoryHandle() {
   try {
     const db = await openDatabase();
-    const tx = db.transaction('handles', 'readonly');
+    const tx = db.transaction('handles', 'readwrite');
     const store = tx.objectStore('handles');
     const handle = await store.get('mediaFolder');
 
-    if (handle) {
+    if (handle && handle.name) {
       directoryHandle = handle;
-      storedFolderName = handle.name; // Remember name for UI
+      storedFolderName = handle.name;
       return { restored: true, name: handle.name };
+    } else if (handle) {
+      // Handle exists but no name - corrupted, clear it
+      console.warn('Stored handle has no name, clearing');
+      store.delete('mediaFolder');
     }
   } catch (err) {
     console.warn('Could not restore directory handle:', err);
