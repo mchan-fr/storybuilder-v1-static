@@ -57,7 +57,8 @@ export default defineConfig(({ command }) => ({
             ignore: ['**/.git/**', '**/.DS_Store', '**/.gitattributes']
           }
         },
-        { src: 'styles/*', dest: 'styles' }
+        { src: 'styles/*', dest: 'styles' },
+        { src: 'images/*', dest: 'images' }
       ]
     })
   ],
