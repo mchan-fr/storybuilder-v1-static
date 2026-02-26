@@ -79,7 +79,8 @@ export default defineConfig(({ command }) => ({
       input: {
         main: resolve(__dirname, 'index.html'),
         app: resolve(__dirname, 'app.html'),
-        guide: resolve(__dirname, 'guide.html')
+        guide: resolve(__dirname, 'guide.html'),
+        blocks: resolve(__dirname, 'blocks.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
