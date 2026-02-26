@@ -432,7 +432,7 @@
             'text',
             'zoom-photo'
         ];
-        els.blockType.innerHTML = blockOrder
+        els.blockType.innerHTML = '<option value="">Select Block Type</option>' + blockOrder
             .filter(type => BLOCKS[type])
             .map(type => `<option value="${type}">${BLOCKS[type].title}</option>`)
             .join('');
@@ -1296,6 +1296,7 @@ function renderEditor() {
         // Add block
         els.addBtn.addEventListener('click', () => {
             const type = els.blockType.value;
+            if (!type) return; // No block type selected
             state.blocks.push(newBlock(type));
             renderBlocksList();
 
