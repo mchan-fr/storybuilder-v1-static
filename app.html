@@ -268,6 +268,27 @@
                         <label class="text-sm font-semibold text-gray-700">Page Title:</label>
                         <input id="pageTitle" type="text" placeholder="e.g., Hiking Mount Whitney"
                             class="px-3 py-2 border border-blue-200 bg-white rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="seoToggle" type="button" class="text-xs text-gray-500 hover:text-blue-600 underline">SEO Settings</button>
+                    </div>
+                    <!-- SEO Settings (collapsible) -->
+                    <div id="seoSettings" class="hidden mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Description</label>
+                                <textarea id="seoDescription" placeholder="Brief summary for search results..."
+                                    class="w-full mt-1 px-2 py-1 border border-gray-300 rounded text-sm h-16 resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Author</label>
+                                <input id="seoAuthor" type="text" placeholder="Your name"
+                                    class="w-full mt-1 px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Social Image URL</label>
+                                <input id="seoImage" type="text" placeholder="https://... or media/image.jpg"
+                                    class="w-full mt-1 px-2 py-1 border border-gray-300 rounded text-sm">
+                            </div>
+                        </div>
                     </div>
                     <!-- Hidden project folder for backwards compatibility -->
                     <input id="projectFolder" type="hidden" value="">
@@ -381,7 +402,10 @@
 
         const state = {
             project: '',
-            pageTitle: '', // NEW: Page title for export
+            pageTitle: '',
+            seoDescription: '',
+            seoAuthor: '',
+            seoImage: '',
             blocks: [],
             selectedBlockIndex: null,
             previewMode: 'iframe', // 'iframe' or 'debug'
@@ -417,6 +441,12 @@
             mediaFolderStatus: document.getElementById('mediaFolderStatus'),
             // Demo banner
             demoBanner: document.getElementById('demoBanner'),
+            // SEO settings
+            seoToggle: document.getElementById('seoToggle'),
+            seoSettings: document.getElementById('seoSettings'),
+            seoDescription: document.getElementById('seoDescription'),
+            seoAuthor: document.getElementById('seoAuthor'),
+            seoImage: document.getElementById('seoImage'),
         };
 
         // Populate block type dropdown (explicit order)
@@ -1351,7 +1381,10 @@ function renderEditor() {
         els.saveBtn.addEventListener('click', () => {
             const payload = JSON.stringify({
                 project: state.project || els.projectInput.value || '',
-                pageTitle: state.pageTitle || els.pageTitleInput.value || '', // NEW: Save page title
+                pageTitle: state.pageTitle || els.pageTitleInput.value || '',
+                seoDescription: state.seoDescription || '',
+                seoAuthor: state.seoAuthor || '',
+                seoImage: state.seoImage || '',
                 blocks: state.blocks
             }, null, 2);
             dl(`story-${state.project || 'project'}.json`, payload);
@@ -1366,11 +1399,17 @@ function renderEditor() {
                 try {
                     const j = JSON.parse(r.result);
                     state.project = j.project || '';
-                    state.pageTitle = j.pageTitle || ''; // NEW: Load page title
+                    state.pageTitle = j.pageTitle || '';
+                    state.seoDescription = j.seoDescription || '';
+                    state.seoAuthor = j.seoAuthor || '';
+                    state.seoImage = j.seoImage || '';
                     state.blocks = Array.isArray(j.blocks) ? j.blocks : [];
                     state.selectedBlockIndex = null;
                     els.projectInput.value = state.project;
-                    els.pageTitleInput.value = state.pageTitle; // NEW: Set input value
+                    els.pageTitleInput.value = state.pageTitle;
+                    els.seoDescription.value = state.seoDescription;
+                    els.seoAuthor.value = state.seoAuthor;
+                    els.seoImage.value = state.seoImage;
                     renderBlocksList();
                     renderEditor();
                     renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
@@ -1389,6 +1428,23 @@ function renderEditor() {
         // Page title input listener
         els.pageTitleInput.addEventListener('input', () => {
             state.pageTitle = els.pageTitleInput.value.trim();
+        });
+
+        // SEO settings toggle
+        els.seoToggle.addEventListener('click', () => {
+            els.seoSettings.classList.toggle('hidden');
+            els.seoToggle.textContent = els.seoSettings.classList.contains('hidden') ? 'SEO Settings' : 'Hide SEO';
+        });
+
+        // SEO input listeners
+        els.seoDescription.addEventListener('input', () => {
+            state.seoDescription = els.seoDescription.value.trim();
+        });
+        els.seoAuthor.addEventListener('input', () => {
+            state.seoAuthor = els.seoAuthor.value.trim();
+        });
+        els.seoImage.addEventListener('input', () => {
+            state.seoImage = els.seoImage.value.trim();
         });
 
         // ============================================
@@ -1515,10 +1571,16 @@ function renderEditor() {
             onLoad: async (storyData, options = {}) => {
                 state.project = storyData.project || '';
                 state.pageTitle = storyData.pageTitle || storyData.title || '';
+                state.seoDescription = storyData.seo_description || storyData.seoDescription || '';
+                state.seoAuthor = storyData.seo_author || storyData.seoAuthor || '';
+                state.seoImage = storyData.seo_image || storyData.seoImage || '';
                 state.blocks = storyData.blocks || [];
                 state.selectedBlockIndex = null;
                 els.projectInput.value = state.project;
                 els.pageTitleInput.value = state.pageTitle;
+                els.seoDescription.value = state.seoDescription;
+                els.seoAuthor.value = state.seoAuthor;
+                els.seoImage.value = state.seoImage;
 
                 // Show/hide demo banner
                 if (options.isDemo) {
@@ -1555,11 +1617,17 @@ function renderEditor() {
             onNew: () => {
                 state.project = '';
                 state.pageTitle = '';
+                state.seoDescription = '';
+                state.seoAuthor = '';
+                state.seoImage = '';
                 state.blocks = [];
                 els.demoBanner.classList.add('hidden');
                 state.selectedBlockIndex = null;
                 els.projectInput.value = '';
                 els.pageTitleInput.value = '';
+                els.seoDescription.value = '';
+                els.seoAuthor.value = '';
+                els.seoImage.value = '';
                 renderBlocksList();
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
@@ -1568,6 +1636,9 @@ function renderEditor() {
             getState: () => ({
                 project: state.project,
                 pageTitle: state.pageTitle,
+                seoDescription: state.seoDescription,
+                seoAuthor: state.seoAuthor,
+                seoImage: state.seoImage,
                 blocks: state.blocks
             })
         });

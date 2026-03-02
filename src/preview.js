@@ -1602,13 +1602,30 @@ export function buildExportHtml({ state }) {
   blocks.forEach((b, index) => {
     const mod = BLOCKS[b.type];
     if (!mod?.exportHTML) return;
-    // Wrap block with tracking attributes including expected time
+    // Wrap block with semantic <section> and tracking attributes
     const blockHtml = mod.exportHTML({ block: b, blocks });
     const expectedTime = getEffectiveExpectedTime(b);
     const standardizedTime = calculateExpectedTime(b);
-    parts.push(`<div data-sb-block="${index}" data-sb-type="${b.type}" data-sb-expected="${expectedTime}" data-sb-expected-std="${standardizedTime}">${blockHtml}</div>`);
+    parts.push(`<section data-sb-block="${index}" data-sb-type="${b.type}" data-sb-expected="${expectedTime}" data-sb-expected-std="${standardizedTime}">${blockHtml}</section>`);
   });
   const body = parts.join('\n');
+
+  // Calculate word count for structured data
+  let totalText = '';
+  (state.blocks || []).forEach(b => {
+    if (b.bodyText) totalText += ' ' + b.bodyText;
+    if (b.text) totalText += ' ' + b.text;
+    if (b.headline) totalText += ' ' + b.headline;
+    if (b.subhead) totalText += ' ' + b.subhead;
+  });
+  const wordCount = totalText.split(/\s+/).filter(w => w.length > 0).length;
+
+  // SEO fields with fallbacks
+  const title = state.pageTitle || state.project || 'Story';
+  const description = state.seoDescription || state.pageTitle || 'A visual story';
+  const author = state.seoAuthor || '';
+  const ogImage = state.seoImage || '';
+  const datePublished = new Date().toISOString().split('T')[0];
 
   // Generate analytics runtime if configured
   let analyticsScript = '';
@@ -1743,26 +1760,54 @@ export function buildExportHtml({ state }) {
   const needsSplit = /class="[^"]*\bsplit-panel-wrapper\b/.test(body) || /class="[^"]*\bsplit-mobile-wrapper\b/.test(body);
   const needsCinematic = /class="[^"]*\bsb-cinematic-scroll\b/.test(body);
 
+  // Build JSON-LD structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": title,
+    "description": description,
+    "wordCount": wordCount,
+    "datePublished": datePublished,
+    "dateModified": datePublished
+  };
+  if (author) {
+    jsonLd.author = { "@type": "Person", "name": author };
+  }
+  if (ogImage) {
+    jsonLd.image = ogImage;
+  }
+
   const doctype = '<!DOCTYPE html>';
   return `${doctype}
 <html lang="en">
   <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${state.pageTitle || state.project || 'Story Export'}</title>
+  <title>${title}</title>
+  <meta name="description" content="${description.replace(/"/g, '&quot;')}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
-  <meta property="og:title" content="${state.pageTitle || state.project || 'Story'}">
-  <meta property="og:description" content="A multimedia story by Marcus Chan">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description.replace(/"/g, '&quot;')}">
   <meta property="og:type" content="article">
+  ${ogImage ? `<meta property="og:image" content="${ogImage}">` : ''}
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="author" content="Marcus Chan">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description.replace(/"/g, '&quot;')}">
+  ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
+  ${author ? `<meta name="author" content="${author}">` : ''}
   <meta name="reading-time" content="${readTime} min read">
+  <meta property="article:published_time" content="${datePublished}">
+  <script type="application/ld+json">${JSON.stringify(jsonLd)}<\/script>
     <script src="https://cdn.tailwindcss.com"><\/script>
     <style>${BASE_CSS}</style>
   </head>
   <body>
     <div id="progress-bar" style="position:fixed;top:0;left:0;height:3px;background:#fbbf24;width:0%;z-index:9999;transition:width 0.1s;"></div>
-    ${body}
+    <main>
+      <article itemscope itemtype="https://schema.org/Article">
+        ${body}
+      </article>
+    </main>
     <script>${BOOT_FADE}<\/script>
     ${needsZoom  ? `<script>${ZOOM_RUNTIME}<\/script>`  : ''}
     ${needsCinematic ? `<script>${CINEMATIC_SCROLL_RUNTIME}<\/script>` : ''}

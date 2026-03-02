@@ -132,6 +132,10 @@ export class StoriesUI {
       id: this.currentStoryId,
       title: state.pageTitle || state.project || 'Untitled Story',
       project: state.project || '',
+      pageTitle: state.pageTitle || '',
+      seoDescription: state.seoDescription || '',
+      seoAuthor: state.seoAuthor || '',
+      seoImage: state.seoImage || '',
       blocks: state.blocks || [],
       userId: this.userId
     });
@@ -159,6 +163,10 @@ export class StoriesUI {
       id: null, // Force create new
       title: newTitle,
       project: state.project || '',
+      pageTitle: state.pageTitle || '',
+      seoDescription: state.seoDescription || '',
+      seoAuthor: state.seoAuthor || '',
+      seoImage: state.seoImage || '',
       blocks: state.blocks || [],
       userId: this.userId
     });

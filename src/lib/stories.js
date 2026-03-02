@@ -3,7 +3,7 @@ import { supabase, isSupabaseConfigured } from './supabase.js';
 /**
  * Save a story (create or update)
  */
-export async function saveStory({ id, title, project, blocks, userId }) {
+export async function saveStory({ id, title, project, pageTitle, seoDescription, seoAuthor, seoImage, blocks, userId }) {
   if (!isSupabaseConfigured()) {
     return { error: { message: 'Supabase not configured' } };
   }
@@ -11,6 +11,10 @@ export async function saveStory({ id, title, project, blocks, userId }) {
   const storyData = {
     title: title || 'Untitled Story',
     project: project || '',
+    page_title: pageTitle || '',
+    seo_description: seoDescription || '',
+    seo_author: seoAuthor || '',
+    seo_image: seoImage || '',
     blocks: blocks || [],
     user_id: userId,
     updated_at: new Date().toISOString()
