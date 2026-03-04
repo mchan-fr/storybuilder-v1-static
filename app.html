@@ -467,6 +467,20 @@
             .map(type => `<option value="${type}">${BLOCKS[type].title}</option>`)
             .join('');
 
+        // Debounce utility for preview updates
+        function debounce(fn, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // Debounced preview update (150ms delay to avoid excessive rerenders during typing)
+        const debouncedPreviewUpdate = debounce(() => {
+            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+        }, 150);
+
         // Render blocks list
         function renderBlocksList() {
             if (state.blocks.length === 0) {
@@ -743,6 +757,7 @@ function renderEditor() {
                     }
 
                     renderBlocksList(); // Update the list view
+                    debouncedPreviewUpdate(); // Update preview with debounce
                 });
 
                 // Handle toggle checkboxes that control visibility of sibling fields

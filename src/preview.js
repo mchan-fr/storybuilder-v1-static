@@ -747,17 +747,18 @@ img,video{display:block;max-width:100%;height:auto}
     object-fit: cover !important;
   }
 
-  h1 {
+  /* Only override headings without inline font-size (allow block-specific styles) */
+  h1:not([style*="font-size"]) {
     font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
     line-height: 1.15 !important;
   }
-  
-  h2 {
+
+  h2:not([style*="font-size"]) {
     font-size: clamp(1.5rem, 5vw, 2rem) !important;
     line-height: 1.2 !important;
   }
-  
-  h3 {
+
+  h3:not([style*="font-size"]) {
     font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
     line-height: 1.25 !important;
   }
