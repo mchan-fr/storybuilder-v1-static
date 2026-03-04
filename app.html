@@ -1645,6 +1645,29 @@ function renderEditor() {
 
         // Initialize Auth UI
         const authUI = new AuthUI(els.authContainer, (user) => {
+            const previousUserId = state.user?.id;
+            const newUserId = user?.id;
+
+            // Clear editor state when user signs out or switches accounts
+            if (previousUserId && previousUserId !== newUserId) {
+                state.project = '';
+                state.pageTitle = '';
+                state.seoDescription = '';
+                state.seoAuthor = '';
+                state.seoImage = '';
+                state.blocks = [];
+                state.selectedBlockIndex = null;
+                els.projectInput.value = '';
+                els.pageTitleInput.value = '';
+                els.seoDescription.value = '';
+                els.seoAuthor.value = '';
+                els.seoImage.value = '';
+                els.demoBanner.classList.add('hidden');
+                renderBlocksList();
+                renderEditor();
+                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+            }
+
             state.user = user;
             storiesUI.setUser(user);
             analyticsUI.setUser(user);
