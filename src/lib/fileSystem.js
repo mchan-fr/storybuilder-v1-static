@@ -2,9 +2,7 @@
 // Requires Chrome or Edge browser
 
 let directoryHandle = null;
-let currentProjectKey = null; // Track which project this handle is for
 let fileCache = new Map(); // Cache blob URLs to avoid re-reading files
-let storedFolderName = null; // Track name of stored folder that needs reconnecting
 
 /**
  * Check if File System Access API is supported
@@ -25,13 +23,6 @@ export function hasDirectoryAccess() {
  */
 export function getDirectoryName() {
   return directoryHandle?.name || null;
-}
-
-/**
- * Get stored folder name that needs reconnecting (if any)
- */
-export function getStoredFolderName() {
-  return storedFolderName;
 }
 
 /**
@@ -61,35 +52,6 @@ export async function requestFolderAccess() {
 }
 
 /**
- * Try to reconnect to a previously stored folder
- * First attempts to re-request permission on the stored handle
- * Falls back to showDirectoryPicker if that fails
- * Returns { success: boolean, name?: string, error?: string }
- */
-export async function reconnectFolder() {
-  if (!isFileSystemSupported()) {
-    return { success: false, error: 'File System Access API not supported' };
-  }
-
-  // If we have a stored handle, try to get permission for it
-  if (directoryHandle) {
-    try {
-      const permission = await directoryHandle.requestPermission({ mode: 'read' });
-      if (permission === 'granted') {
-        clearCache();
-        storedFolderName = null;
-        return { success: true, name: directoryHandle.name };
-      }
-    } catch {
-      // Permission request failed, fall through to picker
-    }
-  }
-
-  // Fall back to picking a new folder
-  return requestFolderAccess();
-}
-
-/**
  * Verify we still have permission to the directory
  */
 export async function verifyPermission() {
@@ -97,20 +59,6 @@ export async function verifyPermission() {
 
   try {
     const permission = await directoryHandle.queryPermission({ mode: 'read' });
-    return permission === 'granted';
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Request permission if needed (for when page is reloaded)
- */
-export async function requestPermissionIfNeeded() {
-  if (!directoryHandle) return false;
-
-  try {
-    const permission = await directoryHandle.requestPermission({ mode: 'read' });
     return permission === 'granted';
   } catch {
     return false;
@@ -200,192 +148,4 @@ export function clearCache() {
 export function disconnect() {
   clearCache();
   directoryHandle = null;
-}
-
-/**
- * Set the current project key for handle storage
- * @param {string} projectName - The project folder name (e.g., "mt_whitney")
- */
-export function setCurrentProject(projectName) {
-  currentProjectKey = projectName || null;
-}
-
-/**
- * Get the current project key
- */
-export function getCurrentProject() {
-  return currentProjectKey;
-}
-
-// Helper to wrap IDBRequest in a Promise
-function wrapRequest(request) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-/**
- * Store directory handle reference in IndexedDB for persistence
- * Associates the handle with the current project
- * Note: The handle can be stored, but user must re-grant permission on page reload
- */
-export async function persistDirectoryHandle() {
-  if (!directoryHandle) {
-    console.log('[FS DEBUG] persistDirectoryHandle: no handle to persist');
-    return false;
-  }
-
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('handles', 'readwrite');
-    const store = tx.objectStore('handles');
-
-    // Store by project key if available, otherwise use generic key
-    const key = currentProjectKey ? `project:${currentProjectKey}` : 'mediaFolder';
-    console.log('[FS DEBUG] Persisting handle with key:', key, 'folder:', directoryHandle.name);
-    await wrapRequest(store.put(directoryHandle, key));
-
-    // Also store the folder name mapping for quick lookup
-    if (currentProjectKey) {
-      const mappingKey = `mapping:${currentProjectKey}`;
-      console.log('[FS DEBUG] Storing mapping:', mappingKey, '→', directoryHandle.name);
-      await wrapRequest(store.put({ folderName: directoryHandle.name, projectKey: currentProjectKey }, mappingKey));
-    }
-
-    return true;
-  } catch (err) {
-    console.error('[FS DEBUG] Could not persist directory handle:', err);
-    return false;
-  }
-}
-
-/**
- * Restore directory handle from IndexedDB for a specific project
- * User will need to re-grant permission
- * @param {string} projectName - Optional project name to restore handle for
- * Returns: { restored: boolean, name: string | null }
- */
-export async function restoreDirectoryHandle(projectName = null) {
-  console.log('[FS DEBUG] restoreDirectoryHandle called with:', projectName);
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('handles', 'readwrite');
-    const store = tx.objectStore('handles');
-
-    // Try project-specific key first, then fall back to generic
-    const projectKey = projectName ? `project:${projectName}` : (currentProjectKey ? `project:${currentProjectKey}` : null);
-    console.log('[FS DEBUG] Looking for key:', projectKey);
-    let handle = null;
-
-    if (projectKey) {
-      handle = await wrapRequest(store.get(projectKey));
-      console.log('[FS DEBUG] Found handle for project key:', !!handle);
-    }
-
-    // Fall back to generic key if no project-specific handle
-    if (!handle) {
-      handle = await wrapRequest(store.get('mediaFolder'));
-      console.log('[FS DEBUG] Fallback to mediaFolder:', !!handle);
-    }
-
-    if (handle && handle.name) {
-      directoryHandle = handle;
-      storedFolderName = handle.name;
-      if (projectName) {
-        currentProjectKey = projectName;
-      }
-      console.log('[FS DEBUG] Restored handle:', handle.name, 'storedFolderName set to:', storedFolderName);
-      return { restored: true, name: handle.name };
-    } else if (handle) {
-      console.warn('[FS DEBUG] Handle exists but no name, clearing');
-      if (projectKey) await wrapRequest(store.delete(projectKey));
-    } else {
-      console.log('[FS DEBUG] No handle found in IndexedDB');
-    }
-  } catch (err) {
-    console.error('[FS DEBUG] Could not restore directory handle:', err);
-  }
-  return { restored: false, name: null };
-}
-
-/**
- * Get stored folder info for a specific project (without restoring)
- * @param {string} projectName - The project name to look up
- * Returns: { found: boolean, folderName: string | null }
- */
-export async function getStoredFolderForProject(projectName) {
-  if (!projectName) return { found: false, folderName: null };
-
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('handles', 'readonly');
-    const store = tx.objectStore('handles');
-
-    // Check mapping first (quick lookup)
-    const mapping = await wrapRequest(store.get(`mapping:${projectName}`));
-    if (mapping && mapping.folderName) {
-      return { found: true, folderName: mapping.folderName };
-    }
-
-    // Fall back to checking handle directly
-    const handle = await wrapRequest(store.get(`project:${projectName}`));
-    if (handle && handle.name) {
-      return { found: true, folderName: handle.name };
-    }
-  } catch (err) {
-    console.warn('Could not look up stored folder:', err);
-  }
-  return { found: false, folderName: null };
-}
-
-/**
- * Clear stored folder name (call after successful reconnection or explicit disconnect)
- */
-export function clearStoredFolderName() {
-  storedFolderName = null;
-}
-
-/**
- * Clear stored handle from IndexedDB for the current project
- * Call this when user explicitly disconnects to allow selecting a new folder
- */
-export async function clearStoredHandle() {
-  try {
-    const db = await openDatabase();
-    const tx = db.transaction('handles', 'readwrite');
-    const store = tx.objectStore('handles');
-
-    // Clear project-specific handle if we have a current project
-    if (currentProjectKey) {
-      console.log('[FS DEBUG] Clearing stored handle for project:', currentProjectKey);
-      await wrapRequest(store.delete(`project:${currentProjectKey}`));
-      await wrapRequest(store.delete(`mapping:${currentProjectKey}`));
-    }
-
-    // Also clear the generic mediaFolder key
-    await wrapRequest(store.delete('mediaFolder'));
-
-    storedFolderName = null;
-    currentProjectKey = null;
-  } catch (err) {
-    console.warn('Could not clear stored handle:', err);
-  }
-}
-
-// IndexedDB helper
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('StoryBuilderFS', 1);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains('handles')) {
-        db.createObjectStore('handles');
-      }
-    };
-  });
 }
