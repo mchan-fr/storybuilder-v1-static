@@ -1623,9 +1623,10 @@ function renderEditor() {
                     els.demoBanner.classList.add('hidden');
                 }
 
-                // Clear all caches when switching projects
+                // Disconnect and clear all caches when switching projects
+                // This ensures the user connects to the correct folder for this project
+                fileSystem.disconnect();
                 clearBlobUrlCache();
-                fileSystem.clearCache();
                 fileSystem.setCurrentProject(state.project);
 
                 // Render immediately
