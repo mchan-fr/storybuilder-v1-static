@@ -1624,10 +1624,13 @@ function renderEditor() {
                 }
 
                 // Disconnect and clear all caches when switching projects
-                // This ensures the user connects to the correct folder for this project
+                console.log('[DEBUG] Loading project:', state.project);
+                console.log('[DEBUG] Blocks with media:', state.blocks.map(b => ({ image: b.image, video: b.video })));
+
                 fileSystem.disconnect();
                 clearBlobUrlCache();
                 fileSystem.setCurrentProject(state.project);
+                console.log('[DEBUG] Set current project to:', state.project);
 
                 // Render immediately
                 renderBlocksList();
@@ -1637,13 +1640,15 @@ function renderEditor() {
                 // Try to restore stored folder info for this project, then update UI
                 (async () => {
                     try {
-                        // This restores the handle and sets storedFolderName if found
                         if (state.project) {
-                            await fileSystem.restoreDirectoryHandle(state.project);
+                            console.log('[DEBUG] Attempting to restore handle for project:', state.project);
+                            const result = await fileSystem.restoreDirectoryHandle(state.project);
+                            console.log('[DEBUG] Restore result:', result);
+                            console.log('[DEBUG] Stored folder name:', fileSystem.getStoredFolderName());
                         }
                         await updateFileSystemUI();
                     } catch (err) {
-                        console.warn('File system restore error:', err);
+                        console.error('[DEBUG] File system restore error:', err);
                     }
                 })();
             },

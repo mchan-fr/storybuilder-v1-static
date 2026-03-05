@@ -231,7 +231,10 @@ function wrapRequest(request) {
  * Note: The handle can be stored, but user must re-grant permission on page reload
  */
 export async function persistDirectoryHandle() {
-  if (!directoryHandle) return false;
+  if (!directoryHandle) {
+    console.log('[FS DEBUG] persistDirectoryHandle: no handle to persist');
+    return false;
+  }
 
   try {
     const db = await openDatabase();
@@ -240,17 +243,19 @@ export async function persistDirectoryHandle() {
 
     // Store by project key if available, otherwise use generic key
     const key = currentProjectKey ? `project:${currentProjectKey}` : 'mediaFolder';
+    console.log('[FS DEBUG] Persisting handle with key:', key, 'folder:', directoryHandle.name);
     await wrapRequest(store.put(directoryHandle, key));
 
     // Also store the folder name mapping for quick lookup
     if (currentProjectKey) {
       const mappingKey = `mapping:${currentProjectKey}`;
+      console.log('[FS DEBUG] Storing mapping:', mappingKey, '→', directoryHandle.name);
       await wrapRequest(store.put({ folderName: directoryHandle.name, projectKey: currentProjectKey }, mappingKey));
     }
 
     return true;
   } catch (err) {
-    console.warn('Could not persist directory handle:', err);
+    console.error('[FS DEBUG] Could not persist directory handle:', err);
     return false;
   }
 }
@@ -262,6 +267,7 @@ export async function persistDirectoryHandle() {
  * Returns: { restored: boolean, name: string | null }
  */
 export async function restoreDirectoryHandle(projectName = null) {
+  console.log('[FS DEBUG] restoreDirectoryHandle called with:', projectName);
   try {
     const db = await openDatabase();
     const tx = db.transaction('handles', 'readwrite');
@@ -269,15 +275,18 @@ export async function restoreDirectoryHandle(projectName = null) {
 
     // Try project-specific key first, then fall back to generic
     const projectKey = projectName ? `project:${projectName}` : (currentProjectKey ? `project:${currentProjectKey}` : null);
+    console.log('[FS DEBUG] Looking for key:', projectKey);
     let handle = null;
 
     if (projectKey) {
       handle = await wrapRequest(store.get(projectKey));
+      console.log('[FS DEBUG] Found handle for project key:', !!handle);
     }
 
     // Fall back to generic key if no project-specific handle
     if (!handle) {
       handle = await wrapRequest(store.get('mediaFolder'));
+      console.log('[FS DEBUG] Fallback to mediaFolder:', !!handle);
     }
 
     if (handle && handle.name) {
@@ -286,14 +295,16 @@ export async function restoreDirectoryHandle(projectName = null) {
       if (projectName) {
         currentProjectKey = projectName;
       }
+      console.log('[FS DEBUG] Restored handle:', handle.name, 'storedFolderName set to:', storedFolderName);
       return { restored: true, name: handle.name };
     } else if (handle) {
-      // Handle exists but no name - corrupted, clear it
-      console.warn('Stored handle has no name, clearing');
+      console.warn('[FS DEBUG] Handle exists but no name, clearing');
       if (projectKey) await wrapRequest(store.delete(projectKey));
+    } else {
+      console.log('[FS DEBUG] No handle found in IndexedDB');
     }
   } catch (err) {
-    console.warn('Could not restore directory handle:', err);
+    console.error('[FS DEBUG] Could not restore directory handle:', err);
   }
   return { restored: false, name: null };
 }
