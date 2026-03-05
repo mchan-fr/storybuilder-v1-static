@@ -1634,8 +1634,18 @@ function renderEditor() {
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
 
-                // Update file system UI to show correct button state (async, don't block)
-                updateFileSystemUI().catch(err => console.warn('File system UI update error:', err));
+                // Try to restore stored folder info for this project, then update UI
+                (async () => {
+                    try {
+                        // This restores the handle and sets storedFolderName if found
+                        if (state.project) {
+                            await fileSystem.restoreDirectoryHandle(state.project);
+                        }
+                        await updateFileSystemUI();
+                    } catch (err) {
+                        console.warn('File system restore error:', err);
+                    }
+                })();
             },
             // Called when user clicks "New Story"
             onNew: () => {
