@@ -58,7 +58,9 @@ export async function resolveAllMediaPaths(blocks, projectFolder) {
       'media1', 'media1Video', 'media2', 'media2Video'  // split-panel
     ];
     mediaFields.forEach(field => {
-      if (block[field] && !isAbs(block[field])) pathsToResolve.add(block[field]);
+      const val = block[field];
+      // Only process string values (arrays like gallery media are handled separately below)
+      if (val && typeof val === 'string' && !isAbs(val)) pathsToResolve.add(val);
     });
 
     // Slides (cinematic-scroll, galleries)

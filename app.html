@@ -1645,6 +1645,17 @@ function renderEditor() {
                             const result = await fileSystem.restoreDirectoryHandle(state.project);
                             console.log('[DEBUG] Restore result:', result);
                             console.log('[DEBUG] Stored folder name:', fileSystem.getStoredFolderName());
+
+                            // If handle was restored, check if we have permission and re-render
+                            if (result.restored) {
+                                const hasPermission = await fileSystem.verifyPermission();
+                                console.log('[DEBUG] Has permission:', hasPermission);
+                                if (hasPermission) {
+                                    // Re-render preview now that we have file access
+                                    console.log('[DEBUG] Re-rendering preview with file access');
+                                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                                }
+                            }
                         }
                         await updateFileSystemUI();
                     } catch (err) {
