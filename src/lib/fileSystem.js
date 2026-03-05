@@ -217,6 +217,14 @@ export function getCurrentProject() {
   return currentProjectKey;
 }
 
+// Helper to wrap IDBRequest in a Promise
+function wrapRequest(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 /**
  * Store directory handle reference in IndexedDB for persistence
  * Associates the handle with the current project
@@ -232,12 +240,12 @@ export async function persistDirectoryHandle() {
 
     // Store by project key if available, otherwise use generic key
     const key = currentProjectKey ? `project:${currentProjectKey}` : 'mediaFolder';
-    await store.put(directoryHandle, key);
+    await wrapRequest(store.put(directoryHandle, key));
 
     // Also store the folder name mapping for quick lookup
     if (currentProjectKey) {
       const mappingKey = `mapping:${currentProjectKey}`;
-      await store.put({ folderName: directoryHandle.name, projectKey: currentProjectKey }, mappingKey);
+      await wrapRequest(store.put({ folderName: directoryHandle.name, projectKey: currentProjectKey }, mappingKey));
     }
 
     return true;
@@ -264,12 +272,12 @@ export async function restoreDirectoryHandle(projectName = null) {
     let handle = null;
 
     if (projectKey) {
-      handle = await store.get(projectKey);
+      handle = await wrapRequest(store.get(projectKey));
     }
 
     // Fall back to generic key if no project-specific handle
     if (!handle) {
-      handle = await store.get('mediaFolder');
+      handle = await wrapRequest(store.get('mediaFolder'));
     }
 
     if (handle && handle.name) {
@@ -282,7 +290,7 @@ export async function restoreDirectoryHandle(projectName = null) {
     } else if (handle) {
       // Handle exists but no name - corrupted, clear it
       console.warn('Stored handle has no name, clearing');
-      if (projectKey) store.delete(projectKey);
+      if (projectKey) await wrapRequest(store.delete(projectKey));
     }
   } catch (err) {
     console.warn('Could not restore directory handle:', err);
@@ -304,13 +312,13 @@ export async function getStoredFolderForProject(projectName) {
     const store = tx.objectStore('handles');
 
     // Check mapping first (quick lookup)
-    const mapping = await store.get(`mapping:${projectName}`);
+    const mapping = await wrapRequest(store.get(`mapping:${projectName}`));
     if (mapping && mapping.folderName) {
       return { found: true, folderName: mapping.folderName };
     }
 
     // Fall back to checking handle directly
-    const handle = await store.get(`project:${projectName}`);
+    const handle = await wrapRequest(store.get(`project:${projectName}`));
     if (handle && handle.name) {
       return { found: true, folderName: handle.name };
     }

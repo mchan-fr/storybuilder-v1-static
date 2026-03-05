@@ -1623,58 +1623,71 @@ function renderEditor() {
                     els.demoBanner.classList.add('hidden');
                 }
 
-                // Set the current project for file system handle tracking
-                fileSystem.setCurrentProject(state.project);
+                // Always clear blob cache when switching projects to prevent stale media
+                clearBlobUrlCache();
+                fileSystem.clearCache();
 
-                // Check if project has media that needs local folder access
-                const hasLocalMedia = state.blocks.some(b => {
-                    const paths = [b.image, b.video, b.sideImage, b.sideVideo, b.media, b.media1, b.media2, b.media1Video, b.media2Video];
-                    return paths.some(p => p && !p.startsWith('http') && !p.startsWith('blob:') && !p.startsWith('projects/'));
-                });
-
-                if (hasLocalMedia) {
-                    // Check if we have a stored folder for this project
-                    const { found, folderName } = await fileSystem.getStoredFolderForProject(state.project);
-
-                    // Try to restore project-specific handle
-                    const { restored } = await fileSystem.restoreDirectoryHandle(state.project);
-                    const hasAccess = restored && await fileSystem.verifyPermission();
-
-                    if (!hasAccess) {
-                        // Clear any stale cache when switching projects
-                        clearBlobUrlCache();
-                        fileSystem.clearCache();
-
-                        if (found && folderName) {
-                            // We remember the folder - prompt to reconnect
-                            if (confirm(`This project uses media from "${folderName}". Click OK to reconnect to this folder.`)) {
-                                const result = await fileSystem.reconnectFolder();
-                                if (result.success) {
-                                    clearBlobUrlCache();
-                                    await fileSystem.persistDirectoryHandle();
-                                    await updateFileSystemUI();
-                                }
-                            }
-                        } else {
-                            // No remembered folder - prompt to select
-                            if (confirm('This project uses local media files. Select your media folder to view images.')) {
-                                const result = await fileSystem.requestFolderAccess();
-                                if (result.success) {
-                                    clearBlobUrlCache();
-                                    await fileSystem.persistDirectoryHandle();
-                                    await updateFileSystemUI();
-                                }
-                            }
-                        }
-                    } else {
-                        // We have access - just update UI
-                        await updateFileSystemUI();
-                    }
-                }
-
+                // Render immediately so UI updates even if file system operations are slow
                 renderBlocksList();
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+
+                // Handle file system access asynchronously (don't block UI)
+                (async () => {
+                    try {
+                        // Set the current project for file system handle tracking
+                        fileSystem.setCurrentProject(state.project);
+
+                        // Check if project has media that needs local folder access
+                        const hasLocalMedia = state.blocks.some(b => {
+                            const paths = [b.image, b.video, b.sideImage, b.sideVideo, b.media, b.media1, b.media2, b.media1Video, b.media2Video];
+                            return paths.some(p => p && !p.startsWith('http') && !p.startsWith('blob:') && !p.startsWith('projects/'));
+                        });
+
+                        if (hasLocalMedia) {
+                            // Check if we have a stored folder for this project
+                            const { found, folderName } = await fileSystem.getStoredFolderForProject(state.project);
+
+                            // Try to restore project-specific handle
+                            const { restored } = await fileSystem.restoreDirectoryHandle(state.project);
+                            const hasAccess = restored && await fileSystem.verifyPermission();
+
+                            if (!hasAccess) {
+                                if (found && folderName) {
+                                    // We remember the folder - prompt to reconnect
+                                    if (confirm(`This project uses media from "${folderName}". Click OK to reconnect to this folder.`)) {
+                                        const result = await fileSystem.reconnectFolder();
+                                        if (result.success) {
+                                            clearBlobUrlCache();
+                                            await fileSystem.persistDirectoryHandle();
+                                            await updateFileSystemUI();
+                                            // Re-render preview with media access
+                                            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                                        }
+                                    }
+                                } else {
+                                    // No remembered folder - prompt to select
+                                    if (confirm('This project uses local media files. Select your media folder to view images.')) {
+                                        const result = await fileSystem.requestFolderAccess();
+                                        if (result.success) {
+                                            clearBlobUrlCache();
+                                            await fileSystem.persistDirectoryHandle();
+                                            await updateFileSystemUI();
+                                            // Re-render preview with media access
+                                            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                                        }
+                                    }
+                                }
+                            } else {
+                                // We have access - update UI and re-render preview
+                                await updateFileSystemUI();
+                                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('File system access error:', err);
+                    }
+                })();
             },
             // Called when user clicks "New Story"
             onNew: () => {
@@ -1691,6 +1704,12 @@ function renderEditor() {
                 els.seoDescription.value = '';
                 els.seoAuthor.value = '';
                 els.seoImage.value = '';
+
+                // Clear caches when starting new project
+                clearBlobUrlCache();
+                fileSystem.clearCache();
+                fileSystem.setCurrentProject('');
+
                 renderBlocksList();
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
