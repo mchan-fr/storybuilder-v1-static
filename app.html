@@ -1470,59 +1470,59 @@ function renderEditor() {
 
         // Update UI based on File System API support
         async function updateFileSystemUI() {
-            if (!fileSystem.isFileSystemSupported()) {
-                els.selectMediaFolderBtn.disabled = true;
-                els.selectMediaFolderBtn.title = 'File System API not supported (use Chrome or Edge)';
-                els.selectMediaFolderBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                els.mediaFolderStatus.textContent = 'Chrome/Edge required';
-                els.mediaFolderStatus.classList.remove('hidden');
-                els.mediaFolderStatus.classList.add('text-amber-600', 'text-green-600');
-                return;
-            }
+            try {
+                if (!fileSystem.isFileSystemSupported()) {
+                    els.selectMediaFolderBtn.disabled = true;
+                    els.selectMediaFolderBtn.title = 'File System API not supported (use Chrome or Edge)';
+                    els.selectMediaFolderBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    els.mediaFolderStatus.textContent = 'Chrome/Edge required';
+                    els.mediaFolderStatus.classList.remove('hidden');
+                    els.mediaFolderStatus.classList.add('text-amber-600', 'text-green-600');
+                    return;
+                }
 
-            // Check if we have a handle AND permission
-            const hasHandle = fileSystem.hasDirectoryAccess();
-            const hasPermission = hasHandle ? await fileSystem.verifyPermission() : false;
+                // Check if we have a handle AND permission
+                const hasHandle = fileSystem.hasDirectoryAccess();
+                const hasPermission = hasHandle ? await fileSystem.verifyPermission() : false;
 
-            if (hasHandle && hasPermission) {
-                const folderName = fileSystem.getDirectoryName();
-                els.mediaFolderLabel.textContent = folderName || 'Connected';
-                els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                els.selectMediaFolderBtn.classList.add('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
-                els.selectMediaFolderBtn.title = 'Click to change folder, or right-click to disconnect';
-                els.mediaFolderStatus.textContent = 'Using local files';
-                els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
-                els.mediaFolderStatus.classList.add('text-green-600');
-                fileSystem.clearStoredFolderName();
-            } else {
-                // Check if we have a stored folder for the current project
-                let folderName = fileSystem.getDirectoryName() || fileSystem.getStoredFolderName();
+                if (hasHandle && hasPermission) {
+                    const folderName = fileSystem.getDirectoryName();
+                    els.mediaFolderLabel.textContent = folderName || 'Connected';
+                    els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                    els.selectMediaFolderBtn.classList.add('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                    els.selectMediaFolderBtn.title = 'Click to change folder, or right-click to disconnect';
+                    els.mediaFolderStatus.textContent = 'Using local files';
+                    els.mediaFolderStatus.classList.remove('hidden', 'text-amber-600');
+                    els.mediaFolderStatus.classList.add('text-green-600');
+                    fileSystem.clearStoredFolderName();
+                } else {
+                    // Check if we have a stored folder name
+                    const folderName = fileSystem.getDirectoryName() || fileSystem.getStoredFolderName();
 
-                // Also check project-specific storage if we have a project name
-                if (!folderName && state.project) {
-                    const { found, folderName: storedName } = await fileSystem.getStoredFolderForProject(state.project);
-                    if (found) {
-                        folderName = storedName;
+                    if (folderName) {
+                        // Have a stored folder - show reconnect
+                        els.mediaFolderLabel.textContent = `Reconnect "${folderName}"`;
+                        els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
+                        els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                        els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
+                        els.mediaFolderStatus.textContent = 'Click to reconnect';
+                        els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
+                        els.mediaFolderStatus.classList.add('text-amber-600');
+                    } else {
+                        // No stored folder - show select button
+                        els.mediaFolderLabel.textContent = 'Select Media Folder';
+                        els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                        els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
+                        els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
+                        els.mediaFolderStatus.classList.add('hidden');
                     }
                 }
-
-                if (folderName) {
-                    // Have a stored folder - show reconnect
-                    els.mediaFolderLabel.textContent = `Reconnect "${folderName}"`;
-                    els.selectMediaFolderBtn.classList.remove('border-green-300', 'text-green-700', 'hover:bg-green-50', 'border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50');
-                    els.selectMediaFolderBtn.classList.add('border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                    els.selectMediaFolderBtn.title = 'Click to reconnect to your media folder';
-                    els.mediaFolderStatus.textContent = 'Click to reconnect';
-                    els.mediaFolderStatus.classList.remove('hidden', 'text-green-600');
-                    els.mediaFolderStatus.classList.add('text-amber-600');
-                } else {
-                    // No stored folder - show select button
-                    els.mediaFolderLabel.textContent = 'Select Media Folder';
-                    els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
-                    els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
-                    els.selectMediaFolderBtn.title = 'Select your local media folder (Chrome/Edge only)';
-                    els.mediaFolderStatus.classList.add('hidden');
-                }
+            } catch (err) {
+                console.warn('Error updating file system UI:', err);
+                // Reset to default state on error
+                els.mediaFolderLabel.textContent = 'Select Media Folder';
+                els.selectMediaFolderBtn.classList.remove('border-blue-300', 'text-blue-700', 'hover:bg-blue-50', 'bg-blue-50', 'border-amber-400', 'text-amber-700', 'hover:bg-amber-50', 'bg-amber-50');
+                els.selectMediaFolderBtn.classList.add('border-green-300', 'text-green-700', 'hover:bg-green-50');
             }
         }
 
@@ -1533,34 +1533,34 @@ function renderEditor() {
                 return;
             }
 
-            // Ensure current project is set for handle association
-            fileSystem.setCurrentProject(state.project);
+            try {
+                // Set current project for handle association
+                fileSystem.setCurrentProject(state.project);
 
-            // Try to restore project-specific handle first
-            if (state.project) {
-                await fileSystem.restoreDirectoryHandle(state.project);
-            }
+                // If there's a stored folder needing reconnection, try to reconnect first
+                const hasStoredFolder = fileSystem.getStoredFolderName();
+                const result = hasStoredFolder
+                    ? await fileSystem.reconnectFolder()
+                    : await fileSystem.requestFolderAccess();
 
-            // If there's a stored folder needing reconnection, try to reconnect first
-            const hasStoredFolder = fileSystem.getStoredFolderName();
-            const result = hasStoredFolder
-                ? await fileSystem.reconnectFolder()
-                : await fileSystem.requestFolderAccess();
+                if (result.success) {
+                    // Clear old blob URL cache when switching folders
+                    clearBlobUrlCache();
 
-            if (result.success) {
-                // Clear old blob URL cache when switching folders
-                clearBlobUrlCache();
+                    // Persist the handle for future sessions
+                    await fileSystem.persistDirectoryHandle();
 
-                // Persist the handle for future sessions (associated with current project)
-                await fileSystem.persistDirectoryHandle();
+                    // Update UI
+                    await updateFileSystemUI();
 
-                // Update UI
-                await updateFileSystemUI();
-
-                // Re-render preview with new file access
-                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
-            } else if (result.error && result.error !== 'Folder selection cancelled') {
-                alert('Error accessing folder: ' + result.error);
+                    // Re-render preview with new file access
+                    renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
+                } else if (result.error && result.error !== 'Folder selection cancelled') {
+                    alert('Error accessing folder: ' + result.error);
+                }
+            } catch (err) {
+                console.error('Folder selection error:', err);
+                alert('Error accessing folder. Please try again.');
             }
         });
 
@@ -1623,71 +1623,18 @@ function renderEditor() {
                     els.demoBanner.classList.add('hidden');
                 }
 
-                // Always clear blob cache when switching projects to prevent stale media
+                // Clear all caches when switching projects
                 clearBlobUrlCache();
                 fileSystem.clearCache();
+                fileSystem.setCurrentProject(state.project);
 
-                // Render immediately so UI updates even if file system operations are slow
+                // Render immediately
                 renderBlocksList();
                 renderEditor();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
 
-                // Handle file system access asynchronously (don't block UI)
-                (async () => {
-                    try {
-                        // Set the current project for file system handle tracking
-                        fileSystem.setCurrentProject(state.project);
-
-                        // Check if project has media that needs local folder access
-                        const hasLocalMedia = state.blocks.some(b => {
-                            const paths = [b.image, b.video, b.sideImage, b.sideVideo, b.media, b.media1, b.media2, b.media1Video, b.media2Video];
-                            return paths.some(p => p && !p.startsWith('http') && !p.startsWith('blob:') && !p.startsWith('projects/'));
-                        });
-
-                        if (hasLocalMedia) {
-                            // Check if we have a stored folder for this project
-                            const { found, folderName } = await fileSystem.getStoredFolderForProject(state.project);
-
-                            // Try to restore project-specific handle
-                            const { restored } = await fileSystem.restoreDirectoryHandle(state.project);
-                            const hasAccess = restored && await fileSystem.verifyPermission();
-
-                            if (!hasAccess) {
-                                if (found && folderName) {
-                                    // We remember the folder - prompt to reconnect
-                                    if (confirm(`This project uses media from "${folderName}". Click OK to reconnect to this folder.`)) {
-                                        const result = await fileSystem.reconnectFolder();
-                                        if (result.success) {
-                                            clearBlobUrlCache();
-                                            await fileSystem.persistDirectoryHandle();
-                                            await updateFileSystemUI();
-                                            // Re-render preview with media access
-                                            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
-                                        }
-                                    }
-                                } else {
-                                    // No remembered folder - prompt to select
-                                    if (confirm('This project uses local media files. Select your media folder to view images.')) {
-                                        const result = await fileSystem.requestFolderAccess();
-                                        if (result.success) {
-                                            clearBlobUrlCache();
-                                            await fileSystem.persistDirectoryHandle();
-                                            await updateFileSystemUI();
-                                            // Re-render preview with media access
-                                            renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
-                                        }
-                                    }
-                                }
-                            } else {
-                                // We have access - update UI and re-render preview
-                                await updateFileSystemUI();
-                                renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
-                            }
-                        }
-                    } catch (err) {
-                        console.warn('File system access error:', err);
-                    }
-                })();
+                // Update file system UI to show correct button state (async, don't block)
+                updateFileSystemUI().catch(err => console.warn('File system UI update error:', err));
             },
             // Called when user clicks "New Story"
             onNew: () => {
