@@ -346,6 +346,33 @@ export function clearStoredFolderName() {
   storedFolderName = null;
 }
 
+/**
+ * Clear stored handle from IndexedDB for the current project
+ * Call this when user explicitly disconnects to allow selecting a new folder
+ */
+export async function clearStoredHandle() {
+  try {
+    const db = await openDatabase();
+    const tx = db.transaction('handles', 'readwrite');
+    const store = tx.objectStore('handles');
+
+    // Clear project-specific handle if we have a current project
+    if (currentProjectKey) {
+      console.log('[FS DEBUG] Clearing stored handle for project:', currentProjectKey);
+      await wrapRequest(store.delete(`project:${currentProjectKey}`));
+      await wrapRequest(store.delete(`mapping:${currentProjectKey}`));
+    }
+
+    // Also clear the generic mediaFolder key
+    await wrapRequest(store.delete('mediaFolder'));
+
+    storedFolderName = null;
+    currentProjectKey = null;
+  } catch (err) {
+    console.warn('Could not clear stored handle:', err);
+  }
+}
+
 // IndexedDB helper
 function openDatabase() {
   return new Promise((resolve, reject) => {

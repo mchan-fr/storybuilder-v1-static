@@ -1569,9 +1569,10 @@ function renderEditor() {
             if (!fileSystem.hasDirectoryAccess() && !fileSystem.getStoredFolderName()) return;
 
             e.preventDefault();
-            if (confirm('Disconnect from the media folder?')) {
+            if (confirm('Disconnect from the media folder? This will clear the stored folder for this project.')) {
                 fileSystem.disconnect();
                 fileSystem.clearStoredFolderName();
+                await fileSystem.clearStoredHandle(); // Clear from IndexedDB too
                 clearBlobUrlCache();
                 await updateFileSystemUI();
                 renderPreview({ state, mount: els.preview, mode: state.previewMode, selectedBlockIndex: state.selectedBlockIndex });
