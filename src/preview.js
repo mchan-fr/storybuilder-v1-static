@@ -168,8 +168,8 @@ img,video{display:block;max-width:100%;height:auto}
 .photo-lede-photo img{border-radius:0.5rem}
 .photo-lede-caption{margin-top:1rem;text-align:center}
 .photo-lede-text{margin:0 auto;padding:0 1.5rem;box-sizing:border-box}
-.photo-lede-text[data-desktop-width="max-w-md"]{max-width:28rem}
 .photo-lede-text[data-desktop-width="max-w-lg"]{max-width:32rem}
+.photo-lede-text[data-desktop-width="max-w-2xl"]{max-width:42rem}
 .photo-lede-text[data-desktop-width="max-w-4xl"]{max-width:56rem}
 .photo-lede-text[data-desktop-width="max-w-6xl"]{max-width:72rem}
 
