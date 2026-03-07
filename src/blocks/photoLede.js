@@ -627,8 +627,8 @@ export const PhotoLedeBlock = {
     const imgWidthClass = imageWidthMap[b.imageWidth || 'medium'];
 
     const textWidthMap = {
-      'extra-narrow': 'max-w-md',
-      'narrow': 'max-w-lg',
+      'extra-narrow': 'max-w-lg',
+      'narrow': 'max-w-2xl',
       'medium': 'max-w-4xl',
       'wide': 'max-w-6xl'
     };
@@ -845,8 +845,8 @@ export const PhotoLedeBlock = {
     const imgWidthClass = imageWidthMap[b.imageWidth || 'medium'];
 
     const textWidthMap = {
-      'extra-narrow': 'max-w-md',
-      'narrow': 'max-w-lg',
+      'extra-narrow': 'max-w-lg',
+      'narrow': 'max-w-2xl',
       'medium': 'max-w-4xl',
       'wide': 'max-w-6xl'
     };
