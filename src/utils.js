@@ -55,7 +55,8 @@ export async function resolveAllMediaPaths(blocks, projectFolder) {
       'mobileMedia', 'mobileVideo', 'mobilePoster',
       'imageMobile', 'videoMobile',  // hero
       'sideImage', 'sideVideo',       // photo-lede-side
-      'media1', 'media1Video', 'media2', 'media2Video'  // split-panel
+      'media1', 'media1Video', 'media2', 'media2Video',  // split-panel
+      'inlineImage'  // text block
     ];
     mediaFields.forEach(field => {
       const val = block[field];
