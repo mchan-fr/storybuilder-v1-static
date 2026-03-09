@@ -295,15 +295,25 @@ export const GalleryBlock = {
 
     // Block Settings content
     const blockSettingsContent = `
-      <div class="grid grid-cols-2 gap-3 mb-3">
-        <div>
-          <label class="block text-xs mb-1">Gap Size</label>
-          <select data-k="gapSize" class="w-full border rounded px-2 py-1 text-sm">
-            ${gapSizes.map(g => `<option value="${g.value}" ${b.gapSize === g.value ? 'selected' : ''}>${g.label}</option>`).join('')}
-          </select>
+      <div class="mb-3">
+        <label class="block text-xs mb-1">Gap Size</label>
+        <select data-k="gapSize" class="w-full border rounded px-2 py-1 text-sm">
+          ${gapSizes.map(g => `<option value="${g.value}" ${b.gapSize === g.value ? 'selected' : ''}>${g.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="block text-xs mb-1">Background Color</label>
+        <div class="mb-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs">
+          <label class="flex items-center gap-2 mb-2">
+            <input type="checkbox" data-k="_isBgColorMaster" class="bgcolor-style-master" ${b._isBgColorMaster ? 'checked' : ''}>
+            <span>Set color for all blocks</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="checkbox" data-k="_inheritBgColor" class="bgcolor-style-inherit" ${b._inheritBgColor === true ? 'checked' : ''}>
+            <span class="text-gray-600">Inherit color from master</span>
+          </label>
         </div>
-        <div>
-          <label class="block text-xs mb-1">Background</label>
+        <div class="bgcolor-style-fields${b._inheritBgColor === true && !b._isBgColorMaster ? ' opacity-50 pointer-events-none' : ''}">
           <input type="color" data-k="bgColor" value="${b.bgColor || '#000000'}" class="w-full h-8 border rounded">
         </div>
       </div>
@@ -444,16 +454,25 @@ export const GalleryBlock = {
       section('🖼️ Media', mediaContent, true);
   },
 
-  preview({ block, project }) {
+  preview({ block, project, blocks = [] }) {
     const b = block;
     const template = GALLERY_TEMPLATES[b.template || 'three-equal'];
-    
+
     const gapMap = { none: '0px', tight: '15px', medium: '30px', spacious: '50px' };
     const gap = gapMap[b.gapSize || 'medium'];
-    
+
     const paddingMap = { none: '0', tight: '15px', medium: '30px', spacious: '50px' };
     const paddingTop = paddingMap[b.paddingTop || 'none'];
     const paddingBottom = paddingMap[b.paddingBottom || 'none'];
+
+    // Handle background color inheritance
+    let bgColor = b.bgColor || '#000000';
+    if (b._inheritBgColor === true) {
+      const masterBlock = blocks.find(blk => blk._isBgColorMaster && blk !== b);
+      if (masterBlock) {
+        bgColor = masterBlock.bgColor || bgColor;
+      }
+    }
 
     let gridHtml = `<div style="display:grid;grid-template-columns:${template.gridColumns};grid-template-rows:${template.gridRows};gap:${gap};width:100%;height:auto;">`;
 
@@ -472,21 +491,30 @@ export const GalleryBlock = {
     gridHtml += '</div>';
 
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
-    return `<section class="fullbleed" style="background-color:${b.bgColor || '#000000'};padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
+    return `<section class="fullbleed" style="background-color:${bgColor};padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
       ${gridHtml}
     </section>`;
   },
 
-  exportHTML({ block }) {
+  exportHTML({ block, blocks = [] }) {
     const b = block;
     const template = GALLERY_TEMPLATES[b.template || 'three-equal'];
-    
+
     const gapMap = { none: '0px', tight: '15px', medium: '30px', spacious: '50px' };
     const gap = gapMap[b.gapSize || 'medium'];
-    
+
     const paddingMap = { none: '0', tight: '15px', medium: '30px', spacious: '50px' };
     const paddingTop = paddingMap[b.paddingTop || 'none'];
     const paddingBottom = paddingMap[b.paddingBottom || 'none'];
+
+    // Handle background color inheritance
+    let bgColor = b.bgColor || '#000000';
+    if (b._inheritBgColor === true) {
+      const masterBlock = blocks.find(blk => blk._isBgColorMaster && blk !== b);
+      if (masterBlock) {
+        bgColor = masterBlock.bgColor || bgColor;
+      }
+    }
 
     const captionStyle = b.captionStyle || { color: '#e5e5e5', size: '14' };
 
@@ -501,7 +529,6 @@ export const GalleryBlock = {
 
     gridHtml += '</div>';
 
-    const bgColor = b.bgColor || '#000000';
     const fadeAttr = block._fadeOnScroll ? ' data-fade-scroll="true"' : '';
     return `<section class="fullbleed" style="position:relative;z-index:3;background-color:${bgColor};padding-top:${paddingTop};padding-bottom:${paddingBottom};"${fadeAttr}>
       <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100%;background-color:${bgColor};z-index:0;"></div>
