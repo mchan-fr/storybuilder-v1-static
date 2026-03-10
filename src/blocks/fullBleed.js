@@ -170,10 +170,10 @@ export const FullBleedBlock = {
     if (b.caption) {
       if (b.captionPosition === 'below') {
         // Below the photo
-        captionHtml = `<div style="color:${captionColor};font-size:${captionSize}px;padding:12px 16px;text-align:center;">${b.caption}</div>`;
+        captionHtml = `<div style="color:${captionColor};font-size:${captionSize}px;padding:12px 16px;text-align:left;">${b.caption}</div>`;
       } else {
         // On the photo (overlay)
-        captionHtml = `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:center;">${b.caption}</div>`;
+        captionHtml = `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:left;">${b.caption}</div>`;
       }
     }
 
@@ -212,10 +212,10 @@ export const FullBleedBlock = {
     if (b.caption) {
       if (b.captionPosition === 'below') {
         // Below the photo
-        captionHtml = `<div style="color:${captionColor};font-size:${captionSize}px;padding:12px 16px;text-align:center;">${b.caption}</div>`;
+        captionHtml = `<div style="color:${captionColor};font-size:${captionSize}px;padding:12px 16px;text-align:left;">${b.caption}</div>`;
       } else {
         // On the photo (overlay)
-        captionHtml = `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:center;">${b.caption}</div>`;
+        captionHtml = `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:left;">${b.caption}</div>`;
       }
     }
 

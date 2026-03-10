@@ -673,7 +673,7 @@ export const TextBlock = {
 
     let inlineImageHtml = '';
     if (b.inlineImage) {
-      const caption = b.inlineImageCaption ? '<p class="text-sm text-slate-600 mt-2 text-center">' + b.inlineImageCaption + '</p>' : '';
+      const caption = b.inlineImageCaption ? '<p class="text-sm text-slate-600 mt-2 text-left">' + b.inlineImageCaption + '</p>' : '';
       inlineImageHtml = '<div class="my-8 ' + wrapperClass + '" style="' + imgWidthStyle + '">' +
         '<img src="' + resolvePreviewPath(b.inlineImage, project) + '" class="w-full rounded" alt="">' + caption + '</div>';
     }
@@ -874,7 +874,7 @@ export const TextBlock = {
 
     let inlineImageHtml = '';
     if (b.inlineImage) {
-      const caption = b.inlineImageCaption ? '<p class="text-sm text-slate-600 mt-2 text-center">' + String(b.inlineImageCaption) + '</p>' : '';
+      const caption = b.inlineImageCaption ? '<p class="text-sm text-slate-600 mt-2 text-left">' + String(b.inlineImageCaption) + '</p>' : '';
       inlineImageHtml = '<div class="my-8 mx-auto ' + breakoutClass + '" style="' + imgWidthStyle + '">' +
         '<img src="' + resolveExportPath(b.inlineImage) + '" class="w-full rounded" alt="">' + caption + '</div>';
     }

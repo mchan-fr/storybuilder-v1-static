@@ -651,7 +651,7 @@ export const SplitPanelBlock = {
       if (panel.inlineImage) {
         const widthMode = panel.inlineImageWidth || 'medium';
         const imgWidthStyle = widthMode === 'small' ? 'max-width:24rem;' : widthMode === 'medium' ? 'max-width:40rem;' : '';
-        const caption = panel.inlineImageCaption ? '<p class="text-sm text-slate-400 mt-2 text-center italic">' + panel.inlineImageCaption + '</p>' : '';
+        const caption = panel.inlineImageCaption ? '<p class="text-sm text-slate-400 mt-2 text-left italic">' + panel.inlineImageCaption + '</p>' : '';
         inlineImageHtml = '<div class="mt-10 mb-6 mx-auto" style="' + imgWidthStyle + '">' +
           '<img src="' + resolvePreviewPath(panel.inlineImage, project) + '" class="w-full rounded" alt="">' + caption + '</div>';
       }
@@ -903,7 +903,7 @@ export const SplitPanelBlock = {
         const widthMode = panel.inlineImageWidth || 'medium';
         const breakoutClass = widthMode === 'large' ? 'breakout-large' : widthMode === 'full' ? 'fullbleed' : '';
         const imgWidthStyle = widthMode === 'small' ? 'max-width:24rem;' : widthMode === 'medium' ? 'max-width:40rem;' : '';
-        const caption = panel.inlineImageCaption ? '<p class="text-sm text-slate-400 mt-2 text-center italic">' + String(panel.inlineImageCaption) + '</p>' : '';
+        const caption = panel.inlineImageCaption ? '<p class="text-sm text-slate-400 mt-2 text-left italic">' + String(panel.inlineImageCaption) + '</p>' : '';
         inlineImageHtml = '<div class="mt-10 mb-6 mx-auto ' + breakoutClass + '" style="' + imgWidthStyle + '">' +
           '<img src="' + resolveExportPath(panel.inlineImage) + '" class="w-full rounded" alt="">' + caption + '</div>';
       }

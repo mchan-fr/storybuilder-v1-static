@@ -570,7 +570,7 @@ function renderMediaItem(item, position, index, project, captionStyle) {
 
   const captionColor = (captionStyle && captionStyle.color) || '#e5e5e5';
   const captionSize = (captionStyle && captionStyle.size) || '14';
-  const caption = item.caption ? `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:center;">${item.caption}</div>` : '';
+  const caption = item.caption ? `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:left;">${item.caption}</div>` : '';
 
   return `<div style="grid-column:${position.gridColumn};grid-row:${position.gridRow};position:relative;overflow:hidden;min-height:200px;">${mediaTag}${caption}</div>`;
 }
@@ -601,7 +601,7 @@ function renderMediaItemExport(item, position, index, captionStyle) {
 
   const captionColor = (captionStyle && captionStyle.color) || '#e5e5e5';
   const captionSize = (captionStyle && captionStyle.size) || '14';
-  const caption = item.caption ? `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:center;">${item.caption}</div>` : '';
+  const caption = item.caption ? `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);color:${captionColor};font-size:${captionSize}px;padding:20px 12px 12px;text-align:left;">${item.caption}</div>` : '';
 
   return `<div class="gallery-media-cell" style="grid-column:${position.gridColumn};grid-row:${position.gridRow};position:relative;overflow:hidden;min-height:200px;">${mediaTag}${muteButton}${caption}</div>`;
 }

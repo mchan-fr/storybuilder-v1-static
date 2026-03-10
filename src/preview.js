@@ -166,7 +166,7 @@ img,video{display:block;max-width:100%;height:auto}
 .photo-lede-photo[data-desktop-width="max-w-6xl"]{max-width:72rem}
 .photo-lede-photo[data-desktop-width="w-full"]{max-width:100%}
 .photo-lede-photo img{border-radius:0.5rem}
-.photo-lede-caption{margin-top:1rem;text-align:center}
+.photo-lede-caption{margin-top:1rem;text-align:left}
 .photo-lede-text{margin:0 auto;padding:0 2rem;box-sizing:border-box}
 .photo-lede-text[data-desktop-width="max-w-lg"]{max-width:32rem !important}
 .photo-lede-text[data-desktop-width="max-w-2xl"]{max-width:42rem !important}
