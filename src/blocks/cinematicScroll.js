@@ -193,9 +193,9 @@ export const CinematicScrollBlock = {
     const blockSettingsContent = `
       <div class="mb-3">
         <label class="block text-xs mb-1">Crossfade Duration (seconds)</label>
-        <input data-k="crossfadeDuration" type="number" step="0.1" min="0.1" max="2"
+        <input data-k="crossfadeDuration" type="number" step="0.1" min="0" max="2"
           value="${b.crossfadeDuration ?? 0.3}" class="w-full border rounded px-2 py-1 text-sm">
-        <p class="text-xs text-gray-500 mt-1">Duration of crossfade between slides</p>
+        <p class="text-xs text-gray-500 mt-1">0 = instant change (no crossfade)</p>
       </div>
       <div class="mb-3">
         <label class="block text-xs mb-1">Expected View Time (seconds)</label>
@@ -330,7 +330,7 @@ export const CinematicScrollBlock = {
       <!-- Desktop: Cinematic Scroll -->
       <section class="sb-cinematic-scroll" id="${id}"
         data-slide-count="${slideCount}"
-        data-crossfade="${b.crossfadeDuration ?? 0.3}"${fadeAttr}>
+        style="--crossfade: ${b.crossfadeDuration ?? 0.3}s"${fadeAttr}>
 
         <div class="cs-media-wrap">
           ${mediaSlidesHtml}
@@ -448,7 +448,7 @@ export const CinematicScrollBlock = {
       <!-- Desktop: Cinematic Scroll -->
       <section class="sb-cinematic-scroll" id="${id}"
         data-slide-count="${slideCount}"
-        data-crossfade="${b.crossfadeDuration ?? 0.3}"${fadeAttr}>
+        style="--crossfade: ${b.crossfadeDuration ?? 0.3}s"${fadeAttr}>
 
         <div class="cs-media-wrap">
           ${mediaSlidesHtml}
