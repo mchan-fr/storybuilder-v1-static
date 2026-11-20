@@ -2,7 +2,7 @@
 
 Create immersive, scroll-driven visual stories with photos, videos, and text.
 
-**[Sign up for the beta](https://marcuschan.github.io/storybuilder-v1-static/)** | **[View example story](https://mchan-fr.github.io/mount-whitney-story/)**
+**[Sign up for the beta](https://mchan-fr.github.io/storybuilder-v1-static/)** | **[View example story](https://mchan-fr.github.io/mount-whitney-story/)**
 
 ## What is StoryBuilder?
 
@@ -74,9 +74,9 @@ For local testing, use a local server (the exported HTML requires serving, not o
 
 We'd love to hear from you! Please submit:
 
-- **Bug reports** - Something not working? [Open an issue](https://github.com/marcuschan/storybuilder-v1-static/issues/new?template=bug_report.md)
-- **Feature requests** - Have an idea? [Suggest a feature](https://github.com/marcuschan/storybuilder-v1-static/issues/new?template=feature_request.md)
-- **General feedback** - [Share your thoughts](https://github.com/marcuschan/storybuilder-v1-static/issues/new?template=feedback.md)
+- **Bug reports** - Something not working? [Open an issue](https://github.com/mchan-fr/storybuilder-v1-static/issues/new?template=bug_report.md)
+- **Feature requests** - Have an idea? [Suggest a feature](https://github.com/mchan-fr/storybuilder-v1-static/issues/new?template=feature_request.md)
+- **General feedback** - [Share your thoughts](https://github.com/mchan-fr/storybuilder-v1-static/issues/new?template=feedback.md)
 
 ## Development
 
